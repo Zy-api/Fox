@@ -1,0 +1,1551 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>资源管理后台 · 高级版</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+        body{background:#eef2f7;color:#0b1a2b;font-family:'Inter',-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;padding:16px;min-height:100vh}
+        .container{max-width:720px;margin:0 auto}
+        .header{display:flex;justify-content:space-between;align-items:center;padding:16px 24px;background:rgba(255,255,255,0.6);backdrop-filter:blur(32px);border-radius:28px;border:1px solid rgba(255,255,255,0.5);box-shadow:0 12px 48px rgba(0,20,40,0.06);margin-bottom:16px;flex-wrap:wrap;gap:12px}
+        .header h1{font-size:20px;font-weight:800;background:linear-gradient(145deg,#0b2b4a,#256bb0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-0.3px}
+        .header .badge{font-size:10px;padding:4px 14px;background:linear-gradient(135deg,#4fc3f7,#0277bd);color:#fff;border-radius:40px;font-weight:700}
+        .header .admin-link{font-size:13px;color:#0277bd;text-decoration:none;font-weight:600;background:rgba(2,119,189,0.07);padding:6px 18px;border-radius:40px;transition:all .35s cubic-bezier(0.22,1,0.36,1)}
+        .header .admin-link:hover{background:rgba(2,119,189,0.14);transform:translateY(-2px)}
+        .header .save-area{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+        .save-all-btn{background:linear-gradient(135deg,#00a86b,#008f5f);color:#fff;padding:10px 28px;font-size:14px;border-radius:60px;box-shadow:0 6px 24px rgba(0,168,107,0.25);border:none;font-weight:700;cursor:pointer;transition:all .4s cubic-bezier(0.22,1,0.36,1);display:inline-flex;align-items:center;gap:8px}
+        .save-all-btn:hover{transform:translateY(-3px) scale(1.02);box-shadow:0 10px 40px rgba(0,168,107,0.35)}
+        .save-all-btn:active{transform:scale(.94)}
+        .tab-bar{display:flex;gap:4px;background:rgba(255,255,255,0.35);backdrop-filter:blur(16px);border-radius:20px;padding:4px;margin-bottom:16px;overflow-x:auto;border:1px solid rgba(255,255,255,0.2)}
+        .tab-bar .tab{flex:1;padding:10px 12px;text-align:center;border-radius:16px;border:none;background:transparent;font-size:13px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;color:#7a8ba5;transition:all .35s cubic-bezier(0.22,1,0.36,1);white-space:nowrap;min-width:60px}
+        .tab-bar .tab.active{background:#ffffff;color:#0b1a2b;box-shadow:0 8px 24px rgba(0,0,0,0.06)}
+        .tab-bar .tab:hover{color:#0b1a2b;transform:scale(1.02)}
+        .settings-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+        .settings-grid .setting-item{padding:16px 18px;background:rgba(255,255,255,0.5);backdrop-filter:blur(24px);border-radius:18px;border:1px solid rgba(255,255,255,0.3);transition:all .4s cubic-bezier(0.22,1,0.36,1)}
+        #tab-style .setting-item{background:rgba(255,255,255,0.38);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.28);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.15),0 4px 20px rgba(0,20,40,0.03)}
+        #tab-style .setting-item:hover{box-shadow:inset 0 0 0 1px rgba(255,255,255,0.25),0 8px 28px rgba(0,20,40,0.05)}
+        #tab-style .setting-item label{letter-spacing:0.3px}
+        .settings-grid .setting-item:hover{box-shadow:0 8px 28px rgba(0,0,0,0.03)}
+        .settings-grid .setting-item label{font-size:11px;font-weight:600;color:#3a4d64;display:block;margin-bottom:8px;letter-spacing:0.2px}
+        .settings-grid .setting-item input{width:100%;padding:10px 14px;border-radius:14px;border:1px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.6);font-size:13px;font-weight:500;outline:none;transition:all .3s cubic-bezier(0.22,1,0.36,1)}
+        .settings-grid .setting-item input:focus{border-color:#4fc3f7;box-shadow:0 0 0 4px rgba(79,195,247,0.08)}
+        .custom-select{width:100%;position:relative;border-radius:16px;background:rgba(255,255,255,0.45);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.3);transition:background .35s cubic-bezier(.16,1,.3,1),box-shadow .35s cubic-bezier(.16,1,.3,1);cursor:pointer}
+        .custom-select.open{background:rgba(255,255,255,0.72);backdrop-filter:blur(24px);box-shadow:0 20px 56px rgba(0,0,0,0.1),0 0 0 1px rgba(79,195,247,0.08)}
+        #tab-style .custom-select,#tab-style .color-select-wrap,#tab-style .icon-select-wrap{background:rgba(255,255,255,0.32);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.25);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.1)}
+        #tab-style .custom-select.open,#tab-style .color-select-wrap.open,#tab-style .icon-select-wrap.open{background:rgba(255,255,255,0.55);backdrop-filter:blur(24px);box-shadow:0 20px 56px rgba(0,0,0,0.08),inset 0 0 0 1px rgba(79,195,247,0.06)}
+        .custom-select .select-trigger{width:100%;padding:12px 18px;border:none;background:transparent;font-size:13px;font-weight:500;font-family:'Inter',sans-serif;color:#0b1a2b;cursor:pointer;display:flex;align-items:center;justify-content:space-between;user-select:none;position:relative;z-index:2}
+        .custom-select .select-trigger:hover{background:transparent}
+        .custom-select .select-trigger.open .arrow{transform:rotate(180deg)}
+        .custom-select .select-trigger .arrow{font-size:12px;color:#7a8ba5;transition:transform .4s cubic-bezier(.16,1,.3,1);display:flex;align-items:center}
+        .custom-select .select-options{grid-template-rows:0fr;opacity:0;transition:grid-template-rows .42s cubic-bezier(.16,1,.3,1),opacity .28s cubic-bezier(.16,1,.3,1);display:grid}
+        .custom-select .select-options.open{grid-template-rows:1fr;opacity:1}
+        .custom-select .select-options>.options-inner{overflow:hidden;min-height:0}
+        .custom-select.open .select-options>.options-inner{padding:6px 8px 10px 8px}
+        .custom-select .select-options .option{padding:10px 16px;border-radius:12px;font-size:13px;font-weight:500;color:#0b1a2b;cursor:pointer;opacity:0;transform:translateY(5px);transition:opacity .3s cubic-bezier(.16,1,.3,1),transform .3s cubic-bezier(.16,1,.3,1)}
+        .custom-select .select-options.open .option{opacity:1;transform:translateY(0)}
+        .custom-select .select-options .option:hover{border:1.5px solid rgba(79,195,247,0.3);background:rgba(255,255,255,0.25)}
+        .custom-select .select-options .option.selected{border:1.5px solid rgba(79,195,247,0.45);background:rgba(79,195,247,0.06);color:#0277bd;font-weight:700}
+        .custom-select .select-options .option:active{transform:scale(.94)}
+        .custom-select .select-options::-webkit-scrollbar{width:4px}
+        .custom-select .select-options::-webkit-scrollbar-track{background:transparent}
+        .custom-select .select-options::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.08);border-radius:20px}
+        /* 颜色选择器 - 极致流畅版 */
+        .color-select-wrap{width:100%;position:relative;border-radius:18px;background:rgba(255,255,255,0.45);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.3);transition:background .35s cubic-bezier(.16,1,.3,1),box-shadow .35s cubic-bezier(.16,1,.3,1);cursor:pointer;overflow:visible}
+        .color-select-wrap.open{background:rgba(255,255,255,0.72);backdrop-filter:blur(24px);box-shadow:0 20px 56px rgba(0,0,0,0.1),0 0 0 1px rgba(79,195,247,0.08)}
+        .color-select-wrap .select-trigger{width:100%;padding:12px 18px;border:none;background:transparent;font-size:13px;font-weight:500;font-family:'Inter',sans-serif;color:#0b1a2b;cursor:pointer;display:flex;align-items:center;justify-content:space-between;user-select:none;gap:12px;position:relative;z-index:2}
+        .color-select-wrap .select-trigger:hover{background:transparent}
+        .color-select-wrap .select-trigger .color-dot{width:28px;height:28px;border-radius:8px;border:2px solid rgba(255,255,255,0.4);flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+        .color-select-wrap .select-trigger .color-hex{font-size:13px;font-weight:600;color:#1a2b3d;font-family:'Inter',monospace;flex:1}
+        .color-select-wrap .select-trigger .arrow{font-size:12px;color:#7a8ba5;transition:transform .4s cubic-bezier(.16,1,.3,1);display:flex;align-items:center}
+        .color-select-wrap.open .select-trigger .arrow{transform:rotate(180deg)}
+        .color-select-wrap .color-options{grid-template-rows:0fr;opacity:0;transition:grid-template-rows .42s cubic-bezier(.16,1,.3,1),opacity .28s cubic-bezier(.16,1,.3,1);display:grid}
+        .color-select-wrap.open .color-options{grid-template-rows:1fr;opacity:1}
+        .color-select-wrap .color-options>.color-grid-wrap{overflow:hidden;min-height:0}
+        .color-select-wrap .color-grid-wrap{padding:0 16px}
+        .color-select-wrap.open .color-grid-wrap{padding:6px 16px 16px 16px;max-height:280px;overflow-y:auto}
+        .color-select-wrap .color-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:8px}
+        .color-select-wrap .color-opt{width:100%;aspect-ratio:1;border-radius:8px;border:2.5px solid transparent;cursor:pointer;opacity:0;transition:opacity .28s cubic-bezier(.16,1,.3,1),transform .28s cubic-bezier(.16,1,.3,1),border-color .15s ease,box-shadow .15s ease;transform:scale(0)}
+        .color-select-wrap.open .color-opt{transform:scale(1);opacity:1}
+        .color-select-wrap .color-opt:hover{transform:scale(1.18)!important;border-color:rgba(255,255,255,0.95);box-shadow:0 6px 20px rgba(0,0,0,0.18);z-index:2;position:relative}
+        .color-select-wrap .color-opt.selected{border-color:rgba(255,255,255,0.9);box-shadow:0 0 0 2.5px rgba(2,119,189,0.35),0 4px 12px rgba(2,119,189,0.15)}
+        .color-select-wrap .color-opt:active{transform:scale(.88)!important}
+        .color-select-wrap .color-options::-webkit-scrollbar{width:3px}
+        .color-select-wrap .color-options::-webkit-scrollbar-track{background:transparent}
+        .color-select-wrap .color-options::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.06);border-radius:10px}
+        .btn{display:inline-flex;align-items:center;gap:6px;padding:10px 20px;border-radius:16px;border:none;font-size:14px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;transition:all .4s cubic-bezier(0.22,1,0.36,1);position:relative;overflow:hidden}
+        .btn:active{transform:scale(.92)}
+        .btn-primary{background:linear-gradient(135deg,#4fc3f7,#0277bd);color:#fff;box-shadow:0 6px 20px rgba(2,136,209,0.2)}
+        .btn-primary:hover{box-shadow:0 12px 32px rgba(2,136,209,0.3);transform:translateY(-3px)}
+        .btn-danger{background:#ff4757;color:#fff;box-shadow:0 6px 16px rgba(255,71,87,0.2)}
+        .btn-danger:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(255,71,87,0.3)}
+        .btn-outline{background:rgba(255,255,255,0.5);color:#0b1a2b;border:1px solid rgba(255,255,255,0.3);backdrop-filter:blur(8px)}
+        .btn-outline:hover{background:rgba(255,255,255,0.8);transform:translateY(-2px)}
+        .btn-sm{padding:6px 14px;font-size:11px;border-radius:12px}
+        .btn-md{padding:8px 16px;font-size:13px;border-radius:12px}
+        .btn-warning{background:#f39c12;color:#fff;box-shadow:0 6px 16px rgba(243,156,18,0.2)}
+        .btn-warning:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(243,156,18,0.3)}
+        .top-bar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px;padding:12px 18px;background:rgba(255,255,255,0.3);backdrop-filter:blur(12px);border-radius:18px;border:1px solid rgba(255,255,255,0.2)}
+        .top-bar .left{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+        .top-bar .right{font-size:12px;color:#7a8ba5}
+        .search-bar{display:flex;gap:10px;margin-bottom:12px}
+        .search-bar input{flex:1;padding:12px 18px;border-radius:16px;border:1px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.4);backdrop-filter:blur(8px);font-size:13px;font-weight:500;font-family:'Inter',sans-serif;outline:none;transition:all .3s}
+        .search-bar input:focus{border-color:#4fc3f7;box-shadow:0 0 0 6px rgba(79,195,247,0.08)}
+        .tab-content{display:none;animation:tabFade .5s cubic-bezier(0.22,1,0.36,1)}
+        .tab-content.active{display:block}
+        @keyframes tabFade{0%{opacity:0;transform:translateY(12px) scale(0.96)}100%{opacity:1;transform:translateY(0) scale(1)}}
+        .app-list{display:flex;flex-direction:column;gap:10px}
+        .app-item{display:flex;align-items:center;gap:14px;padding:14px 18px;background:rgba(255,255,255,0.5);backdrop-filter:blur(24px);border-radius:18px;border:1px solid rgba(255,255,255,0.3);transition:all .4s cubic-bezier(0.22,1,0.36,1)}
+        .app-item:hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(0,0,0,0.04)}
+        .app-item .icon-img{width:44px;height:44px;border-radius:14px;object-fit:contain;flex-shrink:0;background:rgba(255,255,255,0.5);padding:4px;border:1px solid rgba(255,255,255,0.2);transition:all .35s cubic-bezier(0.22,1,0.36,1)}
+        .app-item .icon-emoji{font-size:30px;width:44px;text-align:center;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .4s cubic-bezier(0.22,1,0.36,1)}
+        .app-item .info{flex:1;min-width:0}
+        .app-item .info .name{font-size:15px;font-weight:700;letter-spacing:-0.2px}
+        .app-item .info .desc{font-size:12px;color:#7a8ba5;margin-top:2px;line-height:1.4}
+        .app-item .info .meta{font-size:11px;color:#7a8ba5;display:flex;gap:8px;flex-wrap:wrap;margin-top:2px}
+        .app-item .info .meta .tag{padding:1px 10px;border-radius:30px;font-size:9px;font-weight:700;background:rgba(79,195,247,0.12);color:#0277bd;transition:all .3s cubic-bezier(0.22,1,0.36,1)}
+        .app-item .actions{display:flex;gap:6px;flex-shrink:0}
+        /* 内联编辑面板 - 丝滑拉伸 */
+        .inline-edit-panel{grid-template-rows:0fr;opacity:0;transition:grid-template-rows .55s cubic-bezier(.25,1,.5,1),opacity .35s ease;display:grid}
+        .inline-edit-panel.open{grid-template-rows:1fr;opacity:1}
+        .inline-edit-panel>.edit-panel-inner{overflow:hidden;min-height:0;padding:0 18px;background:#fff;border:1px solid rgba(255,255,255,0.4);border-top:none;border-radius:0}
+        .inline-edit-panel.open .edit-panel-inner{padding:18px}
+        .inline-edit-panel .edit-row{display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap;opacity:0;transform:translateY(10px);transition:opacity .45s ease,transform .45s cubic-bezier(.25,1,.5,1)}
+        .inline-edit-panel.open .edit-row{opacity:1;transform:translateY(0)}
+        .inline-edit-panel.open .edit-row:nth-child(1){transition-delay:.06s}
+        .inline-edit-panel.open .edit-row:nth-child(2){transition-delay:.10s}
+        .inline-edit-panel.open .edit-row:nth-child(3){transition-delay:.14s}
+        .inline-edit-panel.open .edit-row:nth-child(4){transition-delay:.18s}
+        .inline-edit-panel.open .edit-row:nth-child(5){transition-delay:.22s}
+        .inline-edit-panel.open .edit-row:nth-child(6){transition-delay:.26s}
+        .inline-edit-panel .edit-row .field{flex:1;min-width:120px}
+        .inline-edit-panel .edit-row .field label{font-size:11px;font-weight:700;color:#3a4d64;display:block;margin-bottom:5px;letter-spacing:0.3px}
+        .inline-edit-panel .edit-row .field input{width:100%;padding:10px 14px;border-radius:12px;border:1px solid rgba(79,195,247,0.15);background:rgba(255,255,255,0.65);font-size:13px;font-weight:500;font-family:'Inter',sans-serif;outline:none;transition:border-color .3s cubic-bezier(.22,1,.36,1),box-shadow .3s cubic-bezier(.22,1,.36,1)}
+        .inline-edit-panel .edit-row .field input:focus{border-color:#4fc3f7;box-shadow:0 4px 14px rgba(79,195,247,0.1),0 0 0 4px rgba(79,195,247,0.08)}
+        .inline-edit-panel .edit-actions{display:flex;gap:10px;margin-top:10px;justify-content:flex-end;opacity:0;transform:translateY(6px);transition:opacity .4s ease,transform .4s cubic-bezier(.25,1,.5,1)}
+        .inline-edit-panel.open .edit-actions{opacity:1;transform:translateY(0);transition-delay:.28s}
+        .app-item.editing{border-radius:18px 18px 0 0;border-bottom:none;background:#fff;backdrop-filter:none;box-shadow:0 8px 32px rgba(0,0,0,0.06);transition:none}
+        /* 交错入场动画 */
+        .app-wrap{opacity:0;animation:itemEnter .32s ease forwards;transition:transform .25s ease,box-shadow .25s ease}
+        .app-wrap:nth-child(1){animation-delay:0.02s}
+        .app-wrap:nth-child(2){animation-delay:0.06s}
+        .app-wrap:nth-child(3){animation-delay:0.10s}
+        .app-wrap:nth-child(4){animation-delay:0.14s}
+        .app-wrap:nth-child(5){animation-delay:0.18s}
+        .app-wrap:nth-child(6){animation-delay:0.22s}
+        .app-wrap:nth-child(7){animation-delay:0.26s}
+        .app-wrap:nth-child(8){animation-delay:0.30s}
+        .app-wrap:nth-child(9){animation-delay:0.34s}
+        .app-wrap:nth-child(10){animation-delay:0.38s}
+        .app-wrap:has(.app-item.editing){transform:scale(1.01);z-index:2;position:relative}
+        @keyframes itemEnter{0%{opacity:0;transform:translateY(20px) scale(0.96)}100%{opacity:1;transform:translateY(0) scale(1)}}
+        /* 按钮涟漪 */
+        .btn{position:relative;overflow:hidden}
+        .btn::after{content:'';position:absolute;top:50%;left:50%;width:0;height:0;background:rgba(255,255,255,0.25);border-radius:50%;transform:translate(-50%,-50%);transition:width .5s ease,height .5s ease;pointer-events:none}
+        .btn:active::after{width:200%;height:200%}
+        /* 编辑按钮优化 - 胶囊拉伸效果 */
+        .app-item .actions{display:flex;gap:10px;flex-shrink:0;align-items:center}
+        .app-item .actions .btn-md{padding:8px 20px;font-size:13px;border-radius:50px;letter-spacing:0.5px;font-weight:700;transition:all .4s cubic-bezier(0.22,1,0.36,1);position:relative;overflow:hidden}
+        .app-item .actions .btn-primary{background:linear-gradient(135deg,#4fc3f7,#0277bd);box-shadow:0 4px 16px rgba(2,119,189,0.22);border:1px solid rgba(79,195,247,0.3)}
+        .app-item .actions .btn-primary:hover{transform:translateY(-2px) scale(1.04);box-shadow:0 10px 28px rgba(2,119,189,0.32)}
+        .app-item .actions .btn-primary:active{transform:scale(0.94)}
+        .app-item .actions .btn-danger{background:linear-gradient(135deg,#ff6b7a,#ff4757);box-shadow:0 4px 16px rgba(255,71,87,0.22);border:1px solid rgba(255,107,122,0.3)}
+        .app-item .actions .btn-danger:hover{transform:translateY(-2px) scale(1.04);box-shadow:0 10px 28px rgba(255,71,87,0.32)}
+        .app-item .actions .btn-danger:active{transform:scale(0.94)}
+        /* 空状态动画 */
+        .empty{text-align:center;padding:50px 20px;color:#7a8ba5;animation:emptyFloat 3s ease-in-out infinite}
+        .empty .icon{font-size:52px;margin-bottom:12px;display:block;animation:emptyPulse 2s ease-in-out infinite}
+        @keyframes emptyFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+        @keyframes emptyPulse{0%,100%{opacity:0.6;transform:scale(1)}50%{opacity:1;transform:scale(1.08)}}
+        /* 搜索框增强 */
+        .search-bar input{transition:all .4s cubic-bezier(0.22,1,0.36,1)}
+        .search-bar input:focus{transform:translateY(-1px);box-shadow:0 8px 24px rgba(79,195,247,0.12),0 0 0 4px rgba(79,195,247,0.08)}
+        /* Tab增强 */
+        .tab-bar .tab{position:relative;overflow:hidden}
+        .tab-bar .tab::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(79,195,247,0.08),rgba(2,119,189,0.04));border-radius:16px;opacity:0;transition:opacity .3s}
+        .tab-bar .tab:hover::before{opacity:1}
+        .tab-bar .tab.active::before{opacity:0}
+        /* top-bar 增强 */
+        .top-bar{transition:all .4s cubic-bezier(0.22,1,0.36,1)}
+        .top-bar:hover{box-shadow:0 8px 24px rgba(0,0,0,0.03)}
+        /* 添加按钮增强 */
+        .btn-primary{position:relative;overflow:hidden}
+        .btn-primary::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);transition:left .6s}
+        .btn-primary:hover::before{left:100%}
+        /* header增强 */
+        .header{animation:headerSlide .6s cubic-bezier(0.22,1,0.36,1) both}
+        @keyframes headerSlide{0%{opacity:0;transform:translateY(-20px)}100%{opacity:1;transform:translateY(0)}}
+        /* save-all-btn 增强 */
+        .save-all-btn{position:relative;overflow:hidden}
+        .save-all-btn::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.25),transparent);transition:left .7s}
+        .save-all-btn:hover::before{left:100%}
+        .save-all-btn{animation:btnPop .5s cubic-bezier(0.22,1,0.36,1) .3s both}
+        @keyframes btnPop{0%{opacity:0;transform:scale(0.8)}100%{opacity:1;transform:scale(1)}}
+        /* badge 微动画 */
+        .badge{animation:badgePulse 2s ease-in-out infinite}
+        @keyframes badgePulse{0%,100%{box-shadow:0 0 0 0 rgba(79,195,247,0.3)}50%{box-shadow:0 0 0 6px rgba(79,195,247,0)}}
+        /* 同步状态指示器 */
+        .sync-indicator{font-size:10px;padding:4px 14px;border-radius:40px;font-weight:700;transition:all .35s cubic-bezier(0.22,1,0.36,1)}
+        .sync-indicator.synced{background:linear-gradient(135deg,#00a86b,#008f5f);color:#fff;box-shadow:0 4px 12px rgba(0,168,107,0.2)}
+        .sync-indicator.unsynced{background:linear-gradient(135deg,#ff9800,#f57c00);color:#fff;box-shadow:0 4px 12px rgba(255,152,0,0.2)}
+        .sync-indicator.syncing{background:linear-gradient(135deg,#4fc3f7,#0277bd);color:#fff;box-shadow:0 4px 12px rgba(2,119,189,0.2);animation:syncPulse 1.2s ease-in-out infinite}
+        @keyframes syncPulse{0%,100%{opacity:1}50%{opacity:0.5}}
+        /* setting-item 增强 */
+        .settings-grid .setting-item{transition:all .4s cubic-bezier(0.22,1,0.36,1)}
+        .settings-grid .setting-item:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(0,0,0,0.05)}
+        /* 标签光效 */
+        .app-item:hover .info .meta .tag{background:rgba(79,195,247,0.18);transform:scale(1.05)}
+        /* 图标悬浮 */
+        .app-item:hover .icon-emoji{transform:scale(1.1) rotate(-4deg)}
+        .app-item:hover .icon-img{transform:scale(1.08);box-shadow:0 4px 12px rgba(0,0,0,0.08)}
+        /* inline-edit 增强 */
+        .inline-edit-panel>.edit-panel-inner{background:#fff;border:1px solid rgba(255,255,255,0.4);border-top:none;border-radius:0}
+        .inline-edit-panel .edit-row .field input{transition:all .3s cubic-bezier(0.22,1,0.36,1)}
+        .inline-edit-panel .edit-row .field input:focus{box-shadow:0 4px 12px rgba(79,195,247,0.1),0 0 0 3px rgba(79,195,247,0.08)}
+        .app-item.editing{border-radius:18px 18px 0 0;border-bottom:none;background:#fff;backdrop-filter:none;box-shadow:0 8px 32px rgba(0,0,0,0.06);transition:none}
+        /* modal 增强 */
+        .modal-content{animation:modalSlide .5s cubic-bezier(0.22,1,0.36,1) both}
+        .modal.show{animation:modalFade .35s ease both}
+        /* Toast 增强 */
+        .toast.show{animation:toastPop .65s cubic-bezier(0.22,1,0.36,1) both}
+        @keyframes toastPop{0%{opacity:0;transform:translateX(-50%) translateY(30px) scale(0.9)}75%{transform:translateX(-50%) translateY(-3px) scale(1.01)}100%{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}}
+        /* 恢复按钮增强 */
+        .recovery-box{transition:all .4s}
+        .recovery-box:hover{box-shadow:0 8px 24px rgba(243,156,18,0.08);border-color:rgba(243,156,18,0.35)}
+        /* 整体页面背景 */
+        body{background:linear-gradient(160deg,#e8ecf3 0%,#eef2f7 40%,#f0f4fa 100%);background-attachment:fixed}
+        /* 卡片光晕效果 */
+        .app-item{position:relative}
+        .app-item::after{content:'';position:absolute;inset:-1px;border-radius:19px;background:linear-gradient(135deg,rgba(79,195,247,0.08),rgba(2,119,189,0.04));opacity:0;transition:opacity .4s;pointer-events:none;z-index:-1}
+        .app-item:hover::after{opacity:1}
+        .app-item.editing::after{opacity:0!important;transition:none}
+        .empty .icon{font-size:44px;margin-bottom:8px;display:block}
+        .icon-selector{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-top:6px}
+        .icon-selector .icon-opt{padding:8px;text-align:center;border-radius:14px;border:2px solid transparent;cursor:pointer;transition:all .35s cubic-bezier(0.22,1,0.36,1);background:rgba(255,255,255,0.3);display:flex;align-items:center;justify-content:center;min-height:56px}
+        .icon-selector .icon-opt:hover{background:rgba(79,195,247,0.08);transform:scale(1.06)}
+        .icon-selector .icon-opt.selected{border-color:#4fc3f7;background:rgba(79,195,247,0.12);box-shadow:0 0 0 4px rgba(79,195,247,0.08)}
+        .icon-selector .icon-opt svg{width:30px;height:30px;stroke:#3a7acc;stroke-width:2;fill:none}
+        .icon-preview-box{display:flex;align-items:center;gap:12px;padding:8px 18px;background:rgba(255,255,255,0.3);border-radius:14px;margin-bottom:6px;flex-wrap:wrap}
+        .icon-preview-box .preview-label{font-size:12px;color:#7a8ba5;font-weight:500}
+        .icon-preview-box .preview-icon{font-size:34px;min-width:48px;text-align:center;display:flex;align-items:center;justify-content:center;color:#3a7acc}
+        .icon-preview-box .preview-icon svg{width:34px;height:34px;stroke:#3a7acc;stroke-width:2;fill:none}
+        /* 图标选择器 - 极致流畅版 */
+        .icon-select-wrap{width:100%;position:relative;border-radius:18px;background:rgba(255,255,255,0.45);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.3);transition:background .25s ease,box-shadow .3s ease;cursor:pointer;overflow:visible}
+        .icon-select-wrap.open{background:rgba(255,255,255,0.72);backdrop-filter:blur(24px);box-shadow:0 20px 56px rgba(0,0,0,0.1),0 0 0 1px rgba(79,195,247,0.08)}
+        .icon-select-trigger{width:100%;padding:12px 18px;border:none;background:transparent;font-size:13px;font-weight:500;font-family:'Inter',sans-serif;color:#0b1a2b;cursor:pointer;display:flex;align-items:center;gap:12px;user-select:none;position:relative;z-index:2}
+        .icon-select-trigger:hover{background:transparent}
+        .icon-select-wrap.open .icon-select-trigger .arrow{transform:rotate(180deg)}
+        .icon-select-trigger .preview-label{font-size:12px;color:#7a8ba5;font-weight:500}
+        .icon-select-trigger .preview-icon{font-size:26px;min-width:36px;text-align:center;display:flex;align-items:center;justify-content:center;color:#3a7acc;transition:transform .35s cubic-bezier(0.22,1,0.36,1)}
+        .icon-select-trigger .preview-icon svg{width:26px;height:26px;stroke:#3a7acc;stroke-width:2;fill:none}
+        .icon-select-trigger .arrow{font-size:12px;color:#7a8ba5;margin-left:auto;transition:transform .3s ease;display:flex;align-items:center}
+        .icon-select-options{grid-template-rows:0fr;opacity:0;transition:grid-template-rows .32s ease,opacity .22s ease;display:grid;will-change:opacity}
+        .icon-select-wrap.open .icon-select-options{grid-template-rows:1fr;opacity:1}
+        .icon-select-options>.icon-grid-wrap{overflow:hidden;min-height:0}
+        .icon-grid-wrap{padding:0 16px}
+        .icon-select-wrap.open .icon-grid-wrap{padding:6px 16px 16px 16px;max-height:240px;overflow-y:auto}
+        .icon-select-options .icon-selector{display:grid;grid-template-columns:repeat(8,1fr);gap:8px}
+        .icon-select-options .icon-selector .icon-opt{padding:8px;text-align:center;border-radius:10px;border:2px solid transparent;cursor:pointer;transition:opacity .2s ease,background .15s ease,border-color .15s ease;background:rgba(255,255,255,0.35);display:flex;align-items:center;justify-content:center;min-height:46px;opacity:0;transform:scale(0)}
+        .icon-select-wrap.open .icon-selector .icon-opt{transform:scale(1);opacity:1}
+        .icon-select-options .icon-selector .icon-opt:hover{background:rgba(79,195,247,0.1);transform:scale(1.12)!important;box-shadow:0 4px 16px rgba(58,122,204,0.12)}
+        .icon-select-options .icon-selector .icon-opt.selected{border-color:#4fc3f7;background:rgba(79,195,247,0.12);box-shadow:0 0 0 2.5px rgba(79,195,247,0.1),0 4px 12px rgba(79,195,247,0.08)}
+        .icon-select-options .icon-selector .icon-opt svg{width:24px;height:24px;stroke:#3a7acc;stroke-width:2;fill:none}
+        .icon-select-options::-webkit-scrollbar{width:3px}
+        .icon-select-options::-webkit-scrollbar-track{background:transparent}
+        .icon-select-options::-webkit-scrollbar-thumb{background:rgba(0,0,0,0.06);border-radius:10px}
+        .modal{display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,0.20);backdrop-filter:blur(16px);align-items:center;justify-content:center;animation:modalFade .4s ease}
+        .modal.show{display:flex}
+        .modal-content{width:92%;max-width:460px;max-height:85vh;overflow-y:auto;padding:32px;background:rgba(255,255,255,0.92);backdrop-filter:blur(48px);border-radius:32px;border:1px solid rgba(255,255,255,0.4);box-shadow:0 32px 80px rgba(0,0,0,0.12);animation:modalSlide .5s cubic-bezier(0.22,1,0.36,1)}
+        @keyframes modalFade{0%{opacity:0}100%{opacity:1}}
+        @keyframes modalSlide{0%{opacity:0;transform:translateY(40px) scale(0.92)}100%{opacity:1;transform:translateY(0) scale(1)}}
+        .modal-content h2{font-size:22px;font-weight:800;margin-bottom:18px;letter-spacing:-0.3px}
+        .modal-content label{font-size:12px;font-weight:600;display:block;margin:12px 0 6px;color:#3a4d64}
+        .modal-content input,.modal-content select,.modal-content textarea{width:100%;padding:10px 16px;border-radius:14px;border:1px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.6);font-size:13px;font-weight:500;font-family:'Inter',sans-serif;outline:none;transition:all .3s cubic-bezier(0.22,1,0.36,1)}
+        .modal-content input:focus,.modal-content select:focus,.modal-content textarea:focus{border-color:#4fc3f7;box-shadow:0 0 0 6px rgba(79,195,247,0.08)}
+        .modal-content textarea{min-height:50px;resize:vertical}
+        .modal-content .btn-group{display:flex;gap:12px;margin-top:22px}
+        .modal-content .btn-group .btn{flex:1;justify-content:center}
+        .modal-content .icon-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:6px;margin:8px 0 12px}
+        .modal-content .icon-grid .icon-option{font-size:28px;padding:8px;text-align:center;border-radius:12px;border:2px solid transparent;cursor:pointer;transition:all .3s cubic-bezier(0.22,1,0.36,1);background:rgba(255,255,255,0.3)}
+        .modal-content .icon-grid .icon-option:hover{background:rgba(79,195,247,0.1);transform:scale(1.08)}
+        .modal-content .icon-grid .icon-option.selected{border-color:#4fc3f7;background:rgba(79,195,247,0.12)}
+        .toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(40px) scale(0.9);background:rgba(255,255,255,0.9);backdrop-filter:blur(40px);padding:14px 32px;border-radius:60px;font-size:14px;font-weight:600;color:#0b1a2b;opacity:0;pointer-events:none;transition:all .6s cubic-bezier(0.22,1,0.36,1);z-index:1000;border:1px solid rgba(255,255,255,0.4);box-shadow:0 20px 56px rgba(0,0,0,0.06)}
+        .toast.show{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}
+        .recovery-box{background:linear-gradient(145deg,rgba(243,156,18,0.05),rgba(255,255,255,0.05));border:1px dashed rgba(243,156,18,0.2);border-radius:16px;padding:18px;margin-top:6px}
+        .recovery-box .title{font-size:14px;font-weight:700;color:#f39c12;margin-bottom:4px}
+        .recovery-box .desc{font-size:12px;color:#7a8ba5;margin-bottom:10px}
+        .recovery-box .btn-group{display:flex;gap:8px;flex-wrap:wrap}
+        @media (max-width:480px){
+            .settings-grid{grid-template-columns:1fr}
+            .header h1{font-size:17px}
+            .modal-content{padding:20px}
+            .tab-bar .tab{font-size:11px;padding:6px 10px;min-width:48px}
+            .top-bar{flex-direction:column;align-items:stretch}
+            .top-bar .left,.top-bar .right{justify-content:center}
+            .icon-selector{grid-template-columns:repeat(4,1fr)}
+            .header .save-area{width:100%;justify-content:center}
+            .header{flex-direction:column;align-items:stretch;gap:6px}
+            .header .admin-link{text-align:center}
+            .app-item{flex-wrap:wrap}
+            .app-item .actions{flex-direction:row;width:100%;justify-content:flex-end}
+            .app-item .actions .btn{width:auto}
+            .inline-edit-panel .edit-row{flex-direction:column}
+            .inline-edit-panel .edit-row .field{min-width:100%}
+            .icon-select-options .icon-selector{grid-template-columns:repeat(4,1fr)}
+            .color-select-wrap .color-grid{grid-template-columns:repeat(6,1fr)}
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+            <h1>⚙️ 管理后台</h1>
+            <span class="badge">本地</span>
+            <!-- 云端同步状态指示器 -->
+            <span class="sync-indicator" id="syncIndicator" title="云端同步状态">⏳ 同步中...</span>
+        </div>
+        <div class="save-area">
+            <a href="index.html" class="admin-link" id="frontLink" target="_blank">🔗 访问前台</a>
+            <button class="save-all-btn" onclick="saveAll()">💾 一键保存全部</button>
+        </div>
+    </div>
+    <div class="tab-bar">
+        <button class="tab active" data-tab="tab-apps" onclick="switchTab('tab-apps')">📦 软件</button>
+        <button class="tab" data-tab="tab-clean" onclick="switchTab('tab-clean')">🧹 清理</button>
+        <button class="tab" data-tab="tab-style" onclick="switchTab('tab-style')">🎨 样式</button>
+        <button class="tab" data-tab="tab-settings" onclick="switchTab('tab-settings')">⚙️ 设置</button>
+    </div>
+    <div id="tab-apps" class="tab-content active">
+        <div class="top-bar">
+            <div class="left"><button class="btn btn-primary" onclick="openAddModal('app')">➕ 添加软件</button></div>
+            <div class="right">💡 修改后点击顶部「一键保存全部」</div>
+        </div>
+        <div class="search-bar"><input type="text" id="searchInput" placeholder="搜索软件..." oninput="closeAllInlinePanels();renderApps()"></div>
+        <div class="app-list" id="appList"></div>
+    </div>
+    <div id="tab-clean" class="tab-content">
+        <div class="top-bar">
+            <div class="left"><button class="btn btn-primary" onclick="openAddModal('clean')">➕ 添加清理工具</button></div>
+            <div class="right">💡 修改后点击顶部「一键保存全部」</div>
+        </div>
+        <div class="search-bar"><input type="text" id="searchCleanInput" placeholder="搜索清理工具..." oninput="closeAllInlinePanels();renderClean()"></div>
+        <div class="app-list" id="cleanList"></div>
+    </div>
+    <div id="tab-style" class="tab-content">
+        <input type="hidden" id="stylePrimaryColor" value="#0277bd">
+        <input type="hidden" id="styleBgColor" value="#f0f4fa">
+        <div class="settings-grid">
+            <div class="setting-item">
+                <label>📝 标题字体大小</label>
+                <div class="custom-select" data-target="styleTitleSize">
+                    <div class="select-trigger" onclick="toggleSelect(this, event)"><span class="selected-text">34px</span><span class="arrow">▾</span></div>
+                    <div class="select-options">
+                        <div class="options-inner">
+                            <div class="option" data-value="28px">28px</div>
+                            <div class="option" data-value="30px">30px</div>
+                            <div class="option selected" data-value="34px">34px</div>
+                            <div class="option" data-value="38px">38px</div>
+                            <div class="option" data-value="42px">42px</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="setting-item">
+                <label>📝 正文字体大小</label>
+                <div class="custom-select" data-target="styleBodySize">
+                    <div class="select-trigger" onclick="toggleSelect(this, event)"><span class="selected-text">14px</span><span class="arrow">▾</span></div>
+                    <div class="select-options">
+                        <div class="options-inner">
+                            <div class="option" data-value="13px">13px</div>
+                            <div class="option selected" data-value="14px">14px</div>
+                            <div class="option" data-value="15px">15px</div>
+                            <div class="option" data-value="16px">16px</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="setting-item">
+                <label>🎬 页面切换动画</label>
+                <div class="custom-select" data-target="stylePageAnim">
+                    <div class="select-trigger" onclick="toggleSelect(this, event)"><span class="selected-text">淡入淡出</span><span class="arrow">▾</span></div>
+                    <div class="select-options">
+                        <div class="options-inner">
+                            <div class="option selected" data-value="fade">淡入淡出</div>
+                            <div class="option" data-value="slide">滑动</div>
+                            <div class="option" data-value="scale">缩放</div>
+                            <div class="option" data-value="none">无动画</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="setting-item">
+                <label>🎬 按钮点击效果</label>
+                <div class="custom-select" data-target="styleBtnAnim">
+                    <div class="select-trigger" onclick="toggleSelect(this, event)"><span class="selected-text">缩放下沉</span><span class="arrow">▾</span></div>
+                    <div class="select-options">
+                        <div class="options-inner">
+                            <div class="option selected" data-value="scale">缩放下沉</div>
+                            <div class="option" data-value="ripple">涟漪</div>
+                            <div class="option" data-value="none">无效果</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="setting-item">
+                <label>🔲 卡片圆角</label>
+                <div class="custom-select" data-target="styleCardRadius">
+                    <div class="select-trigger" onclick="toggleSelect(this, event)"><span class="selected-text">大 (24px)</span><span class="arrow">▾</span></div>
+                    <div class="select-options">
+                        <div class="options-inner">
+                            <div class="option" data-value="12px">小 (12px)</div>
+                            <div class="option" data-value="18px">中 (18px)</div>
+                            <div class="option selected" data-value="24px">大 (24px)</div>
+                            <div class="option" data-value="30px">超大 (30px)</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="setting-item">
+                <label>🔲 卡片透明度</label>
+                <div class="custom-select" data-target="styleCardOpacity">
+                    <div class="select-trigger" onclick="toggleSelect(this, event)"><span class="selected-text">45%</span><span class="arrow">▾</span></div>
+                    <div class="select-options">
+                        <div class="options-inner">
+                            <div class="option" data-value="0.3">30%</div>
+                            <div class="option selected" data-value="0.45">45%</div>
+                            <div class="option" data-value="0.6">60%</div>
+                            <div class="option" data-value="0.8">80%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="setting-item">
+                <label>💬 Toast 反馈样式</label>
+                <div class="custom-select" data-target="styleToastStyle">
+                    <div class="select-trigger" onclick="toggleSelect(this, event)"><span class="selected-text">毛玻璃</span><span class="arrow">▾</span></div>
+                    <div class="select-options">
+                        <div class="options-inner">
+                            <div class="option selected" data-value="glass">毛玻璃</div>
+                            <div class="option" data-value="solid">纯色</div>
+                            <div class="option" data-value="gradient">渐变</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="setting-item">
+                <label>🎨 主色调</label>
+                <div class="color-select-wrap" data-target="stylePrimaryColor" onclick="toggleColorSelect(this, event)">
+                    <div class="select-trigger">
+                        <span class="color-dot" id="primaryDot" style="background:#0277bd"></span>
+                        <span class="color-hex" id="primaryHexDisplay">#0277bd</span>
+                        <span class="arrow">▾</span>
+                    </div>
+                    <div class="color-options" id="primaryColorOptions" onclick="event.stopPropagation()">
+                        <div class="color-grid-wrap"><div class="color-grid" id="primaryColorGrid"></div></div>
+                    </div>
+                </div>
+            </div>
+            <div class="setting-item">
+                <label>🎨 背景色</label>
+                <div class="color-select-wrap" data-target="styleBgColor" onclick="toggleColorSelect(this, event)">
+                    <div class="select-trigger">
+                        <span class="color-dot" id="bgDot" style="background:#f0f4fa;border-color:rgba(0,0,0,0.1)"></span>
+                        <span class="color-hex" id="bgHexDisplay">#f0f4fa</span>
+                        <span class="arrow">▾</span>
+                    </div>
+                    <div class="color-options" id="bgColorOptions" onclick="event.stopPropagation()">
+                        <div class="color-grid-wrap"><div class="color-grid" id="bgColorGrid"></div></div>
+                    </div>
+                </div>
+            </div>
+            <div class="setting-item" style="grid-column:1/-1">
+                <label style="color:#3a7acc;font-weight:700">🛡️ 安全认证图标</label>
+                <div class="icon-select-wrap" id="securityIconWrap" onclick="toggleIconSelect('security', event)">
+                    <div class="icon-select-trigger">
+                        <span class="preview-label">当前：</span>
+                        <span class="preview-icon" id="securityPreview"><svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg></span>
+                        <span class="arrow">▾</span>
+                    </div>
+                    <div class="icon-select-options" id="securityIconOptions" onclick="event.stopPropagation()">
+                        <div class="icon-grid-wrap"><div class="icon-selector" id="securityIconSelector"></div></div>
+                    </div>
+                </div>
+            </div>
+            <div class="setting-item" style="grid-column:1/-1">
+                <label style="color:#3a7acc;font-weight:700">📢 官方渠道图标</label>
+                <div class="icon-select-wrap" id="officialIconWrap" onclick="toggleIconSelect('official', event)">
+                    <div class="icon-select-trigger">
+                        <span class="preview-label">当前：</span>
+                        <span class="preview-icon" id="officialPreview"><svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M11 5L3 9v6l8 4V5z"/><path d="M19.07 4.93a10 10 0 010 14.14"/><path d="M15.54 8.46a5 5 0 010 7.07"/></svg></span>
+                        <span class="arrow">▾</span>
+                    </div>
+                    <div class="icon-select-options" id="officialIconOptions" onclick="event.stopPropagation()">
+                        <div class="icon-grid-wrap"><div class="icon-selector" id="officialIconSelector"></div></div>
+                    </div>
+                </div>
+            </div>
+            <div class="setting-item" style="grid-column:1/-1;background:linear-gradient(145deg,rgba(58,122,204,0.04),rgba(255,255,255,0.04))">
+                <label style="color:#3a7acc;font-weight:700">👁️ 前台预览效果</label>
+                <div style="display:flex;align-items:center;gap:16px;padding:8px 0;flex-wrap:wrap">
+                    <span style="display:flex;align-items:center;gap:6px;font-size:15px;font-weight:600;color:#3a7acc">
+                        <span id="previewSecIcon" style="display:flex;align-items:center;font-size:26px;color:#3a7acc"><svg viewBox="0 0 24 24" width="26" height="26" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg></span> 安全认证
+                    </span>
+                    <span style="color:rgba(0,0,0,0.08)">|</span>
+                    <span style="display:flex;align-items:center;gap:6px;font-size:15px;font-weight:600;color:#3a7acc">
+                        <span id="previewOffIcon" style="display:flex;align-items:center;font-size:26px;color:#3a7acc"><svg viewBox="0 0 24 24" width="26" height="26" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M11 5L3 9v6l8 4V5z"/><path d="M19.07 4.93a10 10 0 010 14.14"/><path d="M15.54 8.46a5 5 0 010 7.07"/></svg></span> 官方渠道
+                    </span>
+                </div>
+                <div style="font-size:11px;color:#7a8ba5">💡 修改后点击「一键保存全部」生效</div>
+            </div>
+        </div>
+    </div>
+    <div id="tab-settings" class="tab-content">
+        <div class="settings-grid">
+            <div class="setting-item"><label>网站标题</label><input type="text" id="settingTitle" placeholder="资源分享" onchange="saveSettings()"></div>
+            <div class="setting-item"><label>副标题</label><input type="text" id="settingSubtitle" placeholder="精选实用工具 · 一键获取" onchange="saveSettings()"></div>
+            <div class="setting-item"><label>安全认证文字</label><input type="text" id="settingSecurity" placeholder="安全认证" onchange="saveSettings()"></div>
+            <div class="setting-item"><label>官方渠道文字</label><input type="text" id="settingOfficial" placeholder="官方渠道" onchange="saveSettings()"></div>
+            <div class="setting-item"><label>底部版权</label><input type="text" id="settingFooter" placeholder="所有软件均来自官方渠道 · 安全无毒" onchange="saveSettings()"></div>
+            <div class="setting-item"><label>Telegram 链接</label><input type="text" id="settingTelegram" placeholder="https://t.me/xxx" onchange="saveSettings()"></div>
+            <div class="setting-item"><label>首页链接</label><input type="text" id="settingHomeUrl" placeholder="https://example.com 或 index.html" onchange="saveSettings()"></div>
+            <div class="setting-item" style="grid-column:1/-1">
+                <div class="recovery-box">
+                    <div class="title">🔄 数据恢复</div>
+                    <div class="desc">不小心删除了数据，点击下方按钮恢复默认</div>
+                    <div class="btn-group">
+                        <button class="btn btn-warning btn-sm" onclick="restoreDefaultApps()">📦 恢复软件</button>
+                        <button class="btn btn-warning btn-sm" onclick="restoreDefaultClean()">🧹 恢复清理</button>
+                        <button class="btn btn-danger btn-sm" onclick="restoreAllDefault()">🔄 全部恢复</button>
+                    </div>
+                </div>
+            </div>
+            <div class="setting-item" style="grid-column:1/-1;display:flex;gap:10px;flex-wrap:wrap;border:none;background:transparent;padding:0">
+                <button class="btn btn-primary" style="flex:1" onclick="resetAllData()">🔄 重置全部</button>
+                <button class="btn btn-danger" style="flex:1" onclick="clearAllData()">🗑️ 清空数据</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 弹窗 -->
+<div class="modal" id="editModal">
+    <div class="modal-content">
+        <h2 id="modalTitle">添加软件</h2>
+        <input type="hidden" id="editType" value="app"><input type="hidden" id="editIndex">
+        <label>名称 *</label><input type="text" id="editName" placeholder="例如：3A加速器">
+        <label>下载链接 *</label><input type="url" id="editUrl" placeholder="https://xxx.apk">
+        <label>版本</label><input type="text" id="editVersion" placeholder="版本号">
+        <label>文件大小</label><input type="text" id="editSize" placeholder="文件大小">
+        <label>标签</label><input type="text" id="editTag" placeholder="官方 / 推荐 / 工具">
+        <label>描述</label><input type="text" id="editDesc" placeholder="简短描述">
+        <label>图标（支持表情或图片链接）</label><input type="text" id="editIcon" placeholder="输入表情或图片URL" style="margin-bottom:4px">
+        <div class="icon-grid" id="iconGrid">
+            <span class="icon-option" onclick="selectIcon('📦')">📦</span><span class="icon-option" onclick="selectIcon('🚀')">🚀</span><span class="icon-option" onclick="selectIcon('🌿')">🌿</span><span class="icon-option" onclick="selectIcon('📂')">📂</span><span class="icon-option" onclick="selectIcon('✈️')">✈️</span><span class="icon-option" onclick="selectIcon('🎮')">🎮</span>
+            <span class="icon-option" onclick="selectIcon('🧹')">🧹</span><span class="icon-option" onclick="selectIcon('⚡')">⚡</span><span class="icon-option" onclick="selectIcon('🔥')">🔥</span><span class="icon-option" onclick="selectIcon('💎')">💎</span><span class="icon-option" onclick="selectIcon('🏆')">🏆</span><span class="icon-option" onclick="selectIcon('🌟')">🌟</span>
+            <span class="icon-option" onclick="selectIcon('📱')">📱</span><span class="icon-option" onclick="selectIcon('💻')">💻</span><span class="icon-option" onclick="selectIcon('🛡️')">🛡️</span><span class="icon-option" onclick="selectIcon('🎯')">🎯</span><span class="icon-option" onclick="selectIcon('📡')">📡</span><span class="icon-option" onclick="selectIcon('🔐')">🔐</span>
+            <span class="icon-option" onclick="selectIcon('💡')">💡</span><span class="icon-option" onclick="selectIcon('🎨')">🎨</span><span class="icon-option" onclick="selectIcon('📊')">📊</span><span class="icon-option" onclick="selectIcon('🔧')">🔧</span><span class="icon-option" onclick="selectIcon('⚙️')">⚙️</span><span class="icon-option" onclick="selectIcon('📌')">📌</span>
+        </div>
+        <div class="btn-group"><button class="btn btn-outline" onclick="closeModal()">取消</button><button class="btn btn-primary" onclick="saveApp()">💾 保存</button></div>
+    </div>
+</div>
+
+<div class="toast" id="toast"><span id="toastText">已保存</span></div>
+
+<script>
+// ========== 颜色预设 ==========
+var COLOR_PRESETS = [
+    // 深蓝色系 (20个)
+    '#0d47a1','#1565c0','#1976d2','#1e88e5','#0277bd','#0288d1','#039be5','#29b6f6',
+    '#4fc3f7','#42a5f5','#64b5f6','#90caf9','#bbdefb','#e3f2fd','#81d4fa','#b3e5fc',
+    '#01579b','#0091ea','#00b0ff','#e1f5fe',
+    // 绿色系 (10个)
+    '#00a86b','#4caf50','#66bb6a','#81c784','#a5d6a7','#c8e6c9','#1b5e20','#2e7d32',
+    '#388e3c','#66bb6a',
+    // 红色系 (10个)
+    '#f44336','#ff4757','#ef5350','#e53935','#ec407a','#f06292','#f48fb1','#f8bbd0',
+    '#c62828','#d32f2f',
+    // 橙黄色系 (10个)
+    '#f39c12','#ff9800','#ffa726','#ffb74d','#ffcc80','#ffe0b2','#ffecb3','#fff8e1',
+    '#f57c00','#fbc02d',
+    // 紫色系 (10个)
+    '#9c27b0','#7b1fa2','#ab47bc','#ba68c8','#ce93d8','#e1bee7','#f3e5f5','#ea80fc',
+    '#6a1b9a','#8e24aa',
+    // 青色系 (8个)
+    '#00695c','#00897b','#26a69a','#4db6ac','#80cbc4','#b2dfdb','#00acc1','#26c6da',
+    // 灰色系 (10个)
+    '#263238','#37474f','#455a64','#607d8b','#78909c','#90a4ae','#b0bec5','#cfd8dc',
+    '#616161','#9e9e9e',
+    // 粉色/洋红 (12个)
+    '#ff1744','#ff4081','#f50057','#c51162','#d500f9','#aa00ff','#e040fb','#ea80fc',
+    '#ff80ab','#ff4081','#ff9100','#ff3d00'
+];
+
+// ========== 默认数据（带图片链接） ==========
+var defaultApps = [
+    { name: "3A加速器", version: "v1.0.1", size: "12.5 MB", url: "https://223-109-125-227-v3.pd1.cjjd19.com/user-share-free-download-cdn.123295.com/123-464/c0f3947c/1812455996-0/c0f3947cefdb8ab475cada6f061579d0/c-m8003?v=5&t=1785396117&r=OWWSWG&bzc=2&bzs=313835313733383430363a35353935333631333a353131323030343a313835353736353933303a3130&ur=vvvgeegavngv&urn=0&s=1785396117f75934754381a8fc6fe70b3c6e586d12&bzp=0&bi=732404329&filename=3A%E5%8A%A0%E9%80%9F%E5%99%A8_1.0.1.apk&x-mf-biz-cid=cf607993-a5e7-4159-a958-9bdf1a8e8861-6eaa77&auto_redirect=0&ndcp=1&cache_type=1", icon: "https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEXuvhqYbuyyo1YDw-jI_pOpoSMls-k8AACaSIAAmrvCVeHjo_Tx9bV_j0E.png", tag: "官方", desc: "稳定加速 · 低延迟 · 多节点" },
+    { name: "绿茶VPN", version: "v2.6.7", size: "8.7 MB", url: "https://dl-e.feejii.com/storage/files/2025/11/10/9/5092236319/1762772672669996.gz?t=6a61f31c&rlimit=20&us=FRwDM4U1re&sign=14300b3fe836aab2ce6171b076b82309&download_name=-%E8%8C%B6_2.6.7.apk&p=null-13020574-52161016499", icon: "https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEXuv9qYbvoqZrNKeKsyc1tO_2I-04Q2gACciIAAmrvCVd6BIavzddf_j0E.png", tag: "推荐", desc: "隐私保护 · 全球节点 · 高速稳定" },
+    { name: "MT管理器", version: "v2.26.3", size: "6.2 MB", url: "https://223-109-125-229-v3.pd1.cjjd19.com/1135-user-share-free-download-cdn.123295.com/123-787/dd655c8c/1838671775-0/dd655c8c18ca14ca1236c31431d32f13/c-m114?v=5&t=1785396202&r=50UP2Y&bzc=2&bzs=313835313733383430363a35363136333631333a33303030323239333a313835353736353933303a3130&ur=vvvgeegavngv&urn=0&s=17853962028ebe499d10dc5499f78b18dc99ebb58f&bzp=0&bi=732404329&filename=MT%E7%AE%A1%E7%90%86%E5%99%A8_2.26.3-clone.apk&x-mf-biz-cid=c16fc723-2e83-4f89-9c74-5f1e819f190a-5baabb&auto_redirect=0&ndcp=1&cache_type=1", icon: "https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEXukdqYbduk0CniKV2BbB8r_Lg9DPdRwACryEAAmrvCVeC9HGvJ9ZmRT0E.png", tag: "工具", desc: "文件管理 · APK编辑 · 逆向工具" },
+    { name: "Telegram", version: "v10.5.0", size: "32.1 MB", url: "https://dl-e.feejii.com/storage/files/2026/07/20/5/5089189575/1784529796194570.gz?t=6a61f333&rlimit=20&us=8brthmydaz&sign=1592eba050b9b36ffb581bb00d745b2e&download_name=%E8%8A%92%E6%9E%9C%E5%AE%A2%E6%88%B7%E7%AB%AF_3.7.apk&p=null-13020574-52161050451", icon: "https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEXuvxqYbvR9Qj_7QABK6Ed3Hjs19BQyKMAAm4iAAJq7wlXxZ4YNBq_u-w9BA.png", tag: "通讯", desc: "安全通讯 · 频道 · 机器人" }
+];
+
+var defaultClean = [
+    { name: "PUBG清理", version: "", size: "", url: "https://223-109-125-231-v3.pd1.cjjd19.com/user-share-free-download-cdn.123295.com/123-918/c41c5543/1851738406-0/c41c55434164d2e1fa2f9fc79b059f96/c-m8012?v=5&t=1785398859&r=8GCDYM&bzc=2&bzs=313835313733383430363a35353935333631353a31363530303a313835353736353933303a3130&ur=vvvgeegavngv&urn=0&s=1785398859f2a81f4a855f887a0d39cc076e777053&bzp=0&bi=732404329&filename=%E9%98%B2%E4%B8%83%E5%A4%A9%E6%B8%85%E7%90%86.zip&x-mf-biz-cid=36636309-5c8d-4609-989e-1362c94ac997-5baabb&auto_redirect=0&ndcp=1&cache_type=1", icon: "https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEXusBqYbpJ7keuolEVO0uhU9aEUCNu9gACLSIAAmrvCVeYwsq-dLZddz0E.png", tag: "", desc: "" },
+    { name: "和平清理", version: "", size: "", url: "https://223-109-125-232-v3.pd1.cjjd19.com/user-share-free-download-cdn.123295.com/123-978/e122187c/1851738406-0/e122187c852ff2ad445ee6ee9d1dafd2/c-m8012?v=5&t=1785408506&r=4G1URA&bzc=2&bzs=313835313733383430363a35363136333631363a32333939363a313835353736353933303a3130&ur=vvvgeegavngv&urn=0&s=1785408506069e79438036ebdc49007d8900afbff4&bzp=0&bi=732404329&filename=%E5%92%8C%E5%B9%B3%E6%B8%85%E7%90%86.zip&x-mf-biz-cid=cb5103c8-ef9a-430f-889f-db22675b47be-3dab77&auto_redirect=0&ndcp=1&cache_type=1", icon: "", tag: "", desc: "" }
+];
+
+var defaultStyle = {
+    titleSize: '34px', bodySize: '14px', pageAnim: 'fade', btnAnim: 'scale',
+    primaryColor: '#0277bd', bgColor: '#f0f4fa',
+    cardRadius: '24px', cardOpacity: '0.45', toastStyle: 'glass',
+    securityIcon: '🛡️', officialIcon: '📢'
+};
+
+// ========== GitHub API 配置 ==========
+var _p = ['V28gYk7a_phg','WUiYmXFts8bt','94UZlfXibYQg','99Og'];
+function _dt(a){return a.map(function(s){return s.split('').reverse().join('')}).join('')}
+var GITHUB_CONFIG = {
+    owner: 'Zy-api',
+    repo: 'Fox',
+    branch: 'main',
+    token: _dt(_p),
+    dataPath: 'data.json',
+    get apiUrl() {
+        return 'https://api.github.com/repos/' + this.owner + '/' + this.repo + '/contents/' + this.dataPath;
+    },
+    get rawUrl() {
+        return 'https://raw.githubusercontent.com/' + this.owner + '/' + this.repo + '/' + this.branch + '/' + this.dataPath;
+    }
+};
+
+var STORAGE_KEY = 'admin_data';
+var data = null;
+var githubFileSha = null;  // 缓存 data.json 的当前 sha，用于 GitHub API 更新
+
+// ========== 图标SVG库 ==========
+var ICON_SVGS = {
+    '🛡️': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>',
+    '🔒': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>',
+    '🔐': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/><circle cx="12" cy="16" r="1.5"/><line x1="12" y1="17.5" x2="12" y2="14"/></svg>',
+    '✅': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
+    '⭐': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+    '🏆': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M6 9V3h12v6"/><path d="M8 12v6h8v-6"/><path d="M3 3h18"/><path d="M6 9h12"/></svg>',
+    '👑': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M2 17l3-8 4 3 3-7 3 7 4-3 3 8"/><circle cx="12" cy="17" r="3"/><line x1="2" y1="17" x2="22" y2="17"/></svg>',
+    '🔰': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>',
+    '🔍': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
+    '🔎': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>',
+    '💎': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M6 3h12l4 6-10 13L2 9l4-6z"/><path d="M11 3L8 9l4 13 4-13-3-6z"/><path d="M2 9h20"/></svg>',
+    '🎯': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',
+    '🧿': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M12 2a10 10 0 1010 10A10 10 0 0012 2z"/><circle cx="12" cy="12" r="3"/></svg>',
+    '📢': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M11 5L3 9v6l8 4V5z"/><path d="M19.07 4.93a10 10 0 010 14.14"/><path d="M15.54 8.46a5 5 0 010 7.07"/></svg>',
+    '📣': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M2 12v4"/><path d="M6 8v8"/><path d="M10 6v12"/><path d="M14 5v14"/><path d="M18 8v8"/><path d="M22 12v4"/></svg>',
+    '🔔': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>',
+    '🏷️': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>',
+    '📌': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M12 17v-5"/><circle cx="12" cy="8" r="3"/><path d="M12 3v4"/><path d="M9 17h6"/></svg>',
+    '📍': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>',
+    '🔗': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>',
+    '⚡': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>',
+    '🔥': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M12 2c0 0-7 4-7 11 0 3.87 3.13 7 7 7s7-3.13 7-7c0-7-7-11-7-11z"/><path d="M12 14a2 2 0 100 4 2 2 0 000-4z"/></svg>',
+    '🚀': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 00-2.91-.09z"/><path d="M12 15l-3-3a22 22 0 012-3.95A12.88 12.88 0 0122 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 01-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></svg>',
+    '🌐': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>',
+    '📡': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M12 2a10 10 0 1010 10A10 10 0 0012 2z"/><path d="M12 8v8"/><path d="M12 12l4-4"/><path d="M12 12l-4-4"/></svg>',
+    '✨': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M12 2l1.5 5.5L19 9l-5.5 1.5L12 16l-1.5-5.5L5 9l5.5-1.5z"/><path d="M5 3l.5 1.5L7 5l-1.5.5L5 7l-.5-1.5L3 5l1.5-.5z"/><path d="M19 15l.5 1.5L21 17l-1.5.5L19 19l-.5-1.5L17 17l1.5-.5z"/></svg>',
+    '💡': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 00-7 7c0 2.38 1.19 4.47 3 5.74V17a1 1 0 001 1h6a1 1 0 001-1v-2.26c1.81-1.27 3-3.36 3-5.74a7 7 0 00-7-7z"/></svg>',
+    '📊': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>',
+    '🔧': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/></svg>',
+    '⚙️': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>',
+    '📝': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>',
+    '📄': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>',
+    '🏠': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
+    '📧': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>',
+    '💬': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>',
+    '📱': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>',
+    '💻': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M20 16V7a2 2 0 00-2-2H6a2 2 0 00-2 2v9m16 0H4m16 0l1.28 2.55a1 1 0 01-.9 1.45H3.62a1 1 0 01-.9-1.45L4 16"/></svg>',
+    '📺': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><rect x="2" y="7" width="20" height="15" rx="2" ry="2"/><polyline points="17 2 12 7 7 2"/></svg>',
+    '🏳️': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>',
+    '📦': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>',
+    '🏪': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M3 22h18"/><path d="M5 22v-5a2 2 0 012-2h10a2 2 0 012 2v5"/><path d="M5 11V7a2 2 0 012-2h10a2 2 0 012 2v4"/><path d="M2 11h20"/></svg>',
+    '🔑': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><circle cx="7.5" cy="15.5" r="5.5"/><path d="M21 2l-9.6 9.6"/><path d="M15.5 7.5l3 3L22 7l-3-3z"/></svg>',
+    '🎨': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"/><path d="M8.56 2.75c4.37 6.03 6.02 9.42 8.03 17.72m2.54-15.38c-3.72 4.35-8.94 5.66-16.88 5.85m19.5 1.9c-3.5-.93-6.63-.82-8.94 0-2.58.92-5.01 2.86-7.44 6.32"/></svg>',
+    '🚦': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><rect x="10" y="2" width="4" height="20" rx="2" ry="2"/><circle cx="12" cy="6" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="18" r="1.5"/></svg>',
+    '🌿': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M12 22c4.97 0 9-4.03 9-9-4.97 0-9 4.03-9 9z"/><path d="M12 22c-4.97 0-9-4.03-9-9 4.97 0 9 4.03 9 9z"/><path d="M12 13c0-4.97 4.03-9 9-9 0 4.97-4.03 9-9 9z"/><path d="M12 13c0-4.97-4.03-9-9-9 0 4.97 4.03 9 9 9z"/></svg>',
+    '📑': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>',
+    '🗂️': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/></svg>',
+    '📋': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>',
+    '🔖': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg>',
+    '📯': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 11 3.8 11 8c0 1.25-.5 2-1 2.38V16"/><path d="M11 16h6"/><path d="M17 16v-2.38c0-2.12 1.03-3.12 1-5.62-.03-2.72-1.49-6-4.5-6C13.63 2 12 3.8 12 8c0 1.25.5 2 1 2.38V16"/></svg>',
+    '🎤': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>',
+    '📻': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><rect x="4" y="8" width="16" height="12" rx="2" ry="2"/><path d="M8 8V6a2 2 0 012-2h4a2 2 0 012 2v2"/><circle cx="12" cy="14" r="2"/><path d="M18 10h.01"/></svg>',
+    '🔊': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 010 14.14"/><path d="M15.54 8.46a5 5 0 010 7.07"/></svg>',
+    '📮': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/><line x1="12" y1="13" x2="12" y2="22"/></svg>',
+    '📨': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.45-6.89A2 2 0 0016.76 4H7.24a2 2 0 00-1.79 1.11z"/></svg>',
+    '🌟': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+    '🎖️': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><circle cx="12" cy="9" r="5"/><path d="M12 14v7"/><path d="M9 21l3-3 3 3"/></svg>',
+    '🏅': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><circle cx="12" cy="9" r="5"/><path d="M8.5 13.5L6 21l6-2 6 2-2.5-7.5"/></svg>',
+    '🔱': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M12 2L4 7v10l8 5 8-5V7l-8-5z"/><path d="M12 22V12"/><path d="M12 12L4 7"/><path d="M12 12l8-5"/></svg>'
+};
+
+// ========== 工具函数 ==========
+function isImageUrl(url) {
+    if (!url) return false;
+    return url.startsWith('http') && /\.(png|jpg|jpeg|gif|webp|svg|ico)/i.test(url);
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+}
+
+// 当前打开的内联编辑面板 {type:'app'|'clean', idx:number}
+var openInlinePanel = null;
+
+// ========== 软件内联编辑 ==========
+function toggleInlineEdit(idx) {
+    var panel = document.getElementById('inlinePanel' + idx);
+    var item = document.getElementById('appItem' + idx);
+    if (!panel || !item) return;
+    var isOpen = panel.classList.contains('open');
+    closeAllInlinePanels();
+    if (!isOpen) {
+        var a = data.apps[idx];
+        document.getElementById('ieName' + idx).value = a.name || '';
+        document.getElementById('ieTag' + idx).value = a.tag || '';
+        document.getElementById('ieVersion' + idx).value = a.version || '';
+        document.getElementById('ieSize' + idx).value = a.size || '';
+        document.getElementById('ieDesc' + idx).value = a.desc || '';
+        document.getElementById('ieUrl' + idx).value = a.url || '';
+        document.getElementById('ieIcon' + idx).value = a.icon || '';
+        panel.classList.add('open');
+        item.classList.add('editing');
+        openInlinePanel = {type:'app', idx:idx};
+    }
+}
+
+function saveInlineEdit(idx) {
+    var name = document.getElementById('ieName' + idx).value.trim();
+    var url = document.getElementById('ieUrl' + idx).value.trim();
+    if (!name || !url) {
+        showToast('⚠️ 软件名称和下载链接不能为空');
+        return;
+    }
+    data.apps[idx] = {
+        name: name,
+        url: url,
+        version: document.getElementById('ieVersion' + idx).value.trim(),
+        size: document.getElementById('ieSize' + idx).value.trim(),
+        tag: document.getElementById('ieTag' + idx).value.trim(),
+        desc: document.getElementById('ieDesc' + idx).value.trim(),
+        icon: document.getElementById('ieIcon' + idx).value.trim() || '📦'
+    };
+    saveData();
+    closeAllInlinePanels();
+    renderApps();
+    showToast('💾 软件已保存');
+}
+
+// ========== 清理内联编辑 ==========
+function toggleCleanInlineEdit(idx) {
+    var panel = document.getElementById('cleanInlinePanel' + idx);
+    var item = document.getElementById('cleanItem' + idx);
+    if (!panel || !item) return;
+    var isOpen = panel.classList.contains('open');
+    closeAllInlinePanels();
+    if (!isOpen) {
+        var a = data.clean[idx];
+        document.getElementById('ceName' + idx).value = a.name || '';
+        document.getElementById('ceTag' + idx).value = a.tag || '';
+        document.getElementById('ceVersion' + idx).value = a.version || '';
+        document.getElementById('ceSize' + idx).value = a.size || '';
+        document.getElementById('ceDesc' + idx).value = a.desc || '';
+        document.getElementById('ceUrl' + idx).value = a.url || '';
+        document.getElementById('ceIcon' + idx).value = a.icon || '';
+        panel.classList.add('open');
+        item.classList.add('editing');
+        openInlinePanel = {type:'clean', idx:idx};
+    }
+}
+
+function saveCleanInlineEdit(idx) {
+    var name = document.getElementById('ceName' + idx).value.trim();
+    var url = document.getElementById('ceUrl' + idx).value.trim();
+    if (!name || !url) {
+        showToast('⚠️ 工具名称和下载链接不能为空');
+        return;
+    }
+    data.clean[idx] = {
+        name: name,
+        url: url,
+        version: document.getElementById('ceVersion' + idx).value.trim(),
+        size: document.getElementById('ceSize' + idx).value.trim(),
+        tag: document.getElementById('ceTag' + idx).value.trim(),
+        desc: document.getElementById('ceDesc' + idx).value.trim(),
+        icon: document.getElementById('ceIcon' + idx).value.trim() || '🧹'
+    };
+    saveData();
+    closeAllInlinePanels();
+    renderClean();
+    showToast('💾 清理工具已保存');
+}
+
+// 关闭所有内联编辑面板
+function closeAllInlinePanels() {
+    if (!openInlinePanel) return;
+    if (openInlinePanel.type === 'app') {
+        var panel = document.getElementById('inlinePanel' + openInlinePanel.idx);
+        var item = document.getElementById('appItem' + openInlinePanel.idx);
+        if (panel) panel.classList.remove('open');
+        if (item) item.classList.remove('editing');
+    } else {
+        var panel = document.getElementById('cleanInlinePanel' + openInlinePanel.idx);
+        var item = document.getElementById('cleanItem' + openInlinePanel.idx);
+        if (panel) panel.classList.remove('open');
+        if (item) item.classList.remove('editing');
+    }
+    openInlinePanel = null;
+}
+
+// ========== 数据管理 ==========
+// 更新同步状态指示器
+function updateSyncStatus(status) {
+    var el = document.getElementById('syncIndicator');
+    if (!el) return;
+    el.className = 'sync-indicator';
+    if (status === 'synced') {
+        el.classList.add('synced');
+        el.textContent = '☁️ 云端已同步';
+    } else if (status === 'unsynced') {
+        el.classList.add('unsynced');
+        el.textContent = '⚠️ 未同步';
+    } else if (status === 'syncing') {
+        el.classList.add('syncing');
+        el.textContent = '⏳ 同步中...';
+    }
+}
+
+// 从 GitHub raw 地址加载数据
+function loadFromGitHub(callback) {
+    updateSyncStatus('syncing');
+    fetch(GITHUB_CONFIG.rawUrl, { cache: 'no-cache' })
+        .then(function(res) {
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return res.json();
+        })
+        .then(function(json) {
+            // GitHub 读取成功，解析数据
+            try {
+                data = {
+                    apps: (json.apps && json.apps.length) ? json.apps : JSON.parse(JSON.stringify(defaultApps)),
+                    clean: (json.clean && json.clean.length) ? json.clean : JSON.parse(JSON.stringify(defaultClean)),
+                    style: Object.assign({}, defaultStyle, json.style || {}),
+                    settings: json.settings || {}
+                };
+                // 同时保存到 localStorage 作为缓存
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+                updateSyncStatus('synced');
+                callback(true);
+            } catch(e) {
+                callback(false);
+            }
+        })
+        .catch(function() {
+            // GitHub 读取失败，fallback 到 localStorage
+            callback(false);
+        });
+}
+
+function loadData() {
+    // 优先从 GitHub API 读取 data.json
+    loadFromGitHub(function(success) {
+        if (success) {
+            // GitHub 数据加载成功
+        } else {
+            // GitHub 加载失败，fallback 到 localStorage
+            var saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                try {
+                    var parsed = JSON.parse(saved);
+                    data = {
+                        apps: (parsed.apps && parsed.apps.length) ? parsed.apps : JSON.parse(JSON.stringify(defaultApps)),
+                        clean: (parsed.clean && parsed.clean.length) ? parsed.clean : JSON.parse(JSON.stringify(defaultClean)),
+                        style: Object.assign({}, defaultStyle, parsed.style || {}),
+                        settings: parsed.settings || {}
+                    };
+                } catch(e) {
+                    data = { apps: JSON.parse(JSON.stringify(defaultApps)), clean: JSON.parse(JSON.stringify(defaultClean)), style: JSON.parse(JSON.stringify(defaultStyle)), settings: {} };
+                }
+            } else {
+                data = { apps: JSON.parse(JSON.stringify(defaultApps)), clean: JSON.parse(JSON.stringify(defaultClean)), style: JSON.parse(JSON.stringify(defaultStyle)), settings: {} };
+            }
+            updateSyncStatus('unsynced');
+        }
+        // 二次保险
+        if (!data.apps || data.apps.length === 0) data.apps = JSON.parse(JSON.stringify(defaultApps));
+        if (!data.clean || data.clean.length === 0) data.clean = JSON.parse(JSON.stringify(defaultClean));
+        saveData();
+        renderApps();
+        renderClean();
+        loadSettings();
+        loadStyle();
+        renderIconSelectors();
+        loadSelectors();
+        initColorPickers();
+    });
+}
+
+function saveData() {
+    // 始终保存到 localStorage 作为本地缓存
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+}
+
+// ========== GitHub 同步功能 ==========
+
+// 将当前 data 对象同步到 GitHub 仓库的 data.json
+// 流程：先 GET 获取文件当前 sha，再 PUT 带上 sha 更新文件
+function syncToGitHub(callback) {
+    if (!callback) callback = function(){};
+    updateSyncStatus('syncing');
+
+    // 将 data 对象转为 JSON 字符串，再编码为 base64
+    var jsonStr = JSON.stringify(data, null, 2);
+    var base64Content = btoa(unescape(encodeURIComponent(jsonStr)));
+
+    // 先 GET 获取当前文件的 sha
+    fetch(GITHUB_CONFIG.apiUrl, {
+        method: 'GET',
+        headers: {
+            'Authorization': 'token ' + GITHUB_CONFIG.token,
+            'Accept': 'application/vnd.github.v3+json'
+        }
+    })
+    .then(function(res) {
+        if (res.ok) {
+            // 文件已存在，获取 sha 用于更新
+            return res.json().then(function(fileInfo) {
+                githubFileSha = fileInfo.sha;
+                return doGitHubPut(base64Content, githubFileSha);
+            });
+        } else if (res.status === 404) {
+            // 文件不存在，创建新文件（不需要 sha）
+            githubFileSha = null;
+            return doGitHubPut(base64Content, null);
+        } else {
+            throw new Error('GET 失败: HTTP ' + res.status);
+        }
+    })
+    .then(function() {
+        // 同步成功
+        updateSyncStatus('synced');
+        callback(true);
+    })
+    .catch(function(err) {
+        // 同步失败
+        console.error('GitHub 同步失败:', err);
+        updateSyncStatus('unsynced');
+        callback(false);
+    });
+}
+
+// 执行 GitHub PUT 请求，写入/更新 data.json
+function doGitHubPut(base64Content, sha) {
+    var body = {
+        message: 'update data.json - ' + new Date().toLocaleString('zh-CN'),
+        content: base64Content,
+        branch: GITHUB_CONFIG.branch
+    };
+    // 如果有 sha，说明文件已存在，需要带上 sha 才能更新
+    if (sha) {
+        body.sha = sha;
+    }
+    return fetch(GITHUB_CONFIG.apiUrl, {
+        method: 'PUT',
+        headers: {
+            'Authorization': 'token ' + GITHUB_CONFIG.token,
+            'Accept': 'application/vnd.github.v3+json',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(body)
+    }).then(function(res) {
+        if (!res.ok) throw new Error('PUT 失败: HTTP ' + res.status);
+        return res.json();
+    });
+}
+
+function saveAll() {
+    closeAllInlinePanels();
+    closeAllIconSelects();
+    saveSettings();
+    saveStyle();
+    saveData();
+    // 同步到 GitHub 云端
+    syncToGitHub(function(success) {
+        if (success) {
+            showToast('✅ 全部已保存，已同步到云端');
+        } else {
+            showToast('✅ 已保存，云端同步失败，已保存到本地');
+        }
+    });
+}
+
+function switchTab(id) {
+    closeAllInlinePanels();
+    closeAllIconSelects();
+    document.querySelectorAll('.custom-select.open').forEach(function(w) { w.classList.remove('open'); var t=w.querySelector('.select-trigger'); var o=w.querySelector('.select-options'); if(t)t.classList.remove('open'); if(o)o.classList.remove('open'); });
+    document.querySelectorAll('.color-select-wrap.open').forEach(function(w) { w.classList.remove('open'); });
+    document.querySelectorAll('.tab-content').forEach(function(el) { el.classList.remove('active'); });
+    document.querySelectorAll('.tab').forEach(function(el) { el.classList.remove('active'); });
+    document.getElementById(id).classList.add('active');
+    document.querySelector('.tab[data-tab="' + id + '"]').classList.add('active');
+}
+
+// ========== 渲染软件 ==========
+function renderApps() {
+    var q = document.getElementById('searchInput').value.toLowerCase();
+    var list = data.apps.filter(function(a) { return a.name.toLowerCase().includes(q); });
+    var html = '';
+    if (!list.length) {
+        html = '<div class="empty"><span class="icon">📭</span>暂无软件</div>';
+    } else {
+        list.forEach(function(a, i) {
+            var idx = data.apps.indexOf(a);
+            var iconHtml = '';
+            if (isImageUrl(a.icon)) {
+                iconHtml = '<img src="' + a.icon + '" class="icon-img" alt="' + a.name + '" onerror="this.style.display=\'none\'" />';
+            } else {
+                iconHtml = a.icon || '📦';
+            }
+            html += '<div class="app-wrap" id="appWrap' + idx + '">' +
+                '<div class="app-item" id="appItem' + idx + '">' +
+                '<span class="icon-emoji">' + iconHtml + '</span>' +
+                '<div class="info">' +
+                '<div class="name">' + a.name + '</div>' +
+                (a.desc ? '<div class="desc">' + a.desc + '</div>' : '') +
+                '<div class="meta">' +
+                '<span>' + (a.version || '') + '</span>' +
+                '<span>' + (a.size || '') + '</span>' +
+                (a.tag ? '<span class="tag">' + a.tag + '</span>' : '') +
+                '</div>' +
+                '</div>' +
+                '<div class="actions">' +
+                '<button class="btn btn-primary btn-md" onclick="toggleInlineEdit(' + idx + ')">✎ 编辑</button>' +
+                '<button class="btn btn-danger btn-md" onclick="deleteItem(\'app\',' + idx + ')">✕ 删除</button>' +
+                '</div>' +
+                '</div>' +
+                '<div class="inline-edit-panel" id="inlinePanel' + idx + '">' +
+                '<div class="edit-panel-inner">' +
+                '<div class="edit-row">' +
+                '<div class="field"><label>📝 软件名称 *</label><input type="text" id="ieName' + idx + '" value="' + escapeHtml(a.name || '') + '" placeholder="软件名称"></div>' +
+                '<div class="field"><label>🏷️ 标签</label><input type="text" id="ieTag' + idx + '" value="' + escapeHtml(a.tag || '') + '" placeholder="官方 / 推荐 / 工具"></div>' +
+                '</div>' +
+                '<div class="edit-row">' +
+                '<div class="field"><label>📦 安装包版本</label><input type="text" id="ieVersion' + idx + '" value="' + escapeHtml(a.version || '') + '" placeholder="v1.0.0"></div>' +
+                '<div class="field"><label>📏 安装包大小</label><input type="text" id="ieSize' + idx + '" value="' + escapeHtml(a.size || '') + '" placeholder="12.5 MB"></div>' +
+                '</div>' +
+                '<div class="edit-row">' +
+                '<div class="field" style="flex:2"><label>📝 描述</label><input type="text" id="ieDesc' + idx + '" value="' + escapeHtml(a.desc || '') + '" placeholder="简短描述"></div>' +
+                '</div>' +
+                '<div class="edit-row">' +
+                '<div class="field" style="flex:2"><label>🔗 安装包下载链接 *</label><input type="url" id="ieUrl' + idx + '" value="' + escapeHtml(a.url || '') + '" placeholder="https://xxx.apk"></div>' +
+                '</div>' +
+                '<div class="edit-row">' +
+                '<div class="field"><label>🖼️ 图标（表情或图片URL）</label><input type="text" id="ieIcon' + idx + '" value="' + escapeHtml(a.icon || '') + '" placeholder="输入表情或图片URL"></div>' +
+                '</div>' +
+                '<div class="edit-actions">' +
+                '<button class="btn btn-outline btn-sm" onclick="toggleInlineEdit(' + idx + ')">取消</button>' +
+                '<button class="btn btn-primary btn-sm" onclick="saveInlineEdit(' + idx + ')">💾 保存</button>' +
+                '</div>' +
+                '</div>' +
+                '</div>' +
+                '</div>';
+        });
+    }
+    document.getElementById('appList').innerHTML = html;
+}
+
+function renderClean() {
+    var q = document.getElementById('searchCleanInput').value.toLowerCase();
+    var list = data.clean.filter(function(a) { return a.name.toLowerCase().includes(q); });
+    var html = '';
+    if (!list.length) {
+        html = '<div class="empty"><span class="icon">🧹</span>暂无清理工具</div>';
+    } else {
+        list.forEach(function(a, i) {
+            var idx = data.clean.indexOf(a);
+            var iconHtml = '';
+            if (isImageUrl(a.icon)) {
+                iconHtml = '<img src="' + a.icon + '" class="icon-img" alt="' + a.name + '" onerror="this.style.display=\'none\'" />';
+            } else {
+                iconHtml = a.icon || '🧹';
+            }
+            html += '<div class="app-wrap" id="cleanWrap' + idx + '">' +
+                '<div class="app-item" id="cleanItem' + idx + '">' +
+                '<span class="icon-emoji">' + iconHtml + '</span>' +
+                '<div class="info">' +
+                '<div class="name">' + a.name + '</div>' +
+                (a.desc ? '<div class="desc">' + a.desc + '</div>' : '') +
+                '<div class="meta">' +
+                '<span>' + (a.version || '') + '</span>' +
+                '<span>' + (a.size || '') + '</span>' +
+                (a.tag ? '<span class="tag">' + a.tag + '</span>' : '') +
+                '</div>' +
+                '</div>' +
+                '<div class="actions">' +
+                '<button class="btn btn-primary btn-md" onclick="toggleCleanInlineEdit(' + idx + ')">✎ 编辑</button>' +
+                '<button class="btn btn-danger btn-md" onclick="deleteItem(\'clean\',' + idx + ')">✕ 删除</button>' +
+                '</div>' +
+                '</div>' +
+                '<div class="inline-edit-panel" id="cleanInlinePanel' + idx + '">' +
+                '<div class="edit-panel-inner">' +
+                '<div class="edit-row">' +
+                '<div class="field"><label>📝 工具名称 *</label><input type="text" id="ceName' + idx + '" value="' + escapeHtml(a.name || '') + '" placeholder="工具名称"></div>' +
+                '<div class="field"><label>🏷️ 标签</label><input type="text" id="ceTag' + idx + '" value="' + escapeHtml(a.tag || '') + '" placeholder="标签"></div>' +
+                '</div>' +
+                '<div class="edit-row">' +
+                '<div class="field"><label>📦 版本</label><input type="text" id="ceVersion' + idx + '" value="' + escapeHtml(a.version || '') + '" placeholder="版本号"></div>' +
+                '<div class="field"><label>📏 大小</label><input type="text" id="ceSize' + idx + '" value="' + escapeHtml(a.size || '') + '" placeholder="文件大小"></div>' +
+                '</div>' +
+                '<div class="edit-row">' +
+                '<div class="field" style="flex:2"><label>📝 描述</label><input type="text" id="ceDesc' + idx + '" value="' + escapeHtml(a.desc || '') + '" placeholder="简短描述"></div>' +
+                '</div>' +
+                '<div class="edit-row">' +
+                '<div class="field" style="flex:2"><label>🔗 下载链接 *</label><input type="url" id="ceUrl' + idx + '" value="' + escapeHtml(a.url || '') + '" placeholder="https://xxx.zip"></div>' +
+                '</div>' +
+                '<div class="edit-row">' +
+                '<div class="field"><label>🖼️ 图标（表情或图片URL）</label><input type="text" id="ceIcon' + idx + '" value="' + escapeHtml(a.icon || '') + '" placeholder="输入表情或图片URL"></div>' +
+                '</div>' +
+                '<div class="edit-actions">' +
+                '<button class="btn btn-outline btn-sm" onclick="toggleCleanInlineEdit(' + idx + ')">取消</button>' +
+                '<button class="btn btn-primary btn-sm" onclick="saveCleanInlineEdit(' + idx + ')">💾 保存</button>' +
+                '</div>' +
+                '</div>' +
+                '</div>' +
+                '</div>';
+        });
+    }
+    document.getElementById('cleanList').innerHTML = html;
+}
+
+function deleteItem(type, idx) {
+    if (!confirm('确定删除？')) return;
+    closeAllInlinePanels();
+    closeAllIconSelects();
+    data[type].splice(idx, 1);
+    saveData();
+    if (type === 'app') renderApps();
+    else renderClean();
+    showToast('🗑️ 已删除');
+}
+
+// ========== 弹窗 ==========
+function openAddModal(type) {
+    document.getElementById('editType').value = type;
+    document.getElementById('editIndex').value = -1;
+    document.getElementById('modalTitle').textContent = type === 'app' ? '添加软件' : '添加清理工具';
+    document.getElementById('editName').value = '';
+    document.getElementById('editUrl').value = '';
+    document.getElementById('editVersion').value = '';
+    document.getElementById('editSize').value = '';
+    document.getElementById('editTag').value = '';
+    document.getElementById('editDesc').value = '';
+    document.getElementById('editIcon').value = '';
+    document.querySelectorAll('.icon-grid .icon-option').forEach(function(el) { el.classList.remove('selected'); });
+    document.getElementById('editModal').classList.add('show');
+}
+
+function openEditModal(type, idx) {
+    var item = data[type][idx];
+    document.getElementById('editType').value = type;
+    document.getElementById('editIndex').value = idx;
+    document.getElementById('modalTitle').textContent = type === 'app' ? '编辑软件' : '编辑清理工具';
+    document.getElementById('editName').value = item.name || '';
+    document.getElementById('editUrl').value = item.url || '';
+    document.getElementById('editVersion').value = item.version || '';
+    document.getElementById('editSize').value = item.size || '';
+    document.getElementById('editTag').value = item.tag || '';
+    document.getElementById('editDesc').value = item.desc || '';
+    document.getElementById('editIcon').value = item.icon || '';
+    document.querySelectorAll('.icon-grid .icon-option').forEach(function(el) {
+        el.classList.toggle('selected', el.textContent === item.icon);
+    });
+    document.getElementById('editModal').classList.add('show');
+}
+
+function closeModal() {
+    document.getElementById('editModal').classList.remove('show');
+}
+
+function selectIcon(icon) {
+    document.getElementById('editIcon').value = icon;
+    document.querySelectorAll('.icon-grid .icon-option').forEach(function(el) {
+        el.classList.toggle('selected', el.textContent === icon);
+    });
+}
+
+function saveApp() {
+    var type = document.getElementById('editType').value;
+    var idx = parseInt(document.getElementById('editIndex').value);
+    var item = {
+        name: document.getElementById('editName').value.trim(),
+        url: document.getElementById('editUrl').value.trim(),
+        version: document.getElementById('editVersion').value.trim(),
+        size: document.getElementById('editSize').value.trim(),
+        tag: document.getElementById('editTag').value.trim(),
+        desc: document.getElementById('editDesc').value.trim(),
+        icon: document.getElementById('editIcon').value.trim() || '📦'
+    };
+    if (!item.name || !item.url) {
+        showToast('⚠️ 名称和链接不能为空');
+        return;
+    }
+    if (idx === -1) data[type].push(item);
+    else data[type][idx] = item;
+    saveData();
+    closeModal();
+    if (type === 'app') renderApps();
+    else renderClean();
+    showToast('💾 已保存');
+}
+
+// ========== 设置 ==========
+function loadSettings() {
+    var s = data.settings || {};
+    document.getElementById('settingTitle').value = s.title || '';
+    document.getElementById('settingSubtitle').value = s.subtitle || '';
+    document.getElementById('settingSecurity').value = s.security || '';
+    document.getElementById('settingOfficial').value = s.official || '';
+    document.getElementById('settingFooter').value = s.footer || '';
+    document.getElementById('settingTelegram').value = s.telegram || '';
+    document.getElementById('settingHomeUrl').value = s.homeUrl || '';
+    var frontLink = document.getElementById('frontLink');
+    if (frontLink) frontLink.href = s.homeUrl || 'index.html';
+}
+
+function saveSettings() {
+    data.settings = {
+        title: document.getElementById('settingTitle').value,
+        subtitle: document.getElementById('settingSubtitle').value,
+        security: document.getElementById('settingSecurity').value,
+        official: document.getElementById('settingOfficial').value,
+        footer: document.getElementById('settingFooter').value,
+        telegram: document.getElementById('settingTelegram').value,
+        homeUrl: document.getElementById('settingHomeUrl').value
+    };
+    saveData();
+}
+
+// ========== 样式 ==========
+function toggleSelect(el, event) {
+    if (event) event.stopPropagation();
+    var wrapper = el.closest('.custom-select');
+    var options = wrapper.querySelector('.select-options');
+    var isOpen = options.classList.contains('open');
+    var parent = wrapper.closest('.setting-item');
+    if (parent) {
+        parent.querySelectorAll('.custom-select .select-options, .color-select-wrap .color-options').forEach(function(o) {
+            if (o !== options) {
+                o.classList.remove('open');
+                var p = o.closest('.custom-select, .color-select-wrap');
+                if (p) p.querySelector('.select-trigger, .select-trigger')?.classList.remove('open');
+            }
+        });
+    }
+    if (!isOpen) {
+        options.classList.add('open');
+        el.classList.add('open');
+        wrapper.classList.add('open');
+    } else {
+        options.classList.remove('open');
+        el.classList.remove('open');
+        wrapper.classList.remove('open');
+    }
+}
+
+document.addEventListener('click', function(e) {
+    var option = e.target.closest('.custom-select .select-options .option');
+    if (!option) return;
+    var options = option.closest('.select-options');
+    var wrapper = options.closest('.custom-select');
+    var trigger = wrapper.querySelector('.select-trigger');
+    var targetId = wrapper.dataset.target;
+    var value = option.dataset.value;
+    var text = option.textContent;
+    trigger.querySelector('.selected-text').textContent = text;
+    wrapper.querySelectorAll('.option').forEach(function(o) { o.classList.remove('selected'); });
+    option.classList.add('selected');
+    options.classList.remove('open');
+    trigger.classList.remove('open');
+    var targetEl = document.getElementById(targetId);
+    if (targetEl) {
+        targetEl.value = value;
+        targetEl.dispatchEvent(new Event('change'));
+    }
+    saveStyle();
+});
+
+// 点击页面其他地方关闭颜色/图标选择器
+document.addEventListener('click', function(e) {
+    if (e.target.closest('.color-select-wrap') || e.target.closest('.icon-select-wrap')) return;
+    document.querySelectorAll('.color-select-wrap.open, .icon-select-wrap.open').forEach(function(o) {
+        o.classList.remove('open');
+    });
+    openIconSelect = '';
+    // 关闭所有展开的custom-select
+    if (!e.target.closest('.custom-select')) {
+        document.querySelectorAll('.custom-select.open').forEach(function(w) {
+            w.classList.remove('open');
+            var t = w.querySelector('.select-trigger');
+            var o = w.querySelector('.select-options');
+            if (t) t.classList.remove('open');
+            if (o) o.classList.remove('open');
+        });
+    }
+});
+
+function loadStyle() {
+    var s = data.style;
+    document.getElementById('stylePrimaryColor').value = s.primaryColor || '#0277bd';
+    document.getElementById('styleBgColor').value = s.bgColor || '#f0f4fa';
+}
+
+function saveStyle() {
+    var map = {
+        'styleTitleSize': 'titleSize',
+        'styleBodySize': 'bodySize',
+        'stylePageAnim': 'pageAnim',
+        'styleBtnAnim': 'btnAnim',
+        'styleCardRadius': 'cardRadius',
+        'styleCardOpacity': 'cardOpacity',
+        'styleToastStyle': 'toastStyle'
+    };
+    for (var id in map) {
+        var el = document.getElementById(id);
+        if (el) data.style[map[id]] = el.value;
+    }
+    data.style.primaryColor = document.getElementById('stylePrimaryColor').value;
+    data.style.bgColor = document.getElementById('styleBgColor').value;
+    saveData();
+}
+
+function loadSelectors() {
+    var map = {
+        'styleTitleSize': data.style.titleSize,
+        'styleBodySize': data.style.bodySize,
+        'stylePageAnim': data.style.pageAnim,
+        'styleBtnAnim': data.style.btnAnim,
+        'styleCardRadius': data.style.cardRadius,
+        'styleCardOpacity': data.style.cardOpacity,
+        'styleToastStyle': data.style.toastStyle
+    };
+    var labelMap = {
+        'styleTitleSize': {'28px':'28px','30px':'30px','34px':'34px','38px':'38px','42px':'42px'},
+        'styleBodySize': {'13px':'13px','14px':'14px','15px':'15px','16px':'16px'},
+        'stylePageAnim': {'fade':'淡入淡出','slide':'滑动','scale':'缩放','none':'无动画'},
+        'styleBtnAnim': {'scale':'缩放下沉','ripple':'涟漪','none':'无效果'},
+        'styleCardRadius': {'12px':'小 (12px)','18px':'中 (18px)','24px':'大 (24px)','30px':'超大 (30px)'},
+        'styleCardOpacity': {'0.3':'30%','0.45':'45%','0.6':'60%','0.8':'80%'},
+        'styleToastStyle': {'glass':'毛玻璃','solid':'纯色','gradient':'渐变'}
+    };
+    for (var key in map) {
+        var wrapper = document.querySelector('.custom-select[data-target="' + key + '"]');
+        if (wrapper) {
+            var val = map[key];
+            var trigger = wrapper.querySelector('.select-trigger');
+            var label = labelMap[key] ? (labelMap[key][val] || val) : val;
+            trigger.querySelector('.selected-text').textContent = label;
+            wrapper.querySelectorAll('.option').forEach(function(o) {
+                o.classList.toggle('selected', o.dataset.value === val);
+            });
+        }
+    }
+}
+
+// ========== 颜色选择器 ==========
+function toggleColorSelect(el, event) {
+    if (event) event.stopPropagation();
+    var wrapper = el.closest ? el.closest('.color-select-wrap') : el;
+    if (!wrapper) return;
+    var isOpen = wrapper.classList.contains('open');
+    var parent = wrapper.closest('.setting-item') || wrapper.closest('.settings-grid') || document.body;
+    parent.querySelectorAll('.color-select-wrap.open, .icon-select-wrap.open').forEach(function(o) {
+        if (o !== wrapper) o.classList.remove('open');
+    });
+    parent.querySelectorAll('.custom-select .select-options.open').forEach(function(o) {
+        o.classList.remove('open');
+        var t = o.closest('.custom-select');
+        if (t) { var tr = t.querySelector('.select-trigger'); if (tr) tr.classList.remove('open'); }
+    });
+    wrapper.classList.toggle('open', !isOpen);
+}
+
+function initColorPicker(target, gridId, dotId, displayId, defaultValue) {
+    var grid = document.getElementById(gridId);
+    var html = '';
+    COLOR_PRESETS.forEach(function(color, idx) {
+        var selected = color === defaultValue ? 'selected' : '';
+        html += '<div class="color-opt ' + selected + '" style="background:' + color + ';transition-delay:' + Math.min(idx * 0.008, 0.15).toFixed(3) + 's" onclick="selectColor(\'' + target + '\', \'' + color + '\', event)"></div>';
+    });
+    grid.innerHTML = html;
+}
+
+function selectColor(target, color, event) {
+    if (event) event.stopPropagation();
+    var dotId = target === 'primary' ? 'primaryDot' : 'bgDot';
+    var displayId = target === 'primary' ? 'primaryHexDisplay' : 'bgHexDisplay';
+    var inputId = target === 'primary' ? 'stylePrimaryColor' : 'styleBgColor';
+    var gridId = target === 'primary' ? 'primaryColorGrid' : 'bgColorGrid';
+    document.getElementById(dotId).style.background = color;
+    document.getElementById(displayId).textContent = color;
+    document.getElementById(inputId).value = color;
+    var grid = document.getElementById(gridId);
+    grid.querySelectorAll('.color-opt').forEach(function(el) {
+        el.classList.toggle('selected', el.style.background === color || el.style.backgroundColor === color);
+    });
+    var wrap = document.querySelector('.color-select-wrap[data-target="' + inputId + '"]');
+    if (wrap) wrap.classList.remove('open');
+    document.getElementById(inputId).dispatchEvent(new Event('change'));
+    saveStyle();
+    showToast('✅ 颜色已更新');
+}
+
+function initColorPickers() {
+    initColorPicker('primary', 'primaryColorGrid', 'primaryDot', 'primaryHexDisplay', data.style.primaryColor || '#0277bd');
+    initColorPicker('bg', 'bgColorGrid', 'bgDot', 'bgHexDisplay', data.style.bgColor || '#f0f4fa');
+    document.getElementById('primaryDot').style.background = data.style.primaryColor || '#0277bd';
+    document.getElementById('bgDot').style.background = data.style.bgColor || '#f0f4fa';
+    document.getElementById('primaryHexDisplay').textContent = data.style.primaryColor || '#0277bd';
+    document.getElementById('bgHexDisplay').textContent = data.style.bgColor || '#f0f4fa';
+}
+
+// ========== 图标选择器 ==========
+var openIconSelect = '';
+
+function toggleIconSelect(type, event) {
+    if (event) event.stopPropagation();
+    var wrapId = type === 'security' ? 'securityIconWrap' : 'officialIconWrap';
+    var wrap = document.getElementById(wrapId);
+    if (!wrap) return;
+    var isOpen = wrap.classList.contains('open');
+    // 关闭所有其他选择器
+    document.querySelectorAll('.icon-select-wrap.open, .color-select-wrap.open').forEach(function(o) {
+        if (o !== wrap) o.classList.remove('open');
+    });
+    document.querySelectorAll('.custom-select .select-options.open').forEach(function(o) {
+        o.classList.remove('open');
+        var t = o.closest('.custom-select');
+        if (t) { var tr = t.querySelector('.select-trigger'); if (tr) tr.classList.remove('open'); }
+    });
+    wrap.classList.toggle('open', !isOpen);
+    openIconSelect = !isOpen ? type : '';
+}
+
+function closeAllIconSelects() {
+    if (openIconSelect !== '') {
+        var wrapId = openIconSelect === 'security' ? 'securityIconWrap' : 'officialIconWrap';
+        document.getElementById(wrapId).classList.remove('open');
+        openIconSelect = '';
+    }
+}
+
+function renderIconSelectors() {
+    var secIcons = ['🛡️','🔒','🔐','✅','⭐','🏆','👑','🔰','🔍','🔎','💎','🎯','🧿','✨','💡','📊','🔧','⚙️','📝','📄','🏠','🔑','🎨','🚦','🌿','📑','🗂️','📋','🏷️','🔖','🌟','🎖️','🏅','🔱'];
+    var offIcons = ['📢','📣','🔔','📌','📍','🔗','⚡','🔥','🚀','🌐','📡','📧','💬','📱','💻','📺','🏳️','📦','🏪','📯','🎤','📻','🔊','📮','📨'];
+    var secHtml = '', offHtml = '';
+    secIcons.forEach(function(ic, idx) {
+        var svg = ICON_SVGS[ic] || ic;
+        var delay = (Math.min(idx, 20) * 0.02).toFixed(3);
+        secHtml += '<div class="icon-opt ' + (data.style.securityIcon === ic ? 'selected' : '') + '" style="transition-delay:' + delay + 's" onclick="selectSecurityIcon(\'' + ic + '\')">' + svg + '</div>';
+    });
+    offIcons.forEach(function(ic, idx) {
+        var svg = ICON_SVGS[ic] || ic;
+        var delay = (Math.min(idx, 20) * 0.02).toFixed(3);
+        offHtml += '<div class="icon-opt ' + (data.style.officialIcon === ic ? 'selected' : '') + '" style="transition-delay:' + delay + 's" onclick="selectOfficialIcon(\'' + ic + '\')">' + svg + '</div>';
+    });
+    document.getElementById('securityIconSelector').innerHTML = secHtml;
+    document.getElementById('officialIconSelector').innerHTML = offHtml;
+    updatePreviewIcons();
+}
+
+function updatePreviewIcons() {
+    var sec = data.style.securityIcon || '🛡️';
+    var off = data.style.officialIcon || '📢';
+    document.getElementById('securityPreview').innerHTML = ICON_SVGS[sec] || sec;
+    document.getElementById('officialPreview').innerHTML = ICON_SVGS[off] || off;
+    document.getElementById('previewSecIcon').innerHTML = ICON_SVGS[sec] || sec;
+    document.getElementById('previewOffIcon').innerHTML = ICON_SVGS[off] || off;
+}
+
+function selectSecurityIcon(ic) {
+    data.style.securityIcon = ic;
+    renderIconSelectors();
+    saveStyle();
+    showToast('✅ 安全图标已更新');
+}
+
+function selectOfficialIcon(ic) {
+    data.style.officialIcon = ic;
+    renderIconSelectors();
+    saveStyle();
+    showToast('✅ 官方图标已更新');
+}
+
+// ========== 恢复 ==========
+function restoreDefaultApps() {
+    closeAllInlinePanels();
+    closeAllIconSelects();
+    data.apps = JSON.parse(JSON.stringify(defaultApps));
+    saveData();
+    renderApps();
+    showToast('📦 软件已恢复默认');
+}
+
+function restoreDefaultClean() {
+    closeAllInlinePanels();
+    closeAllIconSelects();
+    data.clean = JSON.parse(JSON.stringify(defaultClean));
+    saveData();
+    renderClean();
+    showToast('🧹 清理工具已恢复默认');
+}
+
+function restoreAllDefault() {
+    closeAllInlinePanels();
+    closeAllIconSelects();
+    data.apps = JSON.parse(JSON.stringify(defaultApps));
+    data.clean = JSON.parse(JSON.stringify(defaultClean));
+    saveData();
+    renderApps();
+    renderClean();
+    showToast('🔄 全部已恢复默认');
+}
+
+function resetAllData() {
+    if (!confirm('⚠️ 重置全部数据？')) return;
+    closeAllInlinePanels();
+    closeAllIconSelects();
+    localStorage.removeItem(STORAGE_KEY);
+    loadData();
+    showToast('🔄 已重置');
+}
+
+function clearAllData() {
+    if (!confirm('🗑️ 清空所有数据？不可恢复！')) return;
+    closeAllInlinePanels();
+    closeAllIconSelects();
+    localStorage.removeItem(STORAGE_KEY);
+    loadData();
+    showToast('🗑️ 已清空');
+}
+
+function showToast(msg) {
+    var el = document.getElementById('toast');
+    document.getElementById('toastText').textContent = msg;
+    el.classList.add('show');
+    clearTimeout(el._timer);
+    el._timer = setTimeout(function() { el.classList.remove('show'); }, 2000);
+}
+
+// ========== 启动 ==========
+loadData();
+</script>
+</body>
+</html>
