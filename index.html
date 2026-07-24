@@ -139,7 +139,7 @@
     <!-- ===== 页面1：主页面 ===== -->
     <div id="page1" class="page active" data-page="1">
         <div class="header">
-            <div class="header-badge">✦ 资源站</div>
+            <div class="header-badge" id="badgeText">✦ 资源站</div>
             <h1 id="siteTitle">资源分享</h1>
             <p class="subtitle" id="siteSubtitle">精选实用工具 · 一键获取</p>
         </div>
@@ -168,12 +168,12 @@
 
         <div class="card-grid">
             <div class="card" id="cardSoftware">
-                <img class="icon-img" src="https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEXumFqYbgvYG8o_fLpZzjvmCmVtj4tHQACyyEAAmrvCVc3GBY7xK-q4z0E.png" alt="软件图标">
-                <span class="card-name">软件</span>
+                <img class="icon-img" id="softwareCardIcon" src="https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEXumFqYbgvYG8o_fLpZzjvmCmVtj4tHQACyyEAAmrvCVc3GBY7xK-q4z0E.png" alt="软件图标">
+                <span class="card-name" id="softwareCardName">软件</span>
             </div>
             <div class="card" id="cardClean">
-                <img class="icon-img" src="https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEXukdqYbduk0CniKV2BbB8r_Lg9DPdRwACryEAAmrvCVeC9HGvJ9ZmRT0E.png" alt="清理文件图标">
-                <span class="card-name">清理文件</span>
+                <img class="icon-img" id="cleanCardIcon" src="https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEXukdqYbduk0CniKV2BbB8r_Lg9DPdRwACryEAAmrvCVeC9HGvJ9ZmRT0E.png" alt="清理文件图标">
+                <span class="card-name" id="cleanCardName">清理文件</span>
             </div>
         </div>
 
@@ -195,7 +195,7 @@
     <!-- ===== 页面3：清理文件列表 ===== -->
     <div id="page3" class="page" data-page="3">
         <div class="header" style="margin-bottom:12px;">
-            <h1 class="page-title">🧹 清理文件</h1>
+            <h1 class="page-title" id="cleanTitle">🧹 清理文件</h1>
         </div>
         <div class="card-grid" id="cleanGrid"></div>
         <p class="footer" id="footerText3">所有软件均来自官方渠道 · 安全无毒</p>
@@ -354,7 +354,14 @@ var defaultSettings = {
     official: '官方渠道',
     footer: '所有软件均来自官方渠道 · 安全无毒',
     libTitle: '📦 软件库',
-    telegram: 'https://t.me/NeverSttle888'
+    telegram: 'https://t.me/NeverSttle888',
+    // ===== 新增字段默认值 =====
+    badgeText: '✦ 资源站', // 资源站标签文字
+    softwareCardName: '软件', // 软件卡片名称
+    softwareCardIcon: 'https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEXumFqYbgvYG8o_fLpZzjvmCmVtj4tHQACyyEAAmrvCVc3GBY7xK-q4z0E.png', // 软件卡片图标
+    cleanCardName: '清理文件', // 清理文件卡片名称
+    cleanCardIcon: 'https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEXukdqYbduk0CniKV2BbB8r_Lg9DPdRwACryEAAmrvCVeC9HGvJ9ZmRT0E.png', // 清理文件卡片图标
+    cleanTitle: '🧹 清理文件' // 清理文件页面标题
 };
 
 var defaultStyle = {
@@ -415,6 +422,13 @@ document.getElementById('footerText').textContent = settings.footer || '所有�
 document.getElementById('footerText2').textContent = settings.footer || '所有软件均来自官方渠道 · 安全无毒';
 document.getElementById('footerText3').textContent = settings.footer || '所有软件均来自官方渠道 · 安全无毒';
 document.getElementById('libTitle').textContent = settings.libTitle || '📦 软件库';
+// ===== 从后台 settings 渲染新增字段 =====
+document.getElementById('badgeText').textContent = settings.badgeText || '✦ 资源站'; // 资源站标签文字
+document.getElementById('softwareCardName').textContent = settings.softwareCardName || '软件'; // 软件卡片名称
+document.getElementById('softwareCardIcon').src = settings.softwareCardIcon || 'https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEXumFqYbgvYG8o_fLpZzjvmCmVtj4tHQACyyEAAmrvCVc3GBY7xK-q4z0E.png'; // 软件卡片图标（动态设置 img src）
+document.getElementById('cleanCardName').textContent = settings.cleanCardName || '清理文件'; // 清理文件卡片名称
+document.getElementById('cleanCardIcon').src = settings.cleanCardIcon || 'https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEXukdqYbduk0CniKV2BbB8r_Lg9DPdRwACryEAAmrvCVeC9HGvJ9ZmRT0E.png'; // 清理文件卡片图标（动态设置 img src）
+document.getElementById('cleanTitle').textContent = settings.cleanTitle || '🧹 清理文件'; // 清理文件页面标题
 
 // ===== 安全认证图标（从后台读取，渲染蓝色SVG） =====
 function renderIcon(elementId, iconKey) {
@@ -519,6 +533,13 @@ function applyRemoteData(remoteData) {
     document.getElementById('footerText2').textContent = settings.footer || '所有软件均来自官方渠道 · 安全无毒';
     document.getElementById('footerText3').textContent = settings.footer || '所有软件均来自官方渠道 · 安全无毒';
     document.getElementById('libTitle').textContent = settings.libTitle || '📦 软件库';
+    // ===== 从后台 settings 重新渲染新增字段 =====
+    document.getElementById('badgeText').textContent = settings.badgeText || '✦ 资源站'; // 资源站标签文字
+    document.getElementById('softwareCardName').textContent = settings.softwareCardName || '软件'; // 软件卡片名称
+    document.getElementById('softwareCardIcon').src = settings.softwareCardIcon || 'https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEXumFqYbgvYG8o_fLpZzjvmCmVtj4tHQACyyEAAmrvCVc3GBY7xK-q4z0E.png'; // 软件卡片图标（动态设置 img src）
+    document.getElementById('cleanCardName').textContent = settings.cleanCardName || '清理文件'; // 清理文件卡片名称
+    document.getElementById('cleanCardIcon').src = settings.cleanCardIcon || 'https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEXukdqYbduk0CniKV2BbB8r_Lg9DPdRwACryEAAmrvCVeC9HGvJ9ZmRT0E.png'; // 清理文件卡片图标（动态设置 img src）
+    document.getElementById('cleanTitle').textContent = settings.cleanTitle || '🧹 清理文件'; // 清理文件页面标题
     renderIcon('securityIconDisplay', (style && style.securityIcon) || '🛡️');
     renderIcon('officialIconDisplay', (style && style.officialIcon) || '📢');
     var newTelegramUrl = settings.telegram || 'https://t.me/NeverSttle888';
