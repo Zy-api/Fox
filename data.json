@@ -1,27 +1,82 @@
 {
   "apps": [
-    {"name":"3A加速器","version":"v1.0.1","size":"12.5 MB","url":"","icon":"","tag":"官方","desc":"稳定加速 · 低延迟 · 多节点"},
-    {"name":"绿茶VPN","version":"v2.6.7","size":"8.7 MB","url":"","icon":"","tag":"推荐","desc":"隐私保护 · 全球节点 · 高速稳定"},
-    {"name":"MT管理器","version":"v2.26.3","size":"6.2 MB","url":"","icon":"","tag":"工具","desc":"文件管理 · APK编辑 · 逆向工具"},
-    {"name":"Telegram","version":"v10.5.0","size":"32.1 MB","url":"","icon":"","tag":"通讯","desc":"安全通讯 · 频道 · 机器人"}
+    {
+      "name": "3A加速器",
+      "version": "v1.0.1",
+      "size": "12.5 MB",
+      "url": "",
+      "icon": "",
+      "tag": "官方",
+      "desc": "稳定加速 · 低延迟 · 多节点"
+    },
+    {
+      "name": "绿茶VPN",
+      "version": "v2.6.7",
+      "size": "8.7 MB",
+      "url": "",
+      "icon": "",
+      "tag": "推荐",
+      "desc": "隐私保护 · 全球节点 · 高速稳定"
+    },
+    {
+      "name": "MT管理器",
+      "version": "v2.26.3",
+      "size": "6.2 MB",
+      "url": "",
+      "icon": "",
+      "tag": "工具",
+      "desc": "文件管理 · APK编辑 · 逆向工具"
+    },
+    {
+      "name": "Telegram",
+      "version": "v10.5.0",
+      "size": "32.1 MB",
+      "url": "",
+      "icon": "",
+      "tag": "通讯",
+      "desc": "安全通讯 · 频道 · 机器人"
+    }
   ],
   "clean": [
-    {"name":"PUBG清理","version":"","size":"","url":"","icon":"","tag":"","desc":""},
-    {"name":"和平清理","version":"","size":"","url":"","icon":"","tag":"","desc":""}
+    {
+      "name": "PUBG清理",
+      "url": "无",
+      "version": "",
+      "size": "",
+      "tag": "",
+      "desc": "",
+      "icon": "📂"
+    },
+    {
+      "name": "和平清理",
+      "url": "无",
+      "version": "",
+      "size": "",
+      "tag": "",
+      "desc": "",
+      "icon": "📂"
+    }
   ],
   "style": {
-    "titleSize":"34px","bodySize":"14px","pageAnim":"fade","btnAnim":"scale",
-    "primaryColor":"#0277bd","bgColor":"#f0f4fa",
-    "cardRadius":"24px","cardOpacity":"0.45","toastStyle":"glass",
-    "securityIcon":"🛡️","officialIcon":"📢"
+    "titleSize": "34px",
+    "bodySize": "14px",
+    "pageAnim": "fade",
+    "btnAnim": "scale",
+    "primaryColor": "#0277bd",
+    "bgColor": "#f0f4fa",
+    "cardRadius": "24px",
+    "cardOpacity": "0.45",
+    "toastStyle": "glass",
+    "securityIcon": "🛡️",
+    "officialIcon": "📢"
   },
   "settings": {
-    "title":"资源分享",
-    "subtitle":"精选实用工具 · 一键获取",
-    "security":"安全认证",
-    "official":"官方渠道",
-    "footer":"所有软件均来自官方渠道 · 安全无毒",
-    "telegram":"https://t.me/NeverSttle888",
-    "homeUrl":""
+    "title": "资源分享",
+    "subtitle": "精选实用工具 · 一键获取",
+    "security": "安全认证",
+    "official": "官方渠道",
+    "footer": "所有软件均来自官方渠道 · 安全无毒",
+    "telegram": "https://t.me/NeverSttle888",
+    "homeUrl": ""
   }
 }
