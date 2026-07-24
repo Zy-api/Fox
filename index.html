@@ -234,7 +234,7 @@ var ICON_SVGS = {
 var STORAGE_KEY = 'resource_admin_data';
 var STORAGE_TS_KEY = 'resource_admin_data_ts'; // 缓存时间戳
 var GITHUB_DATA_URL = 'https://raw.githubusercontent.com/Zy-api/Fox/main/data.json';
-var CACHE_TTL = 10 * 60 * 1000; // 缓存有效期 10 分钟（毫秒）
+var CACHE_TTL = 30 * 1000; // 缓存有效期 30 秒（后台保存后前台刷新即可看到更新）
 
 /**
  * 同步从 localStorage 读取缓存数据（用于快速首屏渲染）
@@ -255,7 +255,9 @@ function loadAdminData() {
  * @returns {Promise<Object|null>}
  */
 function fetchGitHubData() {
-    return fetch(GITHUB_DATA_URL, { cache: 'no-cache' })
+    // 加时间戳参数绕过 CDN 缓存，确保拿到最新数据
+    var url = GITHUB_DATA_URL + '?t=' + Date.now();
+    return fetch(url, { cache: 'no-cache' })
         .then(function(res) {
             if (!res.ok) throw new Error('HTTP ' + res.status);
             return res.json();
