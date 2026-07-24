@@ -6,1268 +6,608 @@
     <title>资源分享</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-            outline: none;
-        }
-
-        body {
-            background: #f0f4fa;
-            color: #1a1f2e;
-            font-family: 'Inter', -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
-            padding: 0;
-            min-height: 100vh;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            position: relative;
-            overflow-x: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-        }
-
-        .bg-layer {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            z-index: 0;
-            pointer-events: none;
-            overflow: hidden;
-            background:
-                radial-gradient(ellipse 70% 60% at 10% 10%, rgba(160, 200, 255, 0.12) 0%, transparent 70%),
-                radial-gradient(ellipse 60% 70% at 90% 90%, rgba(180, 210, 250, 0.08) 0%, transparent 70%),
-                radial-gradient(ellipse 50% 50% at 50% 50%, rgba(140, 180, 235, 0.04) 0%, transparent 70%);
-        }
-
-        .glow {
-            position: absolute;
-            border-radius: 50%;
-            filter: blur(140px);
-            will-change: transform, opacity;
-        }
-        .glow-1 {
-            width: 800px;
-            height: 800px;
-            top: -400px;
-            left: -300px;
-            background: rgba(100, 160, 255, 0.05);
-            animation: glow1 20s ease-in-out infinite alternate;
-        }
-        .glow-2 {
-            width: 700px;
-            height: 700px;
-            bottom: -300px;
-            right: -200px;
-            background: rgba(140, 180, 245, 0.04);
-            animation: glow2 22s ease-in-out infinite alternate-reverse;
-        }
-        .glow-3 {
-            width: 500px;
-            height: 500px;
-            top: 40%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(120, 170, 235, 0.03);
-            animation: glow3 25s ease-in-out infinite alternate;
-        }
-
-        @keyframes glow1 {
-            0% { transform: translate(0, 0) scale(1); opacity: 0.3; }
-            100% { transform: translate(140px, 100px) scale(1.4); opacity: 0.8; }
-        }
-        @keyframes glow2 {
-            0% { transform: translate(0, 0) scale(1); opacity: 0.2; }
-            100% { transform: translate(-120px, -140px) scale(1.5); opacity: 0.7; }
-        }
-        @keyframes glow3 {
-            0% { transform: translate(-50%, -50%) scale(0.7); opacity: 0.1; }
-            100% { transform: translate(-50%, -50%) scale(1.6); opacity: 0.5; }
-        }
-
-        .particle {
-            position: absolute;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.20);
-            filter: blur(4px);
-            animation: particleFloat 25s ease-in-out infinite alternate;
-        }
-        .particle-1 { width: 6px; height: 6px; top: 10%; left: 6%; animation-duration: 20s; }
-        .particle-2 { width: 5px; height: 5px; top: 78%; left: 90%; animation-duration: 26s; animation-delay: 2s; }
-        .particle-3 { width: 7px; height: 7px; top: 42%; left: 2%; animation-duration: 18s; animation-delay: 4s; }
-        .particle-4 { width: 4px; height: 4px; top: 88%; left: 10%; animation-duration: 28s; animation-delay: 1s; }
-        .particle-5 { width: 6px; height: 6px; top: 15%; left: 94%; animation-duration: 22s; animation-delay: 3s; }
-
-        @keyframes particleFloat {
-            0% { transform: translate(0, 0) scale(1); opacity: 0.1; }
-            100% { transform: translate(90px, -60px) scale(2); opacity: 0.5; }
-        }
-
-        .container {
-            position: relative;
-            z-index: 1;
-            width: 100%;
-            max-width: 420px;
-            padding: 32px 20px 30px;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        /* ===== 返回按钮 ===== */
-        .back-btn {
-            position: fixed;
-            top: 8px;
-            left: 20px;
-            z-index: 200;
-            width: 46px;
-            height: 46px;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.85);
-            border: 1px solid rgba(255, 255, 255, 0.35);
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: opacity 0.25s ease, transform 0.25s ease;
-            opacity: 0;
-            pointer-events: none;
-            transform: scale(0.85);
-            will-change: transform, opacity;
-        }
-
-        .back-btn.show {
-            opacity: 1;
-            pointer-events: auto;
-            transform: scale(1);
-        }
-
-        .back-btn:active {
-            transform: scale(0.88);
-        }
-
-        .back-btn svg {
-            width: 22px;
-            height: 22px;
-            fill: none;
-            stroke: #1a1f2e;
-            stroke-width: 2.4;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-        }
-
-        .back-btn .ripple {
-            position: absolute;
-            border-radius: 50%;
-            background: rgba(43, 75, 255, 0.10);
-            transform: scale(0);
-            animation: rippleAnim 0.6s cubic-bezier(0, 0, 0.2, 1) forwards;
-            pointer-events: none;
-            will-change: transform, opacity;
-        }
-
-        @keyframes rippleAnim {
-            0% { transform: scale(0); opacity: 1; }
-            100% { transform: scale(4); opacity: 0; }
-        }
-
-        /* ===== Header ===== */
-        .header {
-            width: 100%;
-            text-align: center;
-            margin-bottom: 20px;
-            padding-top: 4px;
-        }
-
-        .header-badge {
-            display: inline-block;
-            font-size: 10px;
-            font-weight: 600;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            color: #7a8aa8;
-            background: rgba(255, 255, 255, 0.40);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            padding: 5px 20px;
-            border-radius: 30px;
-            border: 1px solid rgba(255, 255, 255, 0.30);
-            margin-bottom: 12px;
-        }
-
-        h1 {
-            font-size: 34px;
-            font-weight: 700;
-            letter-spacing: -0.8px;
-            background: linear-gradient(135deg, #162b4a, #2a6bb0, #4a8fd4);
-            background-size: 300% 300%;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            animation: titleGradient 10s ease-in-out infinite alternate;
-            will-change: background-position;
-            line-height: 1.15;
-        }
-
-        @keyframes titleGradient {
-            0% { background-position: 0% 50%; }
-            100% { background-position: 100% 50%; }
-        }
-
-        .subtitle {
-            font-size: 14px;
-            font-weight: 400;
-            color: #8a9bb8;
-            margin-top: 6px;
-            letter-spacing: 0.5px;
-        }
-
-        /* ===== 安全认证展示 ===== */
-        .security-badge {
-            width: 100%;
-            max-width: 320px;
-            margin: 0 auto 20px auto;
-            padding: 12px 20px;
-            background: rgba(255, 255, 255, 0.35);
-            backdrop-filter: blur(24px) saturate(1.4);
-            -webkit-backdrop-filter: blur(24px) saturate(1.4);
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.30);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.7);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 16px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .security-badge::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border-radius: 16px;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.20) 0%, transparent 60%);
-            pointer-events: none;
-        }
-
-        .security-badge::after {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -30%;
-            width: 80%;
-            height: 200%;
-            background: radial-gradient(ellipse, rgba(79, 195, 247, 0.04) 0%, transparent 70%);
-            pointer-events: none;
-            animation: secGlow 8s ease-in-out infinite alternate;
-        }
-
-        @keyframes secGlow {
-            0% { transform: translate(0, 0) scale(1); opacity: 0.5; }
-            100% { transform: translate(-40px, -20px) scale(1.6); opacity: 1; }
-        }
-
-        .security-badge:hover {
-            transform: translateY(-2px) scale(1.01);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
-            border-color: rgba(255, 255, 255, 0.5);
-        }
-
-        .sec-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 15px;
-            color: #5a6a7a;
-            position: relative;
-            z-index: 1;
-        }
-
-        .sec-item .sec-icon {
-            width: 22px;
-            height: 22px;
-            stroke: #3a7acc;
-            stroke-width: 2;
-            fill: none;
-        }
-
-        .sec-item .sec-text {
-            font-weight: 600;
-            color: #1a1f2e;
-        }
-
-        .sec-divider {
-            width: 1px;
-            height: 20px;
-            background: rgba(0, 0, 0, 0.06);
-            position: relative;
-            z-index: 1;
-        }
-
-        .page-title {
-            font-size: 28px;
-            font-weight: 600;
-            letter-spacing: -0.5px;
-            background: linear-gradient(135deg, #162b4a, #2a6bb0);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            animation: titleGradient 10s ease-in-out infinite alternate;
-            will-change: background-position;
-            margin-bottom: 6px;
-        }
-
-        /* ===== Telegram 按钮 ===== */
-        .telegram-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 14px;
-            background: linear-gradient(135deg, #4fc3f7, #0277bd);
-            background-size: 200% 200%;
-            color: #fff;
-            font-size: 16px;
-            font-weight: 600;
-            font-family: 'Inter', -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
-            padding: 14px 34px;
-            border-radius: 50px;
-            border: none;
-            box-shadow: 0 6px 32px rgba(2, 136, 209, 0.30), inset 0 1px 0 rgba(255, 255, 255, 0.15);
-            cursor: pointer;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            margin: 0 auto 20px auto;
-            text-decoration: none;
-            letter-spacing: 0.3px;
-            min-width: 170px;
-            position: relative;
-            overflow: hidden;
-            -webkit-tap-highlight-color: transparent;
-            user-select: none;
-            -webkit-user-select: none;
-            animation: btnGradient 6s ease-in-out infinite;
-            will-change: transform, box-shadow, background-position;
-        }
-
-        @keyframes btnGradient {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        .telegram-btn::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -60%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.20), transparent);
-            transform: rotate(30deg) translateX(-100%);
-            animation: shimmer 6s ease-in-out infinite;
-            pointer-events: none;
-            will-change: transform;
-        }
-
-        @keyframes shimmer {
-            0% { transform: rotate(30deg) translateX(-100%); }
-            60% { transform: rotate(30deg) translateX(100%); }
-            100% { transform: rotate(30deg) translateX(100%); }
-        }
-
-        .telegram-btn:hover {
-            transform: translateY(-4px) scale(1.04);
-            box-shadow: 0 14px 52px rgba(2, 136, 209, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.15);
-        }
-
-        .telegram-btn:active {
-            transform: scale(0.92);
-            box-shadow: 0 4px 16px rgba(2, 136, 209, 0.20);
-            transition-duration: 0.1s;
-        }
-
-        .telegram-btn .ripple {
-            position: absolute;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.30);
-            transform: scale(0);
-            animation: rippleBtn 0.7s cubic-bezier(0, 0, 0.2, 1) forwards;
-            pointer-events: none;
-            will-change: transform, opacity;
-        }
-
-        @keyframes rippleBtn {
-            0% { transform: scale(0); opacity: 1; }
-            100% { transform: scale(5); opacity: 0; }
-        }
-
-        .plane-icon {
-            width: 20px;
-            height: 20px;
-            flex-shrink: 0;
-            fill: #fff;
-            transition: transform 0.3s ease;
-            will-change: transform;
-        }
-
-        .telegram-btn:hover .plane-icon {
-            transform: translateX(5px) rotate(-10deg) scale(1.08);
-        }
-
-        /* ===== 卡片网格 ===== */
-        .card-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 16px;
-            justify-content: center;
-            width: 100%;
-            max-width: 380px;
-            margin: 0 auto 12px auto;
-        }
-
-        /* ===== 卡片 ===== */
-        .card {
-            background: rgba(255, 255, 255, 0.45);
-            backdrop-filter: blur(36px) saturate(1.3);
-            -webkit-backdrop-filter: blur(36px) saturate(1.3);
-            border-radius: 24px;
-            border: 1px solid rgba(255, 255, 255, 0.35);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.8);
-            width: calc(50% - 8px);
-            max-width: 170px;
-            aspect-ratio: 1 / 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            font-size: 17px;
-            font-weight: 500;
-            letter-spacing: -0.2px;
-            color: #1a1f2e;
-            cursor: default;
-            transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            -webkit-tap-highlight-color: transparent;
-            user-select: none;
-            -webkit-user-select: none;
-            animation: cardFadeIn 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
-            will-change: transform, box-shadow, background;
-            padding: 14px 10px 10px 10px;
-            text-align: center;
-        }
-
-        .card::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            border-radius: 24px;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.15) 0%, transparent 50%);
-            pointer-events: none;
-        }
-
-        .card:nth-child(1) { animation-delay: 0.04s; }
-        .card:nth-child(2) { animation-delay: 0.08s; }
-        .card:nth-child(3) { animation-delay: 0.12s; }
-        .card:nth-child(4) { animation-delay: 0.16s; }
-
-        @keyframes cardFadeIn {
-            0% { opacity: 0; transform: translateY(30px) scale(0.92); }
-            100% { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
-        .card:hover {
-            transform: translateY(-6px) scale(1.04);
-            background: rgba(255, 255, 255, 0.80);
-            box-shadow: 0 24px 64px rgba(0, 0, 0, 0.10), inset 0 1px 0 rgba(255, 255, 255, 0.9);
-            border-color: rgba(255, 255, 255, 0.6);
-        }
-
-        .card:active {
-            transform: scale(0.92);
-            transition-duration: 0.08s;
-            background: rgba(255, 255, 255, 0.50);
-        }
-
-        .card .icon {
-            font-size: 32px;
-            margin-bottom: 0px;
-            transition: transform 0.3s ease;
-            will-change: transform;
-            pointer-events: none;
-            position: relative;
-            z-index: 1;
-        }
-
-        .card:hover .icon {
-            transform: scale(1.12) rotate(-4deg);
-        }
-
-        .card .icon-img {
-            width: 52px;
-            height: 52px;
-            object-fit: contain;
-            margin-bottom: 2px;
-            pointer-events: none;
-            transition: transform 0.3s ease;
-            will-change: transform;
-            border-radius: 10px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .card:hover .icon-img {
-            transform: scale(1.12) rotate(-4deg);
-        }
-
-        .card .card-name {
-            font-size: 14px;
-            font-weight: 500;
-            text-align: center;
-            line-height: 1.3;
-            margin-bottom: 4px;
-            pointer-events: none;
-            position: relative;
-            z-index: 1;
-        }
-
-        /* ===== 下载按钮（下沉动画） ===== */
-        .download-btn {
-            display: inline-block;
-            margin-top: auto;
-            padding: 9px 20px;
-            width: 90%;
-            max-width: 130px;
-            background: linear-gradient(135deg, #4fc3f7, #0277bd);
-            color: #fff;
-            font-size: 14px;
-            font-weight: 600;
-            font-family: 'Inter', -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
-            border-radius: 50px;
-            border: none;
-            cursor: pointer;
-            text-decoration: none;
-            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease, background 0.3s ease;
-            box-shadow: 0 4px 16px rgba(2, 136, 209, 0.20);
-            letter-spacing: 0.3px;
-            -webkit-tap-highlight-color: transparent;
-            user-select: none;
-            -webkit-user-select: none;
-            position: relative;
-            overflow: hidden;
-            text-align: center;
-            z-index: 2;
-        }
-
-        .download-btn:hover {
-            transform: translateY(-3px) scale(1.05);
-            box-shadow: 0 8px 32px rgba(2, 136, 209, 0.35);
-        }
-
-        .download-btn:active {
-            transform: scale(0.92) !important;
-            transition-duration: 0.08s;
-        }
-
-        .download-btn::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -60%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.18), transparent);
-            transform: rotate(25deg) translateX(-100%);
-            pointer-events: none;
-        }
-
-        .download-btn:hover::before {
-            animation: btnShimmer 0.6s ease-out forwards;
-        }
-
-        @keyframes btnShimmer {
-            0% { transform: rotate(25deg) translateX(-100%); }
-            100% { transform: rotate(25deg) translateX(100%); }
-        }
-
-        /* ===== 页面切换 ===== */
-        .page {
-            display: none;
-            animation: pageFadeIn 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
-            width: 100%;
-        }
-
-        .page.active {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        @keyframes pageFadeIn {
-            0% { opacity: 0; transform: translateY(16px) scale(0.97); }
-            100% { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
-        /* ===== Footer ===== */
-        .footer {
-            color: #8a9bb8;
-            font-size: 12px;
-            font-weight: 400;
-            letter-spacing: 0.6px;
-            margin-top: 28px;
-            padding-top: 16px;
-            border-top: 1px solid rgba(255, 255, 255, 0.30);
-            width: 100%;
-            max-width: 360px;
-            text-align: center;
-        }
-
-        /* ===== Toast ===== */
-        .toast {
-            position: fixed;
-            bottom: 48px;
-            left: 50%;
-            transform: translateX(-50%) translateY(30px) scale(0.92);
-            background: rgba(255, 255, 255, 0.75);
-            backdrop-filter: blur(40px) saturate(1.5);
-            -webkit-backdrop-filter: blur(40px) saturate(1.5);
-            color: #1a1f2e;
-            padding: 14px 28px;
-            border-radius: 50px;
-            font-size: 14px;
-            font-weight: 500;
-            font-family: 'Inter', -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
-            opacity: 0;
-            pointer-events: none;
-            transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease, box-shadow 0.3s ease;
-            z-index: 999;
-            border: 1px solid rgba(255, 255, 255, 0.50);
-            box-shadow: 0 16px 56px rgba(0, 0, 0, 0.08);
-            letter-spacing: 0.2px;
-            white-space: nowrap;
-            will-change: transform, opacity;
-        }
-
-        .toast.show {
-            opacity: 1;
-            transform: translateX(-50%) translateY(0) scale(1);
-            box-shadow: 0 20px 64px rgba(0, 0, 0, 0.12);
-        }
-
-        .toast .dots {
-            display: inline-flex;
-            gap: 5px;
-            margin-left: 10px;
-        }
-
-        .toast .dots span {
-            display: inline-block;
-            width: 6px;
-            height: 6px;
-            background: #4fc3f7;
-            border-radius: 50%;
-            animation: dotBounce 1.4s ease-in-out infinite;
-            will-change: transform, opacity;
-        }
-
-        .toast .dots span:nth-child(2) {
-            animation-delay: 0.2s;
-            background: #0277bd;
-        }
-
-        .toast .dots span:nth-child(3) {
-            animation-delay: 0.4s;
-            background: #4fc3f7;
-        }
-
-        @keyframes dotBounce {
-            0%, 80%, 100% { transform: scale(0.5) translateY(0); opacity: 0.3; }
-            40% { transform: scale(1.2) translateY(-4px); opacity: 1; }
-        }
-
-        /* ===== 软件库标题 ===== */
-        .lib-title {
-            font-size: 24px;
-            font-weight: 700;
-            text-align: center;
-            background: linear-gradient(135deg, #162b4a, #2a6bb0);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            width: 100%;
-            margin-bottom: 4px;
-            letter-spacing: -0.5px;
-            padding-top: 20px;
-        }
-
-        /* ===== 软件库专用样式 ===== */
-        .stats-bar {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 16px;
-            margin-bottom: 16px;
-            padding: 8px 20px;
-            background: rgba(255, 255, 255, 0.40);
-            backdrop-filter: blur(20px) saturate(1.4);
-            -webkit-backdrop-filter: blur(20px) saturate(1.4);
-            border-radius: 50px;
-            border: 1px solid rgba(255, 255, 255, 0.35);
-            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.6);
-            width: 100%;
-            max-width: 380px;
-        }
-        .stats-bar .stat-divider {
-            width: 1px;
-            height: 20px;
-            background: rgba(0, 0, 0, 0.06);
-        }
-        .stats-bar .stat-item {
-            display: flex;
-            align-items: baseline;
-            gap: 4px;
-        }
-        .stats-bar .stat-item .num {
-            font-weight: 700;
-            font-size: 15px;
-            color: #1a1f2e;
-            letter-spacing: -0.3px;
-        }
-        .stats-bar .stat-item .label {
-            font-size: 12px;
-            color: #8a9bb8;
-            font-weight: 400;
-        }
-
-        .app-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            width: 100%;
-            max-width: 380px;
-        }
-
-        .app-card {
-            background: rgba(255, 255, 255, 0.5);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border-radius: 18px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
-            padding: 14px 16px;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        .app-card::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 60%);
-            pointer-events: none;
-            border-radius: 18px;
-        }
-        .app-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.08);
-            background: rgba(255, 255, 255, 0.75);
-        }
-
-        .app-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 12px;
-            object-fit: contain;
-            flex-shrink: 0;
-            background: rgba(255, 255, 255, 0.3);
-            padding: 4px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .app-info {
-            flex: 1;
-            min-width: 0;
-            position: relative;
-            z-index: 1;
-        }
-        .app-info .app-name {
-            font-size: 15px;
-            font-weight: 600;
-            color: #1a1f2e;
-        }
-        .app-info .app-meta {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 11px;
-            color: #8a9bb8;
-            margin-top: 2px;
-            flex-wrap: wrap;
-        }
-        .app-info .app-meta .tag {
-            background: rgba(79, 195, 247, 0.12);
-            color: #0277bd;
-            padding: 2px 8px;
-            border-radius: 30px;
-            font-size: 9px;
-            font-weight: 600;
-        }
-        .app-info .app-desc {
-            font-size: 11px;
-            color: #6a7a8a;
-            margin-top: 3px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .app-action {
-            flex-shrink: 0;
-            position: relative;
-            z-index: 1;
-        }
-
-        /* ===== 软件库下载按钮（下沉动画） ===== */
-        .app-download-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
-            padding: 8px 18px;
-            min-width: 70px;
-            height: 38px;
-            background: linear-gradient(135deg, #4fc3f7, #0277bd);
-            background-size: 200% 200%;
-            color: #fff;
-            font-size: 13px;
-            font-weight: 600;
-            font-family: 'Inter', sans-serif;
-            border-radius: 50px;
-            border: none;
-            cursor: pointer;
-            text-decoration: none;
-            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
-            box-shadow: 0 4px 16px rgba(2, 136, 209, 0.2);
-            white-space: nowrap;
-            animation: btnGradient 5s ease-in-out infinite;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .app-download-btn:active {
-            transform: scale(0.92) !important;
-            transition-duration: 0.08s;
-        }
-
-        .app-download-btn::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -60%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-            transform: rotate(30deg) translateX(-100%);
-            animation: shimmer 5s ease-in-out infinite;
-            pointer-events: none;
-        }
-        .app-download-btn:hover {
-            transform: translateY(-2px) scale(1.04);
-            box-shadow: 0 8px 28px rgba(2, 136, 209, 0.35);
-        }
-        .app-download-btn svg {
-            width: 14px;
-            height: 14px;
-            fill: none;
-            stroke: #fff;
-            stroke-width: 2.5;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-        }
-
-        .app-download-btn .ripple {
-            position: absolute;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
-            transform: scale(0);
-            animation: rippleBtn 0.7s cubic-bezier(0, 0, 0.2, 1) forwards;
-            pointer-events: none;
-            will-change: transform, opacity;
-        }
-
-        @keyframes rippleBtn {
-            0% { transform: scale(0); opacity: 1; }
-            100% { transform: scale(5); opacity: 0; }
-        }
-
-        @media (max-width: 480px) {
-            .container { padding: 20px 16px 24px; max-width: 100%; }
-            .back-btn { top: 6px; left: 14px; width: 40px; height: 40px; }
-            .back-btn svg { width: 18px; height: 18px; }
-            .card-grid { max-width: 320px; gap: 14px; }
-            .card { width: calc(50% - 7px); max-width: 145px; }
-            .card .icon { font-size: 28px; }
-            .card .icon-img { width: 44px; height: 44px; }
-            .card .card-name { font-size: 13px; }
-            .download-btn { font-size: 12px; padding: 7px 14px; max-width: 110px; }
-            h1 { font-size: 30px; }
-            .page-title { font-size: 24px; }
-            .telegram-btn { padding: 12px 24px; font-size: 15px; min-width: 150px; }
-            .toast { padding: 12px 20px; font-size: 13px; white-space: normal; max-width: 85%; border-radius: 40px; }
-            .security-badge { padding: 10px 16px; max-width: 280px; gap: 10px; }
-            .sec-item { font-size: 13px; }
-            .sec-item .sec-icon { width: 18px; height: 18px; }
-            .stats-bar { padding: 6px 16px; gap: 12px; }
-            .stats-bar .stat-item .num { font-size: 13px; }
-            .stats-bar .stat-item .label { font-size: 11px; }
-            .lib-title { font-size: 20px; padding-top: 12px; }
-            .app-list { max-width: 100%; }
-            .app-card { padding: 12px 12px; gap: 10px; }
-            .app-icon { width: 44px; height: 44px; }
-            .app-info .app-name { font-size: 14px; }
-            .app-download-btn { padding: 6px 14px; font-size: 12px; height: 34px; min-width: 60px; }
-        }
+        *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;outline:none}
+        body{background:#f0f4fa;color:#1a1f2e;font-family:'Inter',-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;padding:0;min-height:100vh;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;position:relative;overflow-x:hidden;display:flex;justify-content:center;align-items:flex-start}
+        .bg-layer{position:fixed;top:0;left:0;right:0;bottom:0;z-index:0;pointer-events:none;overflow:hidden;background:radial-gradient(ellipse 70% 60% at 10% 10%,rgba(160,200,255,0.12) 0%,transparent 70%),radial-gradient(ellipse 60% 70% at 90% 90%,rgba(180,210,250,0.08) 0%,transparent 70%),radial-gradient(ellipse 50% 50% at 50% 50%,rgba(140,180,235,0.04) 0%,transparent 70%)}
+        .glow{position:absolute;border-radius:50%;filter:blur(140px);will-change:transform,opacity}
+        .glow-1{width:800px;height:800px;top:-400px;left:-300px;background:rgba(100,160,255,0.05);animation:g1 20s ease-in-out infinite alternate}
+        .glow-2{width:700px;height:700px;bottom:-300px;right:-200px;background:rgba(140,180,245,0.04);animation:g2 22s ease-in-out infinite alternate-reverse}
+        .glow-3{width:500px;height:500px;top:40%;left:50%;transform:translate(-50%,-50%);background:rgba(120,170,235,0.03);animation:g3 25s ease-in-out infinite alternate}
+        @keyframes g1{0%{transform:translate(0,0) scale(1);opacity:.3}100%{transform:translate(140px,100px) scale(1.4);opacity:.8}}
+        @keyframes g2{0%{transform:translate(0,0) scale(1);opacity:.2}100%{transform:translate(-120px,-140px) scale(1.5);opacity:.7}}
+        @keyframes g3{0%{transform:translate(-50%,-50%) scale(.7);opacity:.1}100%{transform:translate(-50%,-50%) scale(1.6);opacity:.5}}
+        .particle{position:absolute;border-radius:50%;background:rgba(255,255,255,0.2);filter:blur(4px);animation:pf 25s ease-in-out infinite alternate}
+        .particle-1{width:6px;height:6px;top:10%;left:6%;animation-duration:20s}
+        .particle-2{width:5px;height:5px;top:78%;left:90%;animation-duration:26s;animation-delay:2s}
+        .particle-3{width:7px;height:7px;top:42%;left:2%;animation-duration:18s;animation-delay:4s}
+        .particle-4{width:4px;height:4px;top:88%;left:10%;animation-duration:28s;animation-delay:1s}
+        .particle-5{width:6px;height:6px;top:15%;left:94%;animation-duration:22s;animation-delay:3s}
+        @keyframes pf{0%{transform:translate(0,0) scale(1);opacity:.1}100%{transform:translate(90px,-60px) scale(2);opacity:.5}}
+        .container{position:relative;z-index:1;width:100%;max-width:420px;padding:32px 20px 30px;min-height:100vh;display:flex;flex-direction:column;align-items:center}
+        .back-btn{position:fixed;top:8px;left:20px;z-index:200;width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,0.85);border:1px solid rgba(255,255,255,0.35);box-shadow:0 4px 16px rgba(0,0,0,0.08);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:opacity .25s ease,transform .25s ease;opacity:0;pointer-events:none;transform:scale(.85);will-change:transform,opacity}
+        .back-btn.show{opacity:1;pointer-events:auto;transform:scale(1)}
+        .back-btn:active{transform:scale(.88)}
+        .back-btn svg{width:22px;height:22px;fill:none;stroke:#1a1f2e;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+        .back-btn .ripple{position:absolute;border-radius:50%;background:rgba(43,75,255,0.1);transform:scale(0);animation:ra .6s cubic-bezier(0,0,.2,1) forwards;pointer-events:none;will-change:transform,opacity}
+        @keyframes ra{0%{transform:scale(0);opacity:1}100%{transform:scale(4);opacity:0}}
+        .header{width:100%;text-align:center;margin-bottom:20px;padding-top:4px}
+        .header-badge{display:inline-block;font-size:10px;font-weight:600;letter-spacing:3px;text-transform:uppercase;color:#7a8aa8;background:rgba(255,255,255,0.4);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);padding:5px 20px;border-radius:30px;border:1px solid rgba(255,255,255,0.3);margin-bottom:12px}
+        h1{font-size:34px;font-weight:700;letter-spacing:-.8px;background:linear-gradient(135deg,#162b4a,#2a6bb0,#4a8fd4);background-size:300% 300%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:tg 10s ease-in-out infinite alternate;line-height:1.15}
+        @keyframes tg{0%{background-position:0% 50%}100%{background-position:100% 50%}}
+        .subtitle{font-size:14px;font-weight:400;color:#8a9bb8;margin-top:6px;letter-spacing:.5px}
+        
+        /* 安全认证 - 使用蓝色SVG图标 */
+        .security-badge{width:100%;max-width:320px;margin:0 auto 20px;padding:12px 20px;background:rgba(255,255,255,0.35);backdrop-filter:blur(24px);border-radius:16px;border:1px solid rgba(255,255,255,0.3);box-shadow:0 8px 32px rgba(0,0,0,0.04),inset 0 1px 0 rgba(255,255,255,0.7);display:flex;align-items:center;justify-content:center;gap:16px;transition:transform .3s,box-shadow .3s;position:relative;overflow:hidden}
+        .security-badge::before{content:'';position:absolute;inset:0;border-radius:16px;background:linear-gradient(135deg,rgba(255,255,255,0.2) 0%,transparent 60%);pointer-events:none}
+        .security-badge::after{content:'';position:absolute;top:-50%;right:-30%;width:80%;height:200%;background:radial-gradient(ellipse,rgba(79,195,247,0.04) 0%,transparent 70%);pointer-events:none;animation:sg 8s ease-in-out infinite alternate}
+        @keyframes sg{0%{transform:translate(0,0) scale(1);opacity:.5}100%{transform:translate(-40px,-20px) scale(1.6);opacity:1}}
+        .security-badge:hover{transform:translateY(-2px) scale(1.01);box-shadow:0 12px 40px rgba(0,0,0,0.08);border-color:rgba(255,255,255,0.5)}
+        .sec-item{display:flex;align-items:center;gap:8px;font-size:15px;color:#5a6a7a;position:relative;z-index:1}
+        .sec-item .sec-icon{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;color:#3a7acc}
+        .sec-item .sec-icon svg{width:24px;height:24px;stroke:#3a7acc;stroke-width:2;fill:none}
+        .sec-item .sec-text{font-weight:600;color:#1a1f2e}
+        .sec-divider{width:1px;height:20px;background:rgba(0,0,0,0.06);position:relative;z-index:1}
+        
+        .page-title{font-size:28px;font-weight:600;letter-spacing:-.5px;background:linear-gradient(135deg,#162b4a,#2a6bb0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:tg 10s ease-in-out infinite alternate;margin-bottom:6px}
+        .telegram-btn{display:inline-flex;align-items:center;justify-content:center;gap:14px;background:linear-gradient(135deg,#4fc3f7,#0277bd);background-size:200% 200%;color:#fff;font-size:16px;font-weight:600;font-family:'Inter',sans-serif;padding:14px 34px;border-radius:50px;border:none;box-shadow:0 6px 32px rgba(2,136,209,0.3),inset 0 1px 0 rgba(255,255,255,0.15);cursor:pointer;transition:transform .3s,box-shadow .3s;margin:0 auto 20px;text-decoration:none;letter-spacing:.3px;min-width:170px;position:relative;overflow:hidden;user-select:none;animation:bg 6s ease-in-out infinite;will-change:transform,box-shadow,background-position}
+        @keyframes bg{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
+        .telegram-btn::before{content:'';position:absolute;top:-50%;left:-60%;width:200%;height:200%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);transform:rotate(30deg) translateX(-100%);animation:sh 6s ease-in-out infinite;pointer-events:none}
+        @keyframes sh{0%{transform:rotate(30deg) translateX(-100%)}60%{transform:rotate(30deg) translateX(100%)}100%{transform:rotate(30deg) translateX(100%)}}
+        .telegram-btn:hover{transform:translateY(-4px) scale(1.04);box-shadow:0 14px 52px rgba(2,136,209,0.45),inset 0 1px 0 rgba(255,255,255,0.15)}
+        .telegram-btn:active{transform:scale(.92)}
+        .telegram-btn .ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,0.3);transform:scale(0);animation:rb .7s cubic-bezier(0,0,.2,1) forwards;pointer-events:none}
+        @keyframes rb{0%{transform:scale(0);opacity:1}100%{transform:scale(5);opacity:0}}
+        .plane-icon{width:20px;height:20px;flex-shrink:0;fill:#fff;transition:transform .3s}
+        .telegram-btn:hover .plane-icon{transform:translateX(5px) rotate(-10deg) scale(1.08)}
+        .card-grid{display:flex;flex-wrap:wrap;gap:16px;justify-content:center;width:100%;max-width:380px;margin:0 auto 12px}
+        .card{background:rgba(255,255,255,0.45);backdrop-filter:blur(36px);border-radius:24px;border:1px solid rgba(255,255,255,0.35);box-shadow:0 12px 40px rgba(0,0,0,0.04),inset 0 1px 0 rgba(255,255,255,0.8);width:calc(50% - 8px);max-width:170px;aspect-ratio:1/1;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:17px;font-weight:500;letter-spacing:-.2px;color:#1a1f2e;cursor:default;transition:transform .3s,box-shadow .3s,background .3s;position:relative;overflow:hidden;user-select:none;animation:cf .6s cubic-bezier(.25,.46,.45,.94) both;will-change:transform,box-shadow,background;padding:14px 10px 10px;text-align:center}
+        .card::after{content:'';position:absolute;inset:0;border-radius:24px;background:linear-gradient(135deg,rgba(255,255,255,0.15) 0%,transparent 50%);pointer-events:none}
+        .card:nth-child(1){animation-delay:.04s}
+        .card:nth-child(2){animation-delay:.08s}
+        .card:nth-child(3){animation-delay:.12s}
+        .card:nth-child(4){animation-delay:.16s}
+        @keyframes cf{0%{opacity:0;transform:translateY(30px) scale(.92)}100%{opacity:1;transform:translateY(0) scale(1)}}
+        .card:hover{transform:translateY(-6px) scale(1.04);background:rgba(255,255,255,0.8);box-shadow:0 24px 64px rgba(0,0,0,0.1),inset 0 1px 0 rgba(255,255,255,0.9);border-color:rgba(255,255,255,0.6)}
+        .card:active{transform:scale(.92)}
+        .card .icon{font-size:32px;margin-bottom:0;transition:transform .3s;pointer-events:none;position:relative;z-index:1}
+        .card:hover .icon{transform:scale(1.12) rotate(-4deg)}
+        .card .icon-img{width:52px;height:52px;object-fit:contain;margin-bottom:2px;pointer-events:none;transition:transform .3s;border-radius:10px;position:relative;z-index:1}
+        .card:hover .icon-img{transform:scale(1.12) rotate(-4deg)}
+        .card .card-name{font-size:14px;font-weight:500;text-align:center;line-height:1.3;margin-bottom:4px;pointer-events:none;position:relative;z-index:1}
+        .download-btn{display:inline-block;margin-top:auto;padding:9px 20px;width:90%;max-width:130px;background:linear-gradient(135deg,#4fc3f7,#0277bd);color:#fff;font-size:14px;font-weight:600;font-family:'Inter',sans-serif;border-radius:50px;border:none;cursor:pointer;text-decoration:none;transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .3s,background .3s;box-shadow:0 4px 16px rgba(2,136,209,0.2);letter-spacing:.3px;user-select:none;position:relative;overflow:hidden;text-align:center;z-index:2}
+        .download-btn:hover{transform:translateY(-3px) scale(1.05);box-shadow:0 8px 32px rgba(2,136,209,0.35)}
+        .download-btn:active{transform:scale(.92)!important;transition-duration:.08s}
+        .download-btn::before{content:'';position:absolute;top:-50%;left:-60%;width:200%;height:200%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.18),transparent);transform:rotate(25deg) translateX(-100%);pointer-events:none}
+        .download-btn:hover::before{animation:bs .6s ease-out forwards}
+        @keyframes bs{0%{transform:rotate(25deg) translateX(-100%)}100%{transform:rotate(25deg) translateX(100%)}}
+        .page{display:none;animation:pfade .35s cubic-bezier(.25,.46,.45,.94) forwards;width:100%}
+        .page.active{display:flex;flex-direction:column;align-items:center}
+        @keyframes pfade{0%{opacity:0;transform:translateY(16px) scale(.97)}100%{opacity:1;transform:translateY(0) scale(1)}}
+        .footer{color:#8a9bb8;font-size:12px;font-weight:400;letter-spacing:.6px;margin-top:28px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.3);width:100%;max-width:360px;text-align:center}
+        .toast{position:fixed;bottom:48px;left:50%;transform:translateX(-50%) translateY(30px) scale(.92);background:rgba(255,255,255,0.75);backdrop-filter:blur(40px);color:#1a1f2e;padding:14px 28px;border-radius:50px;font-size:14px;font-weight:500;font-family:'Inter',sans-serif;opacity:0;pointer-events:none;transition:transform .4s cubic-bezier(.34,1.56,.64,1),opacity .3s,box-shadow .3s;z-index:999;border:1px solid rgba(255,255,255,0.5);box-shadow:0 16px 56px rgba(0,0,0,0.08);letter-spacing:.2px;white-space:nowrap;will-change:transform,opacity}
+        .toast.show{opacity:1;transform:translateX(-50%) translateY(0) scale(1);box-shadow:0 20px 64px rgba(0,0,0,0.12)}
+        .toast .dots{display:inline-flex;gap:5px;margin-left:10px}
+        .toast .dots span{display:inline-block;width:6px;height:6px;background:#4fc3f7;border-radius:50%;animation:db 1.4s ease-in-out infinite;will-change:transform,opacity}
+        .toast .dots span:nth-child(2){animation-delay:.2s;background:#0277bd}
+        .toast .dots span:nth-child(3){animation-delay:.4s;background:#4fc3f7}
+        @keyframes db{0%,80%,100%{transform:scale(.5) translateY(0);opacity:.3}40%{transform:scale(1.2) translateY(-4px);opacity:1}}
+        .lib-title{font-size:24px;font-weight:700;text-align:center;background:linear-gradient(135deg,#162b4a,#2a6bb0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;width:100%;margin-bottom:4px;letter-spacing:-.5px;padding-top:20px}
+        .stats-bar{display:flex;align-items:center;justify-content:center;gap:16px;margin-bottom:16px;padding:8px 20px;background:rgba(255,255,255,0.4);backdrop-filter:blur(20px);border-radius:50px;border:1px solid rgba(255,255,255,0.35);box-shadow:0 4px 24px rgba(0,0,0,0.04),inset 0 1px 0 rgba(255,255,255,0.6);width:100%;max-width:380px}
+        .stats-bar .stat-divider{width:1px;height:20px;background:rgba(0,0,0,0.06)}
+        .stats-bar .stat-item{display:flex;align-items:baseline;gap:4px}
+        .stats-bar .stat-item .num{font-weight:700;font-size:15px;color:#1a1f2e;letter-spacing:-.3px}
+        .stats-bar .stat-item .label{font-size:12px;color:#8a9bb8;font-weight:400}
+        .app-list{display:flex;flex-direction:column;gap:12px;width:100%;max-width:380px}
+        .app-card{background:rgba(255,255,255,0.5);backdrop-filter:blur(24px);border-radius:18px;border:1px solid rgba(255,255,255,0.3);box-shadow:0 8px 32px rgba(0,0,0,0.04);padding:14px 16px;display:flex;align-items:center;gap:14px;transition:transform .3s,box-shadow .3s;position:relative;overflow:hidden}
+        .app-card::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,0.1) 0%,transparent 60%);pointer-events:none;border-radius:18px}
+        .app-card:hover{transform:translateY(-2px);box-shadow:0 16px 48px rgba(0,0,0,0.08);background:rgba(255,255,255,0.75)}
+        .app-icon{width:50px;height:50px;border-radius:12px;object-fit:contain;flex-shrink:0;background:rgba(255,255,255,0.3);padding:4px;position:relative;z-index:1}
+        .app-info{flex:1;min-width:0;position:relative;z-index:1}
+        .app-info .app-name{font-size:15px;font-weight:600;color:#1a1f2e}
+        .app-info .app-meta{display:flex;align-items:center;gap:10px;font-size:11px;color:#8a9bb8;margin-top:2px;flex-wrap:wrap}
+        .app-info .app-meta .tag{background:rgba(79,195,247,0.12);color:#0277bd;padding:2px 8px;border-radius:30px;font-size:9px;font-weight:600}
+        .app-info .app-desc{font-size:11px;color:#6a7a8a;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+        .app-action{flex-shrink:0;position:relative;z-index:1}
+        .app-download-btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:8px 18px;min-width:70px;height:38px;background:linear-gradient(135deg,#4fc3f7,#0277bd);background-size:200% 200%;color:#fff;font-size:13px;font-weight:600;font-family:'Inter',sans-serif;border-radius:50px;border:none;cursor:pointer;text-decoration:none;transition:transform .2s cubic-bezier(.34,1.56,.64,1),box-shadow .3s;box-shadow:0 4px 16px rgba(2,136,209,0.2);white-space:nowrap;animation:bg 5s ease-in-out infinite;position:relative;overflow:hidden}
+        .app-download-btn:active{transform:scale(.92)!important;transition-duration:.08s}
+        .app-download-btn::before{content:'';position:absolute;top:-50%;left:-60%;width:200%;height:200%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent);transform:rotate(30deg) translateX(-100%);animation:sh 5s ease-in-out infinite;pointer-events:none}
+        .app-download-btn:hover{transform:translateY(-2px) scale(1.04);box-shadow:0 8px 28px rgba(2,136,209,0.35)}
+        .app-download-btn svg{width:14px;height:14px;fill:none;stroke:#fff;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+        .app-download-btn .ripple{position:absolute;border-radius:50%;background:rgba(255,255,255,0.3);transform:scale(0);animation:rb .7s cubic-bezier(0,0,.2,1) forwards;pointer-events:none;will-change:transform,opacity}
+        @media (max-width:480px){.container{padding:20px 16px 24px;max-width:100%}.back-btn{top:6px;left:14px;width:40px;height:40px}.back-btn svg{width:18px;height:18px}.card-grid{max-width:320px;gap:14px}.card{width:calc(50% - 7px);max-width:145px}.card .icon{font-size:28px}.card .icon-img{width:44px;height:44px}.card .card-name{font-size:13px}.download-btn{font-size:12px;padding:7px 14px;max-width:110px}h1{font-size:30px}.page-title{font-size:24px}.telegram-btn{padding:12px 24px;font-size:15px;min-width:150px}.toast{padding:12px 20px;font-size:13px;white-space:normal;max-width:85%;border-radius:40px}.security-badge{padding:10px 16px;max-width:280px;gap:10px}.sec-item{font-size:13px}.sec-item .sec-icon{width:20px;height:20px}.sec-item .sec-icon svg{width:20px;height:20px}.stats-bar{padding:6px 16px;gap:12px}.stats-bar .stat-item .num{font-size:13px}.stats-bar .stat-item .label{font-size:11px}.lib-title{font-size:20px;padding-top:12px}.app-list{max-width:100%}.app-card{padding:12px 12px;gap:10px}.app-icon{width:44px;height:44px}.app-info .app-name{font-size:14px}.app-download-btn{padding:6px 14px;font-size:12px;height:34px;min-width:60px}}
     </style>
 </head>
 <body>
 
-    <!-- ===== 返回按钮 ===== -->
-    <div class="back-btn" id="backBtn">
-        <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-    </div>
+<div class="back-btn" id="backBtn">
+    <svg viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+</div>
 
-    <div class="bg-layer">
-        <div class="glow glow-1"></div>
-        <div class="glow glow-2"></div>
-        <div class="glow glow-3"></div>
-        <div class="particle particle-1"></div>
-        <div class="particle particle-2"></div>
-        <div class="particle particle-3"></div>
-        <div class="particle particle-4"></div>
-        <div class="particle particle-5"></div>
-    </div>
+<div class="bg-layer">
+    <div class="glow glow-1"></div><div class="glow glow-2"></div><div class="glow glow-3"></div>
+    <div class="particle particle-1"></div><div class="particle particle-2"></div><div class="particle particle-3"></div>
+    <div class="particle particle-4"></div><div class="particle particle-5"></div>
+</div>
 
-    <div class="toast" id="toast">
-        <span id="toastText">正在跳转</span>
-        <span class="dots"><span></span><span></span><span></span></span>
-    </div>
+<div class="toast" id="toast">
+    <span id="toastText">正在跳转</span>
+    <span class="dots"><span></span><span></span><span></span></span>
+</div>
 
-    <div class="container" id="container">
+<div class="container" id="container">
 
-        <!-- ===== 页面1：主页面 ===== -->
-        <div id="page1" class="page active" data-page="1">
-            <div class="header">
-                <div class="header-badge">✦ 资源站</div>
-                <h1>资源分享</h1>
-                <p class="subtitle">精选实用工具 · 一键获取</p>
-            </div>
-
-            <!-- ===== 安全认证展示 ===== -->
-            <div class="security-badge">
-                <span class="sec-item">
-                    <svg class="sec-icon" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
-                    <span class="sec-text">安全认证</span>
-                </span>
-                <span class="sec-divider"></span>
-                <span class="sec-item">
-                    <svg class="sec-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
-                    <span class="sec-text">官方渠道</span>
-                </span>
-            </div>
-
-            <div class="telegram-btn" id="telegramBtnTop">
-                <svg class="plane-icon" viewBox="0 0 24 24"><path d="M1.5 11.5L21 3L16.5 21L12.5 13.5L8 17L8.5 11.5L18 6.5L11 11L1.5 11.5Z"/></svg>
-                Telegram
-            </div>
-
-            <div class="card-grid">
-                <div class="card" id="cardSoftware">
-                    <img class="icon-img" src="https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEXumFqYbgvYG8o_fLpZzjvmCmVtj4tHQACyyEAAmrvCVc3GBY7xK-q4z0E.png" alt="软件图标">
-                    <span class="card-name">软件</span>
-                </div>
-                <div class="card" id="cardClean">
-                    <img class="icon-img" src="https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEXukdqYbduk0CniKV2BbB8r_Lg9DPdRwACryEAAmrvCVeC9HGvJ9ZmRT0E.png" alt="清理文件图标">
-                    <span class="card-name">清理文件</span>
-                </div>
-            </div>
-
-            <p class="footer">所有软件均来自官方渠道 · 安全无毒</p>
+    <!-- ===== 页面1：主页面 ===== -->
+    <div id="page1" class="page active" data-page="1">
+        <div class="header">
+            <div class="header-badge">✦ 资源站</div>
+            <h1 id="siteTitle">资源分享</h1>
+            <p class="subtitle" id="siteSubtitle">精选实用工具 · 一键获取</p>
         </div>
 
-        <!-- ===== 页面2：软件库 ===== -->
-        <div id="page2" class="page" data-page="2">
-            <div class="lib-title">📦 软件库</div>
-
-            <div class="stats-bar">
-                <span class="stat-item">
-                    <span class="num">官方</span>
-                    <span class="label">渠道</span>
+        <!-- 安全认证展示 - 蓝色SVG图标 -->
+        <div class="security-badge">
+            <span class="sec-item">
+                <span class="sec-icon" id="securityIconDisplay">
+                    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
                 </span>
-                <span class="stat-divider"></span>
-                <span class="stat-item">
-                    <span class="num">安全</span>
-                    <span class="label">认证</span>
+                <span class="sec-text" id="securityText">安全认证</span>
+            </span>
+            <span class="sec-divider"></span>
+            <span class="sec-item">
+                <span class="sec-icon" id="officialIconDisplay">
+                    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><path d="M11 5L3 9v6l8 4V5z"/><path d="M19.07 4.93a10 10 0 010 14.14"/><path d="M15.54 8.46a5 5 0 010 7.07"/></svg>
                 </span>
-            </div>
-
-            <div class="app-list">
-
-                <div class="app-card">
-                    <img class="app-icon" src="https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEXuvhqYbuyyo1YDw-jI_pOpoSMls-k8AACaSIAAmrvCVeHjo_Tx9bV_j0E.png" alt="3A加速器">
-                    <div class="app-info">
-                        <div class="app-name">3A加速器</div>
-                        <div class="app-meta">
-                            <span>v1.0.1</span>
-                            <span>12.5 MB</span>
-                            <span class="tag">官方</span>
-                        </div>
-                        <div class="app-desc">稳定加速 · 低延迟 · 多节点</div>
-                    </div>
-                    <div class="app-action">
-                        <a class="app-download-btn" href="https://223-109-125-227-v3.pd1.cjjd19.com/user-share-free-download-cdn.123295.com/123-464/c0f3947c/1812455996-0/c0f3947cefdb8ab475cada6f061579d0/c-m8003?v=5&t=1785396117&r=OWWSWG&bzc=2&bzs=313835313733383430363a35353935333631333a35313133323030343a313835353736353933303a3130&ur=vvvgeegavngv&urn=0&s=1785396117f75934754381a8fc6fe70b3c6e586d12&bzp=0&bi=732404329&filename=3A%E5%8A%A0%E9%80%9F%E5%99%A8_1.0.1.apk&x-mf-biz-cid=cf607993-a5e7-4159-a958-9bdf1a8e8861-6eaa77&auto_redirect=0&ndcp=1&cache_type=1" target="_blank">
-                            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                            下载
-                        </a>
-                    </div>
-                </div>
-
-                <div class="app-card">
-                    <img class="app-icon" src="https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEXuv9qYbvoqZrNKeKsyc1tO_2I-04Q2gACciIAAmrvCVd6BIavzddf_j0E.png" alt="绿茶VPN">
-                    <div class="app-info">
-                        <div class="app-name">绿茶VPN</div>
-                        <div class="app-meta">
-                            <span>v2.6.7</span>
-                            <span>8.7 MB</span>
-                            <span class="tag">推荐</span>
-                        </div>
-                        <div class="app-desc">隐私保护 · 全球节点 · 高速稳定</div>
-                    </div>
-                    <div class="app-action">
-                        <a class="app-download-btn" href="https://dl-e.feejii.com/storage/files/2025/11/10/9/5092236319/1762772672669996.gz?t=6a61f31c&rlimit=20&us=FRwDM4U1re&sign=14300b3fe836aab2ce6171b076b82309&download_name=-%E8%8C%B6_2.6.7.apk&p=null-13020574-52161016499" target="_blank">
-                            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                            下载
-                        </a>
-                    </div>
-                </div>
-
-                <div class="app-card">
-                    <img class="app-icon" src="https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEXukdqYbduk0CniKV2BbB8r_Lg9DPdRwACryEAAmrvCVeC9HGvJ9ZmRT0E.png" alt="MT管理器">
-                    <div class="app-info">
-                        <div class="app-name">MT管理器</div>
-                        <div class="app-meta">
-                            <span>v2.26.3</span>
-                            <span>6.2 MB</span>
-                            <span class="tag">工具</span>
-                        </div>
-                        <div class="app-desc">文件管理 · APK编辑 · 逆向工具</div>
-                    </div>
-                    <div class="app-action">
-                        <a class="app-download-btn" href="https://223-109-125-229-v3.pd1.cjjd19.com/1135-user-share-free-download-cdn.123295.com/123-787/dd655c8c/1838671775-0/dd655c8c18ca14ca1236c31431d32f13/c-m114?v=5&t=1785396202&r=50UP2Y&bzc=2&bzs=313835313733383430363a35363136333631333a33303030323239333a313835353736353933303a3130&ur=vvvgeegavngv&urn=0&s=17853962028ebe499d10dc5499f78b18dc99ebb58f&bzp=0&bi=732404329&filename=MT%E7%AE%A1%E7%90%86%E5%99%A8_2.26.3-clone.apk&x-mf-biz-cid=c16fc723-2e83-4f89-9c74-5f1e819f190a-5baabb&auto_redirect=0&ndcp=1&cache_type=1" target="_blank">
-                            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                            下载
-                        </a>
-                    </div>
-                </div>
-
-                <div class="app-card">
-                    <img class="app-icon" src="https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEXuvxqYbvR9Qj_7QABK6Ed3Hjs19BQyKMAAm4iAAJq7wlXxZ4YNBq_u-w9BA.png" alt="Telegram">
-                    <div class="app-info">
-                        <div class="app-name">Telegram</div>
-                        <div class="app-meta">
-                            <span>v10.5.0</span>
-                            <span>32.1 MB</span>
-                            <span class="tag">通讯</span>
-                        </div>
-                        <div class="app-desc">安全通讯 · 频道 · 机器人</div>
-                    </div>
-                    <div class="app-action">
-                        <a class="app-download-btn" href="https://dl-e.feejii.com/storage/files/2026/07/20/5/5089189575/1784529796194570.gz?t=6a61f333&rlimit=20&us=8brthmydaz&sign=1592eba050b9b36ffb581bb00d745b2e&download_name=%E8%8A%92%E6%9E%9C%E5%AE%A2%E6%88%B7%E7%AB%AF_3.7.apk&p=null-13020574-52161050451" target="_blank">
-                            <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                            下载
-                        </a>
-                    </div>
-                </div>
-
-            </div>
-
-            <p class="footer">所有软件均来自官方渠道 · 安全无毒</p>
+                <span class="sec-text" id="officialText">官方渠道</span>
+            </span>
         </div>
 
-        <!-- ===== 页面3：清理文件列表 ===== -->
-        <div id="page3" class="page" data-page="3">
-            <div class="header" style="margin-bottom:12px;">
-                <h1 class="page-title">🧹 清理文件</h1>
-            </div>
-
-            <div class="card-grid">
-                <div class="card" id="cardPUBG">
-                    <img class="icon-img" src="https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEXusBqYbpJ7keuolEVO0uhU9aEUCNu9gACLSIAAmrvCVeYwsq-dLZddz0E.png" alt="PUBG清理图标">
-                    <span class="card-name">PUBG清理</span>
-                    <a class="download-btn" href="https://223-109-125-231-v3.pd1.cjjd19.com/user-share-free-download-cdn.123295.com/123-918/c41c5543/1851738406-0/c41c55434164d2e1fa2f9fc79b059f96/c-m8012?v=5&t=1785398859&r=8GCDYM&bzc=2&bzs=313835313733383430363a35353935333631353a31363530303a313835353736353933303a3130&ur=vvvgeegavngv&urn=0&s=1785398859f2a81f4a855f887a0d39cc076e777053&bzp=0&bi=732404329&filename=%E9%98%B2%E4%B8%83%E5%A4%A9%E6%B8%85%E7%90%86.zip&x-mf-biz-cid=36636309-5c8d-4609-989e-1362c94ac997-5baabb&auto_redirect=0&ndcp=1&cache_type=1" target="_blank">下载</a>
-                </div>
-                <div class="card" id="cardQingli">
-                    <span class="icon">🧹</span>
-                    <span class="card-name">和平清理</span>
-                    <a class="download-btn" href="https://223-109-125-232-v3.pd1.cjjd19.com/user-share-free-download-cdn.123295.com/123-978/e122187c/1851738406-0/e122187c852ff2ad445ee6ee9d1dafd2/c-m8012?v=5&t=1785408506&r=4G1URA&bzc=2&bzs=313835313733383430363a35363136333631363a32333939363a313835353736353933303a3130&ur=vvvgeegavngv&urn=0&s=1785408506069e79438036ebdc49007d8900afbff4&bzp=0&bi=732404329&filename=%E5%92%8C%E5%B9%B3%E6%B8%85%E7%90%86.zip&x-mf-biz-cid=cb5103c8-ef9a-430f-889f-db22675b47be-3dab77&auto_redirect=0&ndcp=1&cache_type=1" target="_blank">下载</a>
-                </div>
-            </div>
-
-            <p class="footer">所有软件均来自官方渠道 · 安全无毒</p>
+        <div class="telegram-btn" id="telegramBtnTop">
+            <svg class="plane-icon" viewBox="0 0 24 24"><path d="M1.5 11.5L21 3L16.5 21L12.5 13.5L8 17L8.5 11.5L18 6.5L11 11L1.5 11.5Z"/></svg>
+            Telegram
         </div>
 
+        <div class="card-grid">
+            <div class="card" id="cardSoftware">
+                <img class="icon-img" src="https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEXumFqYbgvYG8o_fLpZzjvmCmVtj4tHQACyyEAAmrvCVc3GBY7xK-q4z0E.png" alt="软件图标">
+                <span class="card-name">软件</span>
+            </div>
+            <div class="card" id="cardClean">
+                <img class="icon-img" src="https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEXukdqYbduk0CniKV2BbB8r_Lg9DPdRwACryEAAmrvCVeC9HGvJ9ZmRT0E.png" alt="清理文件图标">
+                <span class="card-name">清理文件</span>
+            </div>
+        </div>
+
+        <p class="footer" id="footerText">所有软件均来自官方渠道 · 安全无毒</p>
     </div>
 
-    <script>
-        // ===== 核心变量 =====
-        var toast = document.getElementById('toast');
-        var toastText = document.getElementById('toastText');
-        var toastTimer = null;
-        var currentPage = 1;
-        var backBtn = document.getElementById('backBtn');
+    <!-- ===== 页面2：软件库 ===== -->
+    <div id="page2" class="page" data-page="2">
+        <div class="lib-title" id="libTitle">📦 软件库</div>
+        <div class="stats-bar">
+            <span class="stat-item"><span class="num">官方</span><span class="label">渠道</span></span>
+            <span class="stat-divider"></span>
+            <span class="stat-item"><span class="num">安全</span><span class="label">认证</span></span>
+        </div>
+        <div class="app-list" id="appList"></div>
+        <p class="footer" id="footerText2">所有软件均来自官方渠道 · 安全无毒</p>
+    </div>
 
-        // ===== Toast提示 =====
-        function showToast(text) {
-            toastText.textContent = text;
-            toast.classList.add('show');
-            clearTimeout(toastTimer);
-            toastTimer = setTimeout(function() {
-                toast.classList.remove('show');
-            }, 1600);
+    <!-- ===== 页面3：清理文件列表 ===== -->
+    <div id="page3" class="page" data-page="3">
+        <div class="header" style="margin-bottom:12px;">
+            <h1 class="page-title">🧹 清理文件</h1>
+        </div>
+        <div class="card-grid" id="cleanGrid"></div>
+        <p class="footer" id="footerText3">所有软件均来自官方渠道 · 安全无毒</p>
+    </div>
+
+</div>
+
+<script>
+// ============================================================
+// 蓝色SVG图标库（与后台一致）
+// ============================================================
+var ICON_SVGS = {
+    '🛡️': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>',
+    '🔒': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>',
+    '🔐': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/><circle cx="12" cy="16" r="1.5"/><line x1="12" y1="17.5" x2="12" y2="14"/></svg>',
+    '✅': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
+    '⭐': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+    '🏆': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M6 9V3h12v6"/><path d="M8 12v6h8v-6"/><path d="M3 3h18"/><path d="M6 9h12"/></svg>',
+    '🔰': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>',
+    '👑': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M2 17l3-8 4 3 3-7 3 7 4-3 3 8"/><circle cx="12" cy="17" r="3"/><line x1="2" y1="17" x2="22" y2="17"/></svg>',
+    '📢': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M11 5L3 9v6l8 4V5z"/><path d="M19.07 4.93a10 10 0 010 14.14"/><path d="M15.54 8.46a5 5 0 010 7.07"/></svg>',
+    '🏛️': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
+    '📌': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M12 17v-5"/><circle cx="12" cy="8" r="3"/><path d="M12 3v4"/><path d="M9 17h6"/></svg>',
+    '🔔': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>',
+    '📣': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M2 12v4"/><path d="M6 8v8"/><path d="M10 6v12"/><path d="M14 5v14"/><path d="M18 8v8"/><path d="M22 12v4"/></svg>',
+    '🏷️': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>',
+    '💡': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M9.663 17h4.673M12 3v1"/><path d="M12 21a1 1 0 01-1-1v-1h2v1a1 1 0 01-1 1z"/><path d="M5 7a7 7 0 0114 0c0 3.5-2 6-3 8h-8c-1-2-3-4.5-3-8z"/></svg>',
+    '🔊': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 010 14.14"/><path d="M15.54 8.46a5 5 0 010 7.07"/></svg>',
+    '📡': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M12 20h.01"/><path d="M4 12a8 8 0 0116 0"/><path d="M7 12a5 5 0 0110 0"/><path d="M10 12a2 2 0 014 0"/></svg>',
+    '🎯': '<svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>'
+};
+
+// ============================================================
+// 数据读取机制（GitHub 优先 + localStorage 缓存降级）
+// ============================================================
+var STORAGE_KEY = 'resource_admin_data';
+var STORAGE_TS_KEY = 'resource_admin_data_ts'; // 缓存时间戳
+var GITHUB_DATA_URL = 'https://raw.githubusercontent.com/Zy-api/Fox/main/data.json';
+var CACHE_TTL = 10 * 60 * 1000; // 缓存有效期 10 分钟（毫秒）
+
+/**
+ * 同步从 localStorage 读取缓存数据（用于快速首屏渲染）
+ */
+function loadAdminData() {
+    try {
+        var stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+            return JSON.parse(stored);
         }
+    } catch(e) {}
+    return null;
+}
 
-        // ===== 页面切换 =====
-        function switchPage(pageId) {
-            history.pushState({ page: pageId }, '', '?page=' + pageId);
-            var pages = document.querySelectorAll('.page');
-            for (var i = 0; i < pages.length; i++) {
-                pages[i].classList.remove('active');
+/**
+ * 从 GitHub 远程获取 data.json
+ * 成功后缓存到 localStorage 并记录时间戳
+ * @returns {Promise<Object|null>}
+ */
+function fetchGitHubData() {
+    return fetch(GITHUB_DATA_URL, { cache: 'no-cache' })
+        .then(function(res) {
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return res.json();
+        })
+        .then(function(data) {
+            try {
+                // 将 GitHub 数据写入 localStorage 缓存
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+                localStorage.setItem(STORAGE_TS_KEY, String(Date.now()));
+            } catch(e) {
+                // localStorage 写入失败（如存储满），不影响使用
+                console.warn('缓存写入失败:', e);
             }
-            document.getElementById(pageId).classList.add('active');
-            currentPage = parseInt(pageId.replace('page', ''));
+            return data;
+        })
+        .catch(function(err) {
+            console.warn('GitHub 数据获取失败，使用缓存/默认数据:', err);
+            return null;
+        });
+}
 
-            if (currentPage === 1) {
-                backBtn.classList.remove('show');
+/**
+ * 检查缓存是否过期
+ * @returns {boolean}
+ */
+function isCacheExpired() {
+    try {
+        var ts = localStorage.getItem(STORAGE_TS_KEY);
+        if (!ts) return true;
+        return (Date.now() - parseInt(ts)) > CACHE_TTL;
+    } catch(e) {
+        return true;
+    }
+}
+
+/**
+ * 比较两份数据是否有实质变化（用于判断是否需要重新渲染）
+ * @param {Object|null} a
+ * @param {Object|null} b
+ * @returns {boolean}
+ */
+function isDataChanged(oldData, newData) {
+    if (!oldData && !newData) return false;
+    if (!oldData || !newData) return true;
+    return JSON.stringify(oldData) !== JSON.stringify(newData);
+}
+
+// ===== 默认数据 =====
+var defaultSettings = {
+    title: '资源分享',
+    subtitle: '精选实用工具 · 一键获取',
+    security: '安全认证',
+    official: '官方渠道',
+    footer: '所有软件均来自官方渠道 · 安全无毒',
+    libTitle: '📦 软件库',
+    telegram: 'https://t.me/NeverSttle888'
+};
+
+var defaultStyle = {
+    securityIcon: '🛡️',
+    officialIcon: '📢'
+};
+
+var defaultApps = [
+    { name: "3A加速器", version: "v1.0.1", size: "12.5 MB", url: "https://223-109-125-227-v3.pd1.cjjd19.com/user-share-free-download-cdn.123295.com/123-464/c0f3947c/1812455996-0/c0f3947cefdb8ab475cada6f061579d0/c-m8003?v=5&t=1785396117&r=OWWSWG&bzc=2&bzs=313835313733383430363a35353935333631333a35313133323030343a313835353736353933303a3130&ur=vvvgeegavngv&urn=0&s=1785396117f75934754381a8fc6fe70b3c6e586d12&bzp=0&bi=732404329&filename=3A%E5%8A%A0%E9%80%9F%E5%99%A8_1.0.1.apk&x-mf-biz-cid=cf607993-a5e7-4159-a958-9bdf1a8e8861-6eaa77&auto_redirect=0&ndcp=1&cache_type=1", icon: "https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEXuvhqYbuyyo1YDw-jI_pOpoSMls-k8AACaSIAAmrvCVeHjo_Tx9bV_j0E.png", tag: "官方", desc: "稳定加速 · 低延迟 · 多节点" },
+    { name: "绿茶VPN", version: "v2.6.7", size: "8.7 MB", url: "https://dl-e.feejii.com/storage/files/2025/11/10/9/5092236319/1762772672669996.gz?t=6a61f31c&rlimit=20&us=FRwDM4U1re&sign=14300b3fe836aab2ce6171b076b82309&download_name=-%E8%8C%B6_2.6.7.apk&p=null-13020574-52161016499", icon: "https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEXuv9qYbvoqZrNKeKsyc1tO_2I-04Q2gACciIAAmrvCVd6BIavzddf_j0E.png", tag: "推荐", desc: "隐私保护 · 全球节点 · 高速稳定" },
+    { name: "MT管理器", version: "v2.26.3", size: "6.2 MB", url: "https://223-109-125-229-v3.pd1.cjjd19.com/1135-user-share-free-download-cdn.123295.com/123-787/dd655c8c/1838671775-0/dd655c8c18ca14ca1236c31431d32f13/c-m114?v=5&t=1785396202&r=50UP2Y&bzc=2&bzs=313835313733383430363a35363136333631333a33303030323239333a313835353736353933303a3130&ur=vvvgeegavngv&urn=0&s=17853962028ebe499d10dc5499f78b18dc99ebb58f&bzp=0&bi=732404329&filename=MT%E7%AE%A1%E7%90%86%E5%99%A8_2.26.3-clone.apk&x-mf-biz-cid=c16fc723-2e83-4f89-9c74-5f1e819f190a-5baabb&auto_redirect=0&ndcp=1&cache_type=1", icon: "https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEXukdqYbduk0CniKV2BbB8r_Lg9DPdRwACryEAAmrvCVeC9HGvJ9ZmRT0E.png", tag: "工具", desc: "文件管理 · APK编辑 · 逆向工具" },
+    { name: "Telegram", version: "v10.5.0", size: "32.1 MB", url: "https://dl-e.feejii.com/storage/files/2026/07/20/5/5089189575/1784529796194570.gz?t=6a61f333&rlimit=20&us=8brthmydaz&sign=1592eba050b9b36ffb581bb00d745b2e&download_name=%E8%8A%92%E6%9E%9C%E5%AE%A2%E6%88%B7%E7%AB%AF_3.7.apk&p=null-13020574-52161050451", icon: "https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEXuvxqYbvoqZr9Qj_7QABK6Ed3Hjs19BQyKMAAm4iAAJq7wlXxZ4YNBq_u-w9BA.png", tag: "通讯", desc: "安全通讯 · 频道 · 机器人" }
+];
+
+var defaultClean = [
+    { name: "PUBG清理", version: "", size: "", url: "https://223-109-125-231-v3.pd1.cjjd19.com/user-share-free-download-cdn.123295.com/123-918/c41c5543/1851738406-0/c41c55434164d2e1fa2f9fc79b059f96/c-m8012?v=5&t=1785398859&r=8GCDYM&bzc=2&bzs=313835313733383430363a35353935333631353a31363530303a313835353736353933303a3130&ur=vvvgeegavngv&urn=0&s=1785398859f2a81f4a855f887a0d39cc076e777053&bzp=0&bi=732404329&filename=%E9%98%B2%E4%B8%83%E5%A4%A9%E6%B8%85%E7%90%86.zip&x-mf-biz-cid=36636309-5c8d-4609-989e-1362c94ac997-5baabb&auto_redirect=0&ndcp=1&cache_type=1", icon: "https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEXusBqYbpJ7keuolEVO0uhU9aEUCNu9gACLSIAAmrvCVeYwsq-dLZddz0E.png", tag: "", desc: "" },
+    { name: "和平清理", version: "", size: "", url: "https://223-109-125-232-v3.pd1.cjjd19.com/user-share-free-download-cdn.123295.com/123-978/e122187c/1851738406-0/e122187c852ff2ad445ee6ee9d1dafd2/c-m8012?v=5&t=1785408506&r=4G1URA&bzc=2&bzs=313835313733383430363a35363136333631363a32333939363a313835353736353933303a3130&ur=vvvgeegavngv&urn=0&s=1785408506069e79438036ebdc49007d8900afbff4&bzp=0&bi=732404329&filename=%E5%92%8C%E5%B9%B3%E6%B8%85%E7%90%86.zip&x-mf-biz-cid=cb5103c8-ef9a-430f-889f-db22675b47be-3dab77&auto_redirect=0&ndcp=1&cache_type=1", icon: "", tag: "", desc: "" }
+];
+
+// ============================================================
+// 初始化数据读取流程：
+// 1. 先从 localStorage 缓存同步读取，快速渲染页面
+// 2. 后台异步从 GitHub 获取最新数据
+// 3. 如果 GitHub 数据与缓存不同，则重新渲染
+// ============================================================
+
+// 第一步：同步读取缓存数据，快速首屏渲染
+var adminData = loadAdminData();
+
+// 解析数据（缓存数据或默认数据）
+var settings = adminData ? adminData.settings : defaultSettings;
+var style = adminData ? adminData.style : defaultStyle;
+var apps = (adminData && adminData.apps && adminData.apps.length > 0) ? adminData.apps : defaultApps;
+var clean = (adminData && adminData.clean && adminData.clean.length > 0) ? adminData.clean : defaultClean;
+
+// 第二步：后台从 GitHub 拉取最新数据
+// 如果缓存不存在或已过期，发起远程请求
+(function initGitHubData() {
+    // 没有缓存时立即请求；有缓存但过期时也请求（用新数据静默更新）
+    if (!adminData || isCacheExpired()) {
+        fetchGitHubData().then(function(remoteData) {
+            if (remoteData && isDataChanged(adminData, remoteData)) {
+                // GitHub 数据与当前渲染数据不同，用远程数据重新渲染
+                applyRemoteData(remoteData);
+            }
+        });
+    }
+})();
+
+// ============================================================
+// 应用设置
+// ============================================================
+document.getElementById('siteTitle').textContent = settings.title || '资源分享';
+document.getElementById('siteSubtitle').textContent = settings.subtitle || '精选实用工具 · 一键获取';
+document.getElementById('securityText').textContent = settings.security || '安全认证';
+document.getElementById('officialText').textContent = settings.official || '官方渠道';
+document.getElementById('footerText').textContent = settings.footer || '所有软件均来自官方渠道 · 安全无毒';
+document.getElementById('footerText2').textContent = settings.footer || '所有软件均来自官方渠道 · 安全无毒';
+document.getElementById('footerText3').textContent = settings.footer || '所有软件均来自官方渠道 · 安全无毒';
+document.getElementById('libTitle').textContent = settings.libTitle || '📦 软件库';
+
+// ===== 安全认证图标（从后台读取，渲染蓝色SVG） =====
+function renderIcon(elementId, iconKey) {
+    var el = document.getElementById(elementId);
+    var svgHtml = ICON_SVGS[iconKey];
+    if (svgHtml) {
+        el.innerHTML = svgHtml;
+    } else {
+        el.textContent = iconKey || '📢';
+    }
+}
+
+var securityIcon = (style && style.securityIcon) || '🛡️';
+var officialIcon = (style && style.officialIcon) || '📢';
+renderIcon('securityIconDisplay', securityIcon);
+renderIcon('officialIconDisplay', officialIcon);
+
+// Telegram
+var telegramUrl = settings.telegram || 'https://t.me/NeverSttle888';
+document.getElementById('telegramBtnTop').setAttribute('data-url', telegramUrl);
+
+// ============================================================
+// 渲染软件库
+// ============================================================
+function renderApps() {
+    var html = '';
+    if (!apps || apps.length === 0) {
+        html = '<div style="text-align:center;padding:30px;color:#8a9bb8">暂无软件</div>';
+    } else {
+        apps.forEach(function(app) {
+            var iconDisplay = app.icon || '📦';
+            var isImage = iconDisplay.indexOf('http') === 0 || iconDisplay.indexOf('data:') === 0 || iconDisplay.indexOf('.png') !== -1 || iconDisplay.indexOf('.jpg') !== -1;
+            html += '<div class="app-card">';
+            if (isImage) {
+                html += '<img class="app-icon" src="' + iconDisplay + '" alt="' + app.name + '" onerror="this.style.display=\'none\';this.outerHTML=\'<span class=\\\'app-icon\\\' style=\\\'font-size:32px;display:flex;align-items:center;justify-content:center;width:50px;height:50px\\\'>📦</span>\'">';
             } else {
-                backBtn.classList.add('show');
+                html += '<span class="app-icon" style="font-size:32px;display:flex;align-items:center;justify-content:center;width:50px;height:50px;background:rgba(255,255,255,0.3);border-radius:12px;padding:4px">' + iconDisplay + '</span>';
             }
-        }
-
-        // ===== 返回按钮 =====
-        backBtn.addEventListener('click', function(e) {
-            var ripple = document.createElement('span');
-            ripple.className = 'ripple';
-            var rect = this.getBoundingClientRect();
-            var size = Math.max(rect.width, rect.height);
-            ripple.style.width = ripple.style.height = size + 'px';
-            ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
-            ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
-            this.appendChild(ripple);
-            setTimeout(function() { ripple.remove(); }, 600);
-
-            if (currentPage > 1) {
-                switchPage('page1');
-                showToast('已返回');
-            }
+            html += '<div class="app-info">';
+            html += '<div class="app-name">' + app.name + '</div>';
+            html += '<div class="app-meta">';
+            if (app.version) html += '<span>' + app.version + '</span>';
+            if (app.size) html += '<span>' + app.size + '</span>';
+            if (app.tag) html += '<span class="tag">' + app.tag + '</span>';
+            html += '</div>';
+            if (app.desc) html += '<div class="app-desc">' + app.desc + '</div>';
+            html += '</div>';
+            html += '<div class="app-action">';
+            html += '<a class="app-download-btn" href="' + app.url + '" target="_blank">';
+            html += '<svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>下载';
+            html += '</a>';
+            html += '</div></div>';
         });
+    }
+    document.getElementById('appList').innerHTML = html;
+}
 
-        // ===== 监听系统返回 =====
-        window.addEventListener('popstate', function(e) {
-            var state = e.state;
-            var pageId = state ? state.page : 'page1';
-            var pages = document.querySelectorAll('.page');
-            for (var i = 0; i < pages.length; i++) {
-                pages[i].classList.remove('active');
-            }
-            document.getElementById(pageId).classList.add('active');
-            currentPage = parseInt(pageId.replace('page', ''));
-
-            if (currentPage === 1) {
-                backBtn.classList.remove('show');
+// ============================================================
+// 渲染清理文件
+// ============================================================
+function renderClean() {
+    var html = '';
+    if (!clean || clean.length === 0) {
+        html = '<div style="text-align:center;padding:30px;color:#8a9bb8;width:100%">暂无清理工具</div>';
+    } else {
+        clean.forEach(function(item) {
+            var iconDisplay = item.icon || '🧹';
+            var isImage = iconDisplay.indexOf('http') === 0 || iconDisplay.indexOf('data:') === 0 || iconDisplay.indexOf('.png') !== -1 || iconDisplay.indexOf('.jpg') !== -1;
+            html += '<div class="card" style="cursor:default">';
+            if (isImage) {
+                html += '<img class="icon-img" src="' + iconDisplay + '" alt="' + item.name + '" onerror="this.style.display=\'none\';this.outerHTML=\'<span class=\\\'icon\\\' style=\\\'font-size:32px;\\\'>🧹</span>\'">';
             } else {
-                backBtn.classList.add('show');
+                html += '<span class="icon" style="font-size:32px;">' + iconDisplay + '</span>';
             }
+            html += '<span class="card-name">' + item.name + '</span>';
+            html += '<a class="download-btn" href="' + item.url + '" target="_blank">下载</a>';
+            html += '</div>';
         });
+    }
+    document.getElementById('cleanGrid').innerHTML = html;
+}
 
-        // ===== Telegram 按钮 =====
-        document.getElementById('telegramBtnTop').addEventListener('click', function(e) {
-            e.preventDefault();
-            var ripple = document.createElement('span');
-            ripple.className = 'ripple';
-            var rect = this.getBoundingClientRect();
-            var size = Math.max(rect.width, rect.height);
-            ripple.style.width = ripple.style.height = size + 'px';
-            ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
-            ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
-            this.appendChild(ripple);
-            setTimeout(function() { ripple.remove(); }, 700);
-            showToast('正在跳转 Telegram 频道');
-            window.open('https://t.me/NeverSttle888', '_blank');
-        });
+/**
+ * 用 GitHub 远程数据重新渲染页面
+ * 更新全局数据变量，重新应用设置并重新渲染列表
+ * @param {Object} remoteData - 从 GitHub 获取的数据
+ */
+function applyRemoteData(remoteData) {
+    console.log('检测到数据更新，正在重新渲染...');
+    // 更新全局数据变量
+    adminData = remoteData;
+    settings = remoteData.settings || defaultSettings;
+    style = remoteData.style || defaultStyle;
+    apps = (remoteData.apps && remoteData.apps.length > 0) ? remoteData.apps : defaultApps;
+    clean = (remoteData.clean && remoteData.clean.length > 0) ? remoteData.clean : defaultClean;
+    // 重新应用设置到页面
+    document.getElementById('siteTitle').textContent = settings.title || '资源分享';
+    document.getElementById('siteSubtitle').textContent = settings.subtitle || '精选实用工具 · 一键获取';
+    document.getElementById('securityText').textContent = settings.security || '安全认证';
+    document.getElementById('officialText').textContent = settings.official || '官方渠道';
+    document.getElementById('footerText').textContent = settings.footer || '所有软件均来自官方渠道 · 安全无毒';
+    document.getElementById('footerText2').textContent = settings.footer || '所有软件均来自官方渠道 · 安全无毒';
+    document.getElementById('footerText3').textContent = settings.footer || '所有软件均来自官方渠道 · 安全无毒';
+    document.getElementById('libTitle').textContent = settings.libTitle || '📦 软件库';
+    renderIcon('securityIconDisplay', (style && style.securityIcon) || '🛡️');
+    renderIcon('officialIconDisplay', (style && style.officialIcon) || '📢');
+    var newTelegramUrl = settings.telegram || 'https://t.me/NeverSttle888';
+    document.getElementById('telegramBtnTop').setAttribute('data-url', newTelegramUrl);
+    // 重新渲染软件库和清理文件列表
+    renderApps();
+    renderClean();
+}
 
-        // ===== 主页面卡片 =====
-        document.getElementById('cardSoftware').addEventListener('click', function(e) {
-            switchPage('page2');
-        });
+renderApps();
+renderClean();
 
-        document.getElementById('cardClean').addEventListener('click', function(e) {
-            switchPage('page3');
-        });
+// ============================================================
+// 核心交互
+// ============================================================
+var toast = document.getElementById('toast');
+var toastText = document.getElementById('toastText');
+var toastTimer = null;
+var currentPage = 1;
+var backBtn = document.getElementById('backBtn');
 
-        // ===== 软件库下载按钮（带涟漪+Toast） =====
-        document.querySelectorAll('.app-download-btn').forEach(function(btn) {
-            btn.addEventListener('click', function(e) {
-                var ripple = document.createElement('span');
-                ripple.className = 'ripple';
-                var rect = this.getBoundingClientRect();
-                var size = Math.max(rect.width, rect.height);
-                ripple.style.width = ripple.style.height = size + 'px';
-                ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
-                ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
-                this.appendChild(ripple);
-                setTimeout(function() { ripple.remove(); }, 700);
+function showToast(text) {
+    toastText.textContent = text;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function() {
+        toast.classList.remove('show');
+    }, 1600);
+}
 
-                var card = this.closest('.app-card');
-                var name = card ? card.querySelector('.app-name').textContent : '软件';
-                showToast('正在下载 ' + name);
-            });
-        });
-
-        // ===== 清理文件下载按钮（带Toast） =====
-        document.querySelectorAll('.card .download-btn').forEach(function(btn) {
-            btn.addEventListener('click', function(e) {
-                var card = this.closest('.card');
-                var name = card ? card.querySelector('.card-name').textContent : '文件';
-                showToast('正在下载 ' + name);
-            });
-        });
-
-        // ===== 清理文件卡片 =====
-        var cardPUBG = document.getElementById('cardPUBG');
-        var cardQingli = document.getElementById('cardQingli');
-
-        cardPUBG.addEventListener('click', function(e) {
-            if (e.target.tagName === 'A') return;
-            showToast('点击下载按钮获取 PUBG清理');
-        });
-
-        cardQingli.addEventListener('click', function(e) {
-            if (e.target.tagName === 'A') return;
-            showToast('点击下载按钮获取 和平清理');
-        });
-
-        // ===== 初始隐藏返回按钮 =====
+function switchPage(pageId) {
+    history.pushState({ page: pageId }, '', '?page=' + pageId);
+    var pages = document.querySelectorAll('.page');
+    for (var i = 0; i < pages.length; i++) {
+        pages[i].classList.remove('active');
+    }
+    document.getElementById(pageId).classList.add('active');
+    currentPage = parseInt(pageId.replace('page', ''));
+    if (currentPage === 1) {
         backBtn.classList.remove('show');
-    </script>
+    } else {
+        backBtn.classList.add('show');
+    }
+}
+
+backBtn.addEventListener('click', function(e) {
+    var ripple = document.createElement('span');
+    ripple.className = 'ripple';
+    var rect = this.getBoundingClientRect();
+    var size = Math.max(rect.width, rect.height);
+    ripple.style.width = ripple.style.height = size + 'px';
+    ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+    ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+    this.appendChild(ripple);
+    setTimeout(function() { ripple.remove(); }, 600);
+    if (currentPage > 1) {
+        switchPage('page1');
+        showToast('已返回');
+    }
+});
+
+window.addEventListener('popstate', function(e) {
+    var state = e.state;
+    var pageId = state ? state.page : 'page1';
+    var pages = document.querySelectorAll('.page');
+    for (var i = 0; i < pages.length; i++) {
+        pages[i].classList.remove('active');
+    }
+    document.getElementById(pageId).classList.add('active');
+    currentPage = parseInt(pageId.replace('page', ''));
+    if (currentPage === 1) {
+        backBtn.classList.remove('show');
+    } else {
+        backBtn.classList.add('show');
+    }
+});
+
+document.getElementById('telegramBtnTop').addEventListener('click', function(e) {
+    e.preventDefault();
+    var ripple = document.createElement('span');
+    ripple.className = 'ripple';
+    var rect = this.getBoundingClientRect();
+    var size = Math.max(rect.width, rect.height);
+    ripple.style.width = ripple.style.height = size + 'px';
+    ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+    ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+    this.appendChild(ripple);
+    setTimeout(function() { ripple.remove(); }, 700);
+    showToast('正在跳转 Telegram 频道');
+    var url = this.getAttribute('data-url') || 'https://t.me/NeverSttle888';
+    window.open(url, '_blank');
+});
+
+document.getElementById('cardSoftware').addEventListener('click', function() {
+    switchPage('page2');
+});
+
+document.getElementById('cardClean').addEventListener('click', function() {
+    switchPage('page3');
+});
+
+// ===== 下载按钮事件委托（兼容重新渲染后事件不丢失） =====
+document.getElementById('container').addEventListener('click', function(e) {
+    // 软件库下载按钮
+    var appBtn = e.target.closest('.app-download-btn');
+    if (appBtn) {
+        var ripple = document.createElement('span');
+        ripple.className = 'ripple';
+        var rect = appBtn.getBoundingClientRect();
+        var size = Math.max(rect.width, rect.height);
+        ripple.style.width = ripple.style.height = size + 'px';
+        ripple.style.left = (e.clientX - rect.left - size / 2) + 'px';
+        ripple.style.top = (e.clientY - rect.top - size / 2) + 'px';
+        appBtn.appendChild(ripple);
+        setTimeout(function() { ripple.remove(); }, 700);
+        var card = appBtn.closest('.app-card');
+        var name = card ? card.querySelector('.app-name').textContent : '软件';
+        showToast('正在下载 ' + name);
+        return;
+    }
+    // 清理文件下载按钮
+    var cleanBtn = e.target.closest('.card .download-btn');
+    if (cleanBtn) {
+        var card = cleanBtn.closest('.card');
+        var name = card ? card.querySelector('.card-name').textContent : '文件';
+        showToast('正在下载 ' + name);
+        return;
+    }
+});
+
+backBtn.classList.remove('show');
+</script>
 
 </body>
 </html>
