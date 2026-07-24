@@ -328,6 +328,10 @@
             <div class="left"><button class="btn btn-primary" onclick="openAddModal('app')">➕ 添加软件</button></div>
             <div class="right">💡 修改后点击顶部「一键保存全部」</div>
         </div>
+        <div style="margin-bottom:10px;padding:10px 16px;background:rgba(255,255,255,0.35);backdrop-filter:blur(12px);border-radius:16px;border:1px solid rgba(255,255,255,0.2)">
+            <label style="font-size:11px;font-weight:600;color:#3a4d64;display:block;margin-bottom:5px">📁 软件库页面标题</label>
+            <input type="text" id="settingLibTitle" placeholder="📦 软件库" onchange="saveSettings()" style="width:100%;padding:8px 14px;border-radius:12px;border:1px solid rgba(79,195,247,0.15);background:rgba(255,255,255,0.6);font-size:13px;font-weight:500;outline:none;font-family:'Inter',sans-serif">
+        </div>
         <div class="search-bar"><input type="text" id="searchInput" placeholder="搜索软件..." oninput="closeAllInlinePanels();renderApps()"></div>
         <div class="app-list" id="appList"></div>
     </div>
@@ -335,6 +339,10 @@
         <div class="top-bar">
             <div class="left"><button class="btn btn-primary" onclick="openAddModal('clean')">➕ 添加清理工具</button></div>
             <div class="right">💡 修改后点击顶部「一键保存全部」</div>
+        </div>
+        <div style="margin-bottom:10px;padding:10px 16px;background:rgba(255,255,255,0.35);backdrop-filter:blur(12px);border-radius:16px;border:1px solid rgba(255,255,255,0.2)">
+            <label style="font-size:11px;font-weight:600;color:#3a4d64;display:block;margin-bottom:5px">📁 清理文件页面标题</label>
+            <input type="text" id="settingCleanTitle" placeholder="🧹 清理文件" onchange="saveSettings()" style="width:100%;padding:8px 14px;border-radius:12px;border:1px solid rgba(79,195,247,0.15);background:rgba(255,255,255,0.6);font-size:13px;font-weight:500;outline:none;font-family:'Inter',sans-serif">
         </div>
         <div class="search-bar"><input type="text" id="searchCleanInput" placeholder="搜索清理工具..." oninput="closeAllInlinePanels();renderClean()"></div>
         <div class="app-list" id="cleanList"></div>
@@ -466,51 +474,10 @@
                     </div>
                 </div>
             </div>
-            <div class="setting-item" style="grid-column:1/-1">
-                <label style="color:#3a7acc;font-weight:700">🛡️ 安全认证图标</label>
-                <div class="icon-select-wrap" id="securityIconWrap" onclick="toggleIconSelect('security', event)">
-                    <div class="icon-select-trigger">
-                        <span class="preview-label">当前：</span>
-                        <span class="preview-icon" id="securityPreview"><svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg></span>
-                        <span class="arrow">▾</span>
-                    </div>
-                    <div class="icon-select-options" id="securityIconOptions" onclick="event.stopPropagation()">
-                        <div class="icon-grid-wrap"><div class="icon-selector" id="securityIconSelector"></div></div>
-                    </div>
-                </div>
-            </div>
-            <div class="setting-item" style="grid-column:1/-1">
-                <label style="color:#3a7acc;font-weight:700">📢 官方渠道图标</label>
-                <div class="icon-select-wrap" id="officialIconWrap" onclick="toggleIconSelect('official', event)">
-                    <div class="icon-select-trigger">
-                        <span class="preview-label">当前：</span>
-                        <span class="preview-icon" id="officialPreview"><svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M11 5L3 9v6l8 4V5z"/><path d="M19.07 4.93a10 10 0 010 14.14"/><path d="M15.54 8.46a5 5 0 010 7.07"/></svg></span>
-                        <span class="arrow">▾</span>
-                    </div>
-                    <div class="icon-select-options" id="officialIconOptions" onclick="event.stopPropagation()">
-                        <div class="icon-grid-wrap"><div class="icon-selector" id="officialIconSelector"></div></div>
-                    </div>
-                </div>
-            </div>
-            <div class="setting-item" style="grid-column:1/-1;background:linear-gradient(145deg,rgba(58,122,204,0.04),rgba(255,255,255,0.04))">
-                <label style="color:#3a7acc;font-weight:700">👁️ 前台预览效果</label>
-                <div style="display:flex;align-items:center;gap:16px;padding:8px 0;flex-wrap:wrap">
-                    <span style="display:flex;align-items:center;gap:6px;font-size:15px;font-weight:600;color:#3a7acc">
-                        <span id="previewSecIcon" style="display:flex;align-items:center;font-size:26px;color:#3a7acc"><svg viewBox="0 0 24 24" width="26" height="26" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg></span> 安全认证
-                    </span>
-                    <span style="color:rgba(0,0,0,0.08)">|</span>
-                    <span style="display:flex;align-items:center;gap:6px;font-size:15px;font-weight:600;color:#3a7acc">
-                        <span id="previewOffIcon" style="display:flex;align-items:center;font-size:26px;color:#3a7acc"><svg viewBox="0 0 24 24" width="26" height="26" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M11 5L3 9v6l8 4V5z"/><path d="M19.07 4.93a10 10 0 010 14.14"/><path d="M15.54 8.46a5 5 0 010 7.07"/></svg></span> 官方渠道
-                    </span>
-                </div>
-                <div style="font-size:11px;color:#7a8ba5">💡 修改后点击「一键保存全部」生效</div>
-            </div>
         </div>
     </div>
     <div id="tab-settings" class="tab-content">
         <div class="settings-grid">
-            <div class="setting-item"><label>软件库标题</label><input type="text" id="settingLibTitle" placeholder="📦 软件库" onchange="saveSettings()"></div>
-            <div class="setting-item"><label>清理文件标题</label><input type="text" id="settingCleanTitle" placeholder="🧹 清理文件" onchange="saveSettings()"></div>
             <div class="setting-item" style="grid-column:1/-1">
                 <div class="recovery-box">
                     <div class="title">🔄 数据恢复</div>
@@ -569,23 +536,12 @@
             </div>
             <!-- 主页卡片管理 -->
             <div class="setting-item" style="grid-column:1/-1;background:linear-gradient(145deg,rgba(58,122,204,0.04),rgba(255,255,255,0.04));padding:20px">
-                <label style="color:#3a7acc;font-weight:700;font-size:14px;margin-bottom:14px;display:block">🎴 主页卡片管理</label>
-                <div class="settings-grid" style="gap:10px">
-                    <div class="setting-item">
-                        <label>软件卡片名称</label><input type="text" id="settingSoftwareCardName" placeholder="软件" onchange="saveSettings()">
-                    </div>
-                    <div class="setting-item">
-                        <label>软件卡片图标URL</label><input type="text" id="settingSoftwareCardIcon" placeholder="图片URL或表情" onchange="saveSettings()">
-                    </div>
-                    <div class="setting-item">
-                        <label>清理文件卡片名称</label><input type="text" id="settingCleanCardName" placeholder="清理文件" onchange="saveSettings()">
-                    </div>
-                    <div class="setting-item">
-                        <label>清理文件卡片图标URL</label><input type="text" id="settingCleanCardIcon" placeholder="图片URL或表情" onchange="saveSettings()">
-                    </div>
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+                    <label style="color:#3a7acc;font-weight:700;font-size:14px;margin:0;display:block">🎴 主页卡片管理</label>
+                    <button class="btn btn-primary btn-sm" onclick="openAddCardModal()" style="border-radius:50px">➕ 添加卡片</button>
                 </div>
                 <!-- 卡片排列顺序管理 -->
-                <div style="margin-top:16px">
+                <div>
                     <label style="font-size:12px;font-weight:700;color:#3a4d64;display:block;margin-bottom:10px">📋 卡片排列顺序</label>
                     <div id="homeCardOrderList" class="app-list" style="gap:8px"></div>
                 </div>
@@ -617,6 +573,23 @@
 </div>
 
 <div class="toast" id="toast"><span id="toastText">已保存</span></div>
+
+<!-- 添加卡片模态框 -->
+<div class="modal" id="addCardModal">
+    <div class="modal-content">
+        <h2>➕ 添加主页卡片</h2>
+        <label>卡片名称 *</label><input type="text" id="newCardName" placeholder="如：软件、清理文件">
+        <label>卡片图标（支持表情或图片URL）</label><input type="text" id="newCardIcon" placeholder="输入表情或图片URL" style="margin-bottom:4px">
+        <div class="icon-grid" id="cardIconGrid">
+            <span class="icon-option" onclick="selectCardIcon('📦')">📦</span><span class="icon-option" onclick="selectCardIcon('🚀')">🚀</span><span class="icon-option" onclick="selectCardIcon('🌿')">🌿</span><span class="icon-option" onclick="selectCardIcon('📂')">📂</span><span class="icon-option" onclick="selectCardIcon('✈️')">✈️</span><span class="icon-option" onclick="selectCardIcon('🎮')">🎮</span>
+            <span class="icon-option" onclick="selectCardIcon('🧹')">🧹</span><span class="icon-option" onclick="selectCardIcon('⚡')">⚡</span><span class="icon-option" onclick="selectCardIcon('🔥')">🔥</span><span class="icon-option" onclick="selectCardIcon('💎')">💎</span><span class="icon-option" onclick="selectCardIcon('🏆')">🏆</span><span class="icon-option" onclick="selectCardIcon('🌟')">🌟</span>
+            <span class="icon-option" onclick="selectCardIcon('📱')">📱</span><span class="icon-option" onclick="selectCardIcon('💻')">💻</span><span class="icon-option" onclick="selectCardIcon('🛡️')">🛡️</span><span class="icon-option" onclick="selectCardIcon('🎯')">🎯</span><span class="icon-option" onclick="selectCardIcon('📡')">📡</span><span class="icon-option" onclick="selectCardIcon('🔐')">🔐</span>
+            <span class="icon-option" onclick="selectCardIcon('💡')">💡</span><span class="icon-option" onclick="selectCardIcon('🎨')">🎨</span><span class="icon-option" onclick="selectCardIcon('📊')">📊</span><span class="icon-option" onclick="selectCardIcon('🔧')">🔧</span><span class="icon-option" onclick="selectCardIcon('⚙️')">⚙️</span><span class="icon-option" onclick="selectCardIcon('📌')">📌</span>
+        </div>
+        <label>卡片链接 *</label><input type="text" id="newCardLink" placeholder="如 #software、#clean 或自定义页面">
+        <div class="btn-group"><button class="btn btn-outline" onclick="closeAddCardModal()">取消</button><button class="btn btn-primary" onclick="saveHomeCard()">💾 保存</button></div>
+    </div>
+</div>
 
 <script>
 // ========== 颜色预设 ==========
@@ -676,7 +649,11 @@ var defaultSettings = {
     cleanCardIcon: 'https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEXukdqYbduk0CniKV2BbB8r_Lg9DPdRwACryEAAmrvCVeC9HGvJ9ZmRT0E.png',     // 清理文件卡片图标
     libTitle: '📦 软件库',                                                                 // 软件库页面标题
     cleanTitle: '🧹 清理文件',                                                             // 清理文件页面标题
-    telegramBtnText: 'Telegram'                                                            // Telegram 按钮文字
+    telegramBtnText: 'Telegram',                                                           // Telegram 按钮文字
+    homeCards: [
+        { name: "软件", icon: "https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEXumFqYbgvYG8o_fLpZzjvmCmVtj4tHQACyyEAAmrvCVc3GBY7xK-q4z0E.png", link: "#software" },
+        { name: "清理文件", icon: "https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEXukdqYbduk0CniKV2BbB8r_Lg9DPdRwACryEAAmrvCVeC9HGvJ9ZmRT0E.png", link: "#clean" }
+    ]
 };
 
 // ========== GitHub API 配置 ==========
@@ -1334,12 +1311,12 @@ function loadSettings() {
     document.getElementById('settingTelegramBtnText').value = s.telegramBtnText || defaultSettings.telegramBtnText;
     // 加载前台首页可编辑字段（缺省时回退到 defaultSettings 默认值）
     document.getElementById('settingBadgeText').value = s.badgeText || defaultSettings.badgeText;
-    document.getElementById('settingSoftwareCardName').value = s.softwareCardName || defaultSettings.softwareCardName;
-    document.getElementById('settingSoftwareCardIcon').value = s.softwareCardIcon || defaultSettings.softwareCardIcon;
-    document.getElementById('settingCleanCardName').value = s.cleanCardName || defaultSettings.cleanCardName;
-    document.getElementById('settingCleanCardIcon').value = s.cleanCardIcon || defaultSettings.cleanCardIcon;
     document.getElementById('settingLibTitle').value = s.libTitle || defaultSettings.libTitle;
     document.getElementById('settingCleanTitle').value = s.cleanTitle || defaultSettings.cleanTitle;
+    // homeCards 初始化
+    if (!s.homeCards) {
+        data.settings.homeCards = JSON.parse(JSON.stringify(defaultSettings.homeCards));
+    }
     var frontLink = document.getElementById('frontLink');
     if (frontLink) frontLink.href = s.homeUrl || 'index.html';
     // 加载主页卡片顺序
@@ -1360,12 +1337,10 @@ function saveSettings() {
         homeUrl: document.getElementById('settingHomeUrl').value,
         // 前台首页可编辑字段
         badgeText: document.getElementById('settingBadgeText').value,
-        softwareCardName: document.getElementById('settingSoftwareCardName').value,
-        softwareCardIcon: document.getElementById('settingSoftwareCardIcon').value,
-        cleanCardName: document.getElementById('settingCleanCardName').value,
-        cleanCardIcon: document.getElementById('settingCleanCardIcon').value,
         libTitle: document.getElementById('settingLibTitle').value,
-        cleanTitle: document.getElementById('settingCleanTitle').value
+        cleanTitle: document.getElementById('settingCleanTitle').value,
+        // homeCards
+        homeCards: data.settings.homeCards || JSON.parse(JSON.stringify(defaultSettings.homeCards))
     };
     saveData();
 }
@@ -1558,44 +1533,35 @@ var openIconSelect = '';
 
 function toggleIconSelect(type, event) {
     if (event) event.stopPropagation();
-    // 支持主页 tab 和样式 tab 中的图标选择器
-    var wrapId, homeWrapId;
+    var wrapId;
     if (type === 'security') {
-        wrapId = 'securityIconWrap';
-        homeWrapId = 'homeSecurityIconWrap';
+        wrapId = 'homeSecurityIconWrap';
     } else {
-        wrapId = 'officialIconWrap';
-        homeWrapId = 'homeOfficialIconWrap';
+        wrapId = 'homeOfficialIconWrap';
     }
     var wrap = document.getElementById(wrapId);
-    var homeWrap = document.getElementById(homeWrapId);
-    if (!wrap && !homeWrap) return;
-    // 使用当前可见的那个
-    var targetWrap = homeWrap && homeWrap.offsetParent !== null ? homeWrap : wrap;
-    if (!targetWrap) targetWrap = homeWrap || wrap;
-    var isOpen = targetWrap.classList.contains('open');
+    if (!wrap) return;
+    var isOpen = wrap.classList.contains('open');
     // 关闭所有其他选择器
     document.querySelectorAll('.icon-select-wrap.open, .color-select-wrap.open').forEach(function(o) {
-        if (o !== targetWrap) o.classList.remove('open');
+        if (o !== wrap) o.classList.remove('open');
     });
     document.querySelectorAll('.custom-select .select-options.open').forEach(function(o) {
         o.classList.remove('open');
         var t = o.closest('.custom-select');
         if (t) { var tr = t.querySelector('.select-trigger'); if (tr) tr.classList.remove('open'); }
     });
-    targetWrap.classList.toggle('open', !isOpen);
+    wrap.classList.toggle('open', !isOpen);
     openIconSelect = !isOpen ? type : '';
 }
 
 function closeAllIconSelects() {
     if (openIconSelect !== '') {
-        var wrapIds = openIconSelect === 'security'
-            ? ['securityIconWrap', 'homeSecurityIconWrap']
-            : ['officialIconWrap', 'homeOfficialIconWrap'];
-        wrapIds.forEach(function(id) {
-            var el = document.getElementById(id);
-            if (el) el.classList.remove('open');
-        });
+        var wrapId = openIconSelect === 'security'
+            ? 'homeSecurityIconWrap'
+            : 'homeOfficialIconWrap';
+        var el = document.getElementById(wrapId);
+        if (el) el.classList.remove('open');
         openIconSelect = '';
     }
 }
@@ -1614,25 +1580,12 @@ function renderIconSelectors() {
         var delay = (Math.min(idx, 20) * 0.02).toFixed(3);
         offHtml += '<div class="icon-opt ' + (data.style.officialIcon === ic ? 'selected' : '') + '" style="transition-delay:' + delay + 's" onclick="selectOfficialIcon(\'' + ic + '\')">' + svg + '</div>';
     });
-    // 样式 tab 的图标选择器
-    document.getElementById('securityIconSelector').innerHTML = secHtml;
-    document.getElementById('officialIconSelector').innerHTML = offHtml;
     // 主页 tab 的图标选择器
     var homeSecSelector = document.getElementById('homeSecurityIconSelector');
     var homeOffSelector = document.getElementById('homeOfficialIconSelector');
     if (homeSecSelector) homeSecSelector.innerHTML = secHtml;
     if (homeOffSelector) homeOffSelector.innerHTML = offHtml;
-    updatePreviewIcons();
     updateHomeIconPreviews();
-}
-
-function updatePreviewIcons() {
-    var sec = data.style.securityIcon || '🛡️';
-    var off = data.style.officialIcon || '📢';
-    document.getElementById('securityPreview').innerHTML = ICON_SVGS[sec] || sec;
-    document.getElementById('officialPreview').innerHTML = ICON_SVGS[off] || off;
-    document.getElementById('previewSecIcon').innerHTML = ICON_SVGS[sec] || sec;
-    document.getElementById('previewOffIcon').innerHTML = ICON_SVGS[off] || off;
 }
 
 // 更新主页 tab 的图标选择器预览
@@ -1648,52 +1601,102 @@ function updateHomeIconPreviews() {
 // ========== 主页卡片排序管理 ==========
 function renderHomeCardOrder() {
     var s = data.settings || {};
-    var order = s.homeCardOrder || ['software', 'clean'];
-    var cardInfo = {
-        'software': {
-            name: s.softwareCardName || defaultSettings.softwareCardName,
-            icon: s.softwareCardIcon || defaultSettings.softwareCardIcon
-        },
-        'clean': {
-            name: s.cleanCardName || defaultSettings.cleanCardName,
-            icon: s.cleanCardIcon || defaultSettings.cleanCardIcon
-        }
-    };
+    var cards = s.homeCards || defaultSettings.homeCards || [];
     var container = document.getElementById('homeCardOrderList');
     if (!container) return;
     var html = '';
-    order.forEach(function(key, idx) {
-        var info = cardInfo[key] || { name: key, icon: '📦' };
+    cards.forEach(function(card, idx) {
         var iconHtml = '';
-        if (isImageUrl(info.icon)) {
-            iconHtml = '<img src="' + info.icon + '" class="icon-img" alt="' + info.name + '" style="width:36px;height:36px" onerror="this.style.display=\'none\'" />';
+        if (isImageUrl(card.icon)) {
+            iconHtml = '<img src="' + card.icon + '" class="icon-img" alt="' + card.name + '" style="width:36px;height:36px" onerror="this.style.display=\'none\'" />';
         } else {
-            iconHtml = '<span style="font-size:24px">' + (info.icon || '📦') + '</span>';
+            iconHtml = '<span style="font-size:24px">' + (card.icon || '📦') + '</span>';
         }
         html += '<div class="app-item" style="padding:10px 14px;border-radius:14px">' +
             '<span class="icon-emoji" style="width:36px;min-width:36px">' + iconHtml + '</span>' +
-            '<div class="info"><div class="name" style="font-size:13px">' + info.name + '</div>' +
-            '<div class="desc" style="font-size:11px">' + (key === 'software' ? '软件库' : '清理文件') + '</div></div>' +
+            '<div class="info"><div class="name" style="font-size:13px">' + card.name + '</div>' +
+            '<div class="desc" style="font-size:11px">' + card.link + '</div></div>' +
             '<div class="actions" style="gap:6px">' +
             (idx > 0 ? '<button class="btn btn-outline btn-sm" onclick="moveHomeCard(' + idx + ',-1)" title="上移">⬆</button>' : '') +
-            (idx < order.length - 1 ? '<button class="btn btn-outline btn-sm" onclick="moveHomeCard(' + idx + ',1)" title="下移">⬇</button>' : '') +
+            (idx < cards.length - 1 ? '<button class="btn btn-outline btn-sm" onclick="moveHomeCard(' + idx + ',1)" title="下移">⬇</button>' : '') +
+            '<button class="btn btn-danger btn-sm" onclick="deleteHomeCard(' + idx + ')" title="删除">✕</button>' +
             '</div></div>';
     });
+    if (!cards.length) {
+        html = '<div class="empty"><span class="icon">📭</span>暂无卡片，点击上方「➕ 添加卡片」</div>';
+    }
     container.innerHTML = html;
 }
 
 function moveHomeCard(idx, direction) {
     var s = data.settings || {};
-    var order = s.homeCardOrder || ['software', 'clean'];
+    var cards = s.homeCards || defaultSettings.homeCards || [];
+    if (!data.settings.homeCards) {
+        data.settings.homeCards = JSON.parse(JSON.stringify(defaultSettings.homeCards));
+        cards = data.settings.homeCards;
+    }
     var newIdx = idx + direction;
-    if (newIdx < 0 || newIdx >= order.length) return;
-    var temp = order[idx];
-    order[idx] = order[newIdx];
-    order[newIdx] = temp;
-    data.settings.homeCardOrder = order;
+    if (newIdx < 0 || newIdx >= cards.length) return;
+    var temp = cards[idx];
+    cards[idx] = cards[newIdx];
+    cards[newIdx] = temp;
+    data.settings.homeCards = cards;
     saveData();
     renderHomeCardOrder();
     showToast('✅ 卡片顺序已更新');
+}
+
+function deleteHomeCard(idx) {
+    if (!confirm('确定删除该卡片？')) return;
+    var s = data.settings || {};
+    var cards = s.homeCards || defaultSettings.homeCards || [];
+    if (!data.settings.homeCards) {
+        data.settings.homeCards = JSON.parse(JSON.stringify(defaultSettings.homeCards));
+        cards = data.settings.homeCards;
+    }
+    cards.splice(idx, 1);
+    data.settings.homeCards = cards;
+    saveData();
+    renderHomeCardOrder();
+    showToast('🗑️ 卡片已删除');
+}
+
+// ========== 添加卡片模态框 ==========
+function openAddCardModal() {
+    document.getElementById('newCardName').value = '';
+    document.getElementById('newCardIcon').value = '';
+    document.getElementById('newCardLink').value = '';
+    document.querySelectorAll('#cardIconGrid .icon-option').forEach(function(el) { el.classList.remove('selected'); });
+    document.getElementById('addCardModal').classList.add('show');
+}
+
+function closeAddCardModal() {
+    document.getElementById('addCardModal').classList.remove('show');
+}
+
+function selectCardIcon(icon) {
+    document.getElementById('newCardIcon').value = icon;
+    document.querySelectorAll('#cardIconGrid .icon-option').forEach(function(el) {
+        el.classList.toggle('selected', el.textContent === icon);
+    });
+}
+
+function saveHomeCard() {
+    var name = document.getElementById('newCardName').value.trim();
+    var icon = document.getElementById('newCardIcon').value.trim();
+    var link = document.getElementById('newCardLink').value.trim();
+    if (!name || !link) {
+        showToast('⚠️ 卡片名称和链接不能为空');
+        return;
+    }
+    if (!data.settings.homeCards) {
+        data.settings.homeCards = JSON.parse(JSON.stringify(defaultSettings.homeCards));
+    }
+    data.settings.homeCards.push({ name: name, icon: icon || '📦', link: link });
+    saveData();
+    closeAddCardModal();
+    renderHomeCardOrder();
+    showToast('💾 卡片已添加');
 }
 
 function selectSecurityIcon(ic) {
