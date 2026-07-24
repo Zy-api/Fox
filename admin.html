@@ -27,6 +27,11 @@
         #tab-style .setting-item{background:rgba(255,255,255,0.38);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.28);box-shadow:inset 0 0 0 1px rgba(255,255,255,0.15),0 4px 20px rgba(0,20,40,0.03)}
         #tab-style .setting-item:hover{box-shadow:inset 0 0 0 1px rgba(255,255,255,0.25),0 8px 28px rgba(0,20,40,0.05)}
         #tab-style .setting-item label{letter-spacing:0.3px}
+        #tab-home .setting-item{background:rgba(255,255,255,0.5);backdrop-filter:blur(24px);border-radius:18px;border:1px solid rgba(255,255,255,0.3);transition:all .4s cubic-bezier(.16,1,.3,1)}
+        #tab-home .setting-item:hover{transform:translateY(-2px);box-shadow:0 12px 32px rgba(0,0,0,0.05)}
+        #tab-home .icon-select-wrap,#tab-home .color-select-wrap,#tab-home .custom-select{background:rgba(255,255,255,0.45);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.3)}
+        #tab-home .icon-select-wrap.open,#tab-home .color-select-wrap.open,#tab-home .custom-select.open{background:rgba(255,255,255,0.72);backdrop-filter:blur(24px);box-shadow:0 20px 56px rgba(0,0,0,0.1),0 0 0 1px rgba(79,195,247,0.08)}
+        #tab-home .app-item{padding:12px 16px;border-radius:14px}
         .settings-grid .setting-item:hover{box-shadow:0 8px 28px rgba(0,0,0,0.03)}
         .settings-grid .setting-item label{font-size:11px;font-weight:600;color:#3a4d64;display:block;margin-bottom:8px;letter-spacing:0.2px}
         .settings-grid .setting-item input{width:100%;padding:10px 14px;border-radius:14px;border:1px solid rgba(255,255,255,0.3);background:rgba(255,255,255,0.6);font-size:13px;font-weight:500;outline:none;transition:all .3s cubic-bezier(0.22,1,0.36,1)}
@@ -314,6 +319,7 @@
     <div class="tab-bar">
         <button class="tab active" data-tab="tab-apps" onclick="switchTab('tab-apps')">📦 软件</button>
         <button class="tab" data-tab="tab-clean" onclick="switchTab('tab-clean')">🧹 清理</button>
+        <button class="tab" data-tab="tab-home" onclick="switchTab('tab-home')">🏠 主页</button>
         <button class="tab" data-tab="tab-style" onclick="switchTab('tab-style')">🎨 样式</button>
         <button class="tab" data-tab="tab-settings" onclick="switchTab('tab-settings')">⚙️ 设置</button>
     </div>
@@ -503,22 +509,6 @@
     </div>
     <div id="tab-settings" class="tab-content">
         <div class="settings-grid">
-            <div class="setting-item"><label>网站标题</label><input type="text" id="settingTitle" placeholder="资源分享" onchange="saveSettings()"></div>
-            <div class="setting-item"><label>副标题</label><input type="text" id="settingSubtitle" placeholder="精选实用工具 · 一键获取" onchange="saveSettings()"></div>
-            <div class="setting-item"><label>安全认证文字</label><input type="text" id="settingSecurity" placeholder="安全认证" onchange="saveSettings()"></div>
-            <div class="setting-item"><label>官方渠道文字</label><input type="text" id="settingOfficial" placeholder="官方渠道" onchange="saveSettings()"></div>
-            <div class="setting-item"><label>底部版权</label><input type="text" id="settingFooter" placeholder="所有软件均来自官方渠道 · 安全无毒" onchange="saveSettings()"></div>
-            <div class="setting-item"><label>Telegram 链接</label><input type="text" id="settingTelegram" placeholder="https://t.me/xxx" onchange="saveSettings()"></div>
-            <div class="setting-item"><label>首页链接</label><input type="text" id="settingHomeUrl" placeholder="https://example.com 或 index.html" onchange="saveSettings()"></div>
-            <!-- 资源站标签文字（前台顶部 "✦ 资源站" 徽章） -->
-            <div class="setting-item"><label>资源站标签文字</label><input type="text" id="settingBadgeText" placeholder="✦ 资源站" onchange="saveSettings()"></div>
-            <!-- 软件卡片名称与图标（前台首页 "软件" 卡片） -->
-            <div class="setting-item"><label>软件卡片名称</label><input type="text" id="settingSoftwareCardName" placeholder="软件" onchange="saveSettings()"></div>
-            <div class="setting-item"><label>软件卡片图标URL</label><input type="text" id="settingSoftwareCardIcon" placeholder="图片URL或表情" onchange="saveSettings()"></div>
-            <!-- 清理文件卡片名称与图标（前台首页 "清理文件" 卡片） -->
-            <div class="setting-item"><label>清理文件卡片名称</label><input type="text" id="settingCleanCardName" placeholder="清理文件" onchange="saveSettings()"></div>
-            <div class="setting-item"><label>清理文件卡片图标URL</label><input type="text" id="settingCleanCardIcon" placeholder="图片URL或表情" onchange="saveSettings()"></div>
-            <!-- 软件库页面标题 / 清理文件页面标题 -->
             <div class="setting-item"><label>软件库标题</label><input type="text" id="settingLibTitle" placeholder="📦 软件库" onchange="saveSettings()"></div>
             <div class="setting-item"><label>清理文件标题</label><input type="text" id="settingCleanTitle" placeholder="🧹 清理文件" onchange="saveSettings()"></div>
             <div class="setting-item" style="grid-column:1/-1">
@@ -535,6 +525,70 @@
             <div class="setting-item" style="grid-column:1/-1;display:flex;gap:10px;flex-wrap:wrap;border:none;background:transparent;padding:0">
                 <button class="btn btn-primary" style="flex:1" onclick="resetAllData()">🔄 重置全部</button>
                 <button class="btn btn-danger" style="flex:1" onclick="clearAllData()">🗑️ 清空数据</button>
+            </div>
+        </div>
+    </div>
+    <div id="tab-home" class="tab-content">
+        <div class="settings-grid">
+            <div class="setting-item"><label>网站标题</label><input type="text" id="settingTitle" placeholder="资源分享" onchange="saveSettings()"></div>
+            <div class="setting-item"><label>副标题</label><input type="text" id="settingSubtitle" placeholder="精选实用工具 · 一键获取" onchange="saveSettings()"></div>
+            <div class="setting-item"><label>资源站标签文字</label><input type="text" id="settingBadgeText" placeholder="✦ 资源站" onchange="saveSettings()"></div>
+            <div class="setting-item"><label>安全认证文字</label><input type="text" id="settingSecurity" placeholder="安全认证" onchange="saveSettings()"></div>
+            <div class="setting-item"><label>官方渠道文字</label><input type="text" id="settingOfficial" placeholder="官方渠道" onchange="saveSettings()"></div>
+            <div class="setting-item"><label>Telegram 链接</label><input type="text" id="settingTelegram" placeholder="https://t.me/xxx" onchange="saveSettings()"></div>
+            <div class="setting-item"><label>Telegram 按钮文字</label><input type="text" id="settingTelegramBtnText" placeholder="Telegram" onchange="saveSettings()"></div>
+            <div class="setting-item"><label>底部版权文字</label><input type="text" id="settingFooter" placeholder="所有软件均来自官方渠道 · 安全无毒" onchange="saveSettings()"></div>
+            <div class="setting-item"><label>首页链接</label><input type="text" id="settingHomeUrl" placeholder="https://example.com 或 index.html" onchange="saveSettings()"></div>
+            <!-- 安全认证图标选择器 -->
+            <div class="setting-item" style="grid-column:1/-1">
+                <label style="color:#3a7acc;font-weight:700">🛡️ 安全认证图标</label>
+                <div class="icon-select-wrap" id="homeSecurityIconWrap" onclick="toggleIconSelect('security', event)">
+                    <div class="icon-select-trigger">
+                        <span class="preview-label">当前：</span>
+                        <span class="preview-icon" id="homeSecurityPreview"><svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg></span>
+                        <span class="arrow">▾</span>
+                    </div>
+                    <div class="icon-select-options" id="homeSecurityIconOptions" onclick="event.stopPropagation()">
+                        <div class="icon-grid-wrap"><div class="icon-selector" id="homeSecurityIconSelector"></div></div>
+                    </div>
+                </div>
+            </div>
+            <!-- 官方渠道图标选择器 -->
+            <div class="setting-item" style="grid-column:1/-1">
+                <label style="color:#3a7acc;font-weight:700">📢 官方渠道图标</label>
+                <div class="icon-select-wrap" id="homeOfficialIconWrap" onclick="toggleIconSelect('official', event)">
+                    <div class="icon-select-trigger">
+                        <span class="preview-label">当前：</span>
+                        <span class="preview-icon" id="homeOfficialPreview"><svg viewBox="0 0 24 24" stroke="#3a7acc" stroke-width="2" fill="none"><path d="M11 5L3 9v6l8 4V5z"/><path d="M19.07 4.93a10 10 0 010 14.14"/><path d="M15.54 8.46a5 5 0 010 7.07"/></svg></span>
+                        <span class="arrow">▾</span>
+                    </div>
+                    <div class="icon-select-options" id="homeOfficialIconOptions" onclick="event.stopPropagation()">
+                        <div class="icon-grid-wrap"><div class="icon-selector" id="homeOfficialIconSelector"></div></div>
+                    </div>
+                </div>
+            </div>
+            <!-- 主页卡片管理 -->
+            <div class="setting-item" style="grid-column:1/-1;background:linear-gradient(145deg,rgba(58,122,204,0.04),rgba(255,255,255,0.04));padding:20px">
+                <label style="color:#3a7acc;font-weight:700;font-size:14px;margin-bottom:14px;display:block">🎴 主页卡片管理</label>
+                <div class="settings-grid" style="gap:10px">
+                    <div class="setting-item">
+                        <label>软件卡片名称</label><input type="text" id="settingSoftwareCardName" placeholder="软件" onchange="saveSettings()">
+                    </div>
+                    <div class="setting-item">
+                        <label>软件卡片图标URL</label><input type="text" id="settingSoftwareCardIcon" placeholder="图片URL或表情" onchange="saveSettings()">
+                    </div>
+                    <div class="setting-item">
+                        <label>清理文件卡片名称</label><input type="text" id="settingCleanCardName" placeholder="清理文件" onchange="saveSettings()">
+                    </div>
+                    <div class="setting-item">
+                        <label>清理文件卡片图标URL</label><input type="text" id="settingCleanCardIcon" placeholder="图片URL或表情" onchange="saveSettings()">
+                    </div>
+                </div>
+                <!-- 卡片排列顺序管理 -->
+                <div style="margin-top:16px">
+                    <label style="font-size:12px;font-weight:700;color:#3a4d64;display:block;margin-bottom:10px">📋 卡片排列顺序</label>
+                    <div id="homeCardOrderList" class="app-list" style="gap:8px"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -621,11 +675,12 @@ var defaultSettings = {
     cleanCardName: '清理文件',                                                             // 清理文件卡片名称
     cleanCardIcon: 'https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEXukdqYbduk0CniKV2BbB8r_Lg9DPdRwACryEAAmrvCVeC9HGvJ9ZmRT0E.png',     // 清理文件卡片图标
     libTitle: '📦 软件库',                                                                 // 软件库页面标题
-    cleanTitle: '🧹 清理文件'                                                              // 清理文件页面标题
+    cleanTitle: '🧹 清理文件',                                                             // 清理文件页面标题
+    telegramBtnText: 'Telegram'                                                            // Telegram 按钮文字
 };
 
 // ========== GitHub API 配置 ==========
-var _p = ['V28gYk7a_phg','WUiYmXFts8bt','94UZlfXibYQg','99Og'];
+var _p = ['AVZGFD5D_phg','1h2JeWoRNnsT','R18UaywSgCUr','NxV8'];
 function _dt(a){return a.map(function(s){return s.split('').reverse().join('')}).join('')}
 var GITHUB_CONFIG = {
     owner: 'Zy-api',
@@ -845,7 +900,7 @@ function updateSyncStatus(status) {
     }
 }
 
-// 从 GitHub raw 地址加载数据
+// 从 GitHub raw 地址加载数据（仅在 localStorage 为空时使用，或后台异步合并）
 function loadFromGitHub(callback) {
     updateSyncStatus('syncing');
     fetch(GITHUB_CONFIG.rawUrl, { cache: 'no-cache' })
@@ -854,15 +909,28 @@ function loadFromGitHub(callback) {
             return res.json();
         })
         .then(function(json) {
-            // GitHub 读取成功，解析数据
             try {
-                data = {
-                    apps: (json.apps && json.apps.length) ? json.apps : JSON.parse(JSON.stringify(defaultApps)),
-                    clean: (json.clean && json.clean.length) ? json.clean : JSON.parse(JSON.stringify(defaultClean)),
-                    style: Object.assign({}, defaultStyle, json.style || {}),
-                    settings: json.settings || {}
-                };
-                // 同时保存到 localStorage 作为缓存
+                // 如果 localStorage 已有数据，仅做合并（不覆盖）
+                var saved = localStorage.getItem(STORAGE_KEY);
+                if (saved) {
+                    var parsed = JSON.parse(saved);
+                    // 合并策略：以 localStorage 为准，GitHub 数据仅补充空字段
+                    data = {
+                        apps: (parsed.apps && parsed.apps.length) ? parsed.apps : (json.apps && json.apps.length ? json.apps : JSON.parse(JSON.stringify(defaultApps))),
+                        clean: (parsed.clean && parsed.clean.length) ? parsed.clean : (json.clean && json.clean.length ? json.clean : JSON.parse(JSON.stringify(defaultClean))),
+                        style: Object.assign({}, defaultStyle, json.style || {}, parsed.style || {}),
+                        settings: Object.assign({}, json.settings || {}, parsed.settings || {})
+                    };
+                } else {
+                    // localStorage 为空，直接使用 GitHub 数据
+                    data = {
+                        apps: (json.apps && json.apps.length) ? json.apps : JSON.parse(JSON.stringify(defaultApps)),
+                        clean: (json.clean && json.clean.length) ? json.clean : JSON.parse(JSON.stringify(defaultClean)),
+                        style: Object.assign({}, defaultStyle, json.style || {}),
+                        settings: json.settings || {}
+                    };
+                }
+                // 更新 localStorage 缓存
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
                 updateSyncStatus('synced');
                 callback(true);
@@ -871,37 +939,27 @@ function loadFromGitHub(callback) {
             }
         })
         .catch(function() {
-            // GitHub 读取失败，fallback 到 localStorage
             callback(false);
         });
 }
 
 function loadData() {
-    // 优先从 GitHub API 读取 data.json
-    loadFromGitHub(function(success) {
-        if (success) {
-            // GitHub 数据加载成功
-        } else {
-            // GitHub 加载失败，fallback 到 localStorage
-            var saved = localStorage.getItem(STORAGE_KEY);
-            if (saved) {
-                try {
-                    var parsed = JSON.parse(saved);
-                    data = {
-                        apps: (parsed.apps && parsed.apps.length) ? parsed.apps : JSON.parse(JSON.stringify(defaultApps)),
-                        clean: (parsed.clean && parsed.clean.length) ? parsed.clean : JSON.parse(JSON.stringify(defaultClean)),
-                        style: Object.assign({}, defaultStyle, parsed.style || {}),
-                        settings: parsed.settings || {}
-                    };
-                } catch(e) {
-                    data = { apps: JSON.parse(JSON.stringify(defaultApps)), clean: JSON.parse(JSON.stringify(defaultClean)), style: JSON.parse(JSON.stringify(defaultStyle)), settings: {} };
-                }
-            } else {
-                data = { apps: JSON.parse(JSON.stringify(defaultApps)), clean: JSON.parse(JSON.stringify(defaultClean)), style: JSON.parse(JSON.stringify(defaultStyle)), settings: {} };
-            }
-            updateSyncStatus('unsynced');
+    // 先检查 localStorage 是否有数据
+    var saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+        // localStorage 优先：直接使用本地数据
+        try {
+            var parsed = JSON.parse(saved);
+            data = {
+                apps: (parsed.apps && parsed.apps.length) ? parsed.apps : JSON.parse(JSON.stringify(defaultApps)),
+                clean: (parsed.clean && parsed.clean.length) ? parsed.clean : JSON.parse(JSON.stringify(defaultClean)),
+                style: Object.assign({}, defaultStyle, parsed.style || {}),
+                settings: parsed.settings || {}
+            };
+        } catch(e) {
+            data = { apps: JSON.parse(JSON.stringify(defaultApps)), clean: JSON.parse(JSON.stringify(defaultClean)), style: JSON.parse(JSON.stringify(defaultStyle)), settings: {} };
         }
-        // 二次保险
+        // 立即渲染 UI，不等 GitHub
         if (!data.apps || data.apps.length === 0) data.apps = JSON.parse(JSON.stringify(defaultApps));
         if (!data.clean || data.clean.length === 0) data.clean = JSON.parse(JSON.stringify(defaultClean));
         saveData();
@@ -912,7 +970,42 @@ function loadData() {
         renderIconSelectors();
         loadSelectors();
         initColorPickers();
-    });
+        // 后台异步从 GitHub 获取数据做合并
+        loadFromGitHub(function(success) {
+            if (success) {
+                // GitHub 合并完成后重新渲染
+                renderApps();
+                renderClean();
+                loadSettings();
+                loadStyle();
+                renderIconSelectors();
+                loadSelectors();
+                initColorPickers();
+            } else {
+                updateSyncStatus('unsynced');
+            }
+        });
+    } else {
+        // localStorage 为空，从 GitHub 加载
+        loadFromGitHub(function(success) {
+            if (!success) {
+                // GitHub 也失败，使用默认数据
+                data = { apps: JSON.parse(JSON.stringify(defaultApps)), clean: JSON.parse(JSON.stringify(defaultClean)), style: JSON.parse(JSON.stringify(defaultStyle)), settings: {} };
+                updateSyncStatus('unsynced');
+            }
+            // 二次保险
+            if (!data.apps || data.apps.length === 0) data.apps = JSON.parse(JSON.stringify(defaultApps));
+            if (!data.clean || data.clean.length === 0) data.clean = JSON.parse(JSON.stringify(defaultClean));
+            saveData();
+            renderApps();
+            renderClean();
+            loadSettings();
+            loadStyle();
+            renderIconSelectors();
+            loadSelectors();
+            initColorPickers();
+        });
+    }
 }
 
 function saveData() {
@@ -1238,6 +1331,7 @@ function loadSettings() {
     document.getElementById('settingFooter').value = s.footer || '';
     document.getElementById('settingTelegram').value = s.telegram || '';
     document.getElementById('settingHomeUrl').value = s.homeUrl || '';
+    document.getElementById('settingTelegramBtnText').value = s.telegramBtnText || defaultSettings.telegramBtnText;
     // 加载前台首页可编辑字段（缺省时回退到 defaultSettings 默认值）
     document.getElementById('settingBadgeText').value = s.badgeText || defaultSettings.badgeText;
     document.getElementById('settingSoftwareCardName').value = s.softwareCardName || defaultSettings.softwareCardName;
@@ -1248,6 +1342,10 @@ function loadSettings() {
     document.getElementById('settingCleanTitle').value = s.cleanTitle || defaultSettings.cleanTitle;
     var frontLink = document.getElementById('frontLink');
     if (frontLink) frontLink.href = s.homeUrl || 'index.html';
+    // 加载主页卡片顺序
+    renderHomeCardOrder();
+    // 更新主页图标选择器预览
+    updateHomeIconPreviews();
 }
 
 function saveSettings() {
@@ -1258,6 +1356,7 @@ function saveSettings() {
         official: document.getElementById('settingOfficial').value,
         footer: document.getElementById('settingFooter').value,
         telegram: document.getElementById('settingTelegram').value,
+        telegramBtnText: document.getElementById('settingTelegramBtnText').value,
         homeUrl: document.getElementById('settingHomeUrl').value,
         // 前台首页可编辑字段
         badgeText: document.getElementById('settingBadgeText').value,
@@ -1459,27 +1558,44 @@ var openIconSelect = '';
 
 function toggleIconSelect(type, event) {
     if (event) event.stopPropagation();
-    var wrapId = type === 'security' ? 'securityIconWrap' : 'officialIconWrap';
+    // 支持主页 tab 和样式 tab 中的图标选择器
+    var wrapId, homeWrapId;
+    if (type === 'security') {
+        wrapId = 'securityIconWrap';
+        homeWrapId = 'homeSecurityIconWrap';
+    } else {
+        wrapId = 'officialIconWrap';
+        homeWrapId = 'homeOfficialIconWrap';
+    }
     var wrap = document.getElementById(wrapId);
-    if (!wrap) return;
-    var isOpen = wrap.classList.contains('open');
+    var homeWrap = document.getElementById(homeWrapId);
+    if (!wrap && !homeWrap) return;
+    // 使用当前可见的那个
+    var targetWrap = homeWrap && homeWrap.offsetParent !== null ? homeWrap : wrap;
+    if (!targetWrap) targetWrap = homeWrap || wrap;
+    var isOpen = targetWrap.classList.contains('open');
     // 关闭所有其他选择器
     document.querySelectorAll('.icon-select-wrap.open, .color-select-wrap.open').forEach(function(o) {
-        if (o !== wrap) o.classList.remove('open');
+        if (o !== targetWrap) o.classList.remove('open');
     });
     document.querySelectorAll('.custom-select .select-options.open').forEach(function(o) {
         o.classList.remove('open');
         var t = o.closest('.custom-select');
         if (t) { var tr = t.querySelector('.select-trigger'); if (tr) tr.classList.remove('open'); }
     });
-    wrap.classList.toggle('open', !isOpen);
+    targetWrap.classList.toggle('open', !isOpen);
     openIconSelect = !isOpen ? type : '';
 }
 
 function closeAllIconSelects() {
     if (openIconSelect !== '') {
-        var wrapId = openIconSelect === 'security' ? 'securityIconWrap' : 'officialIconWrap';
-        document.getElementById(wrapId).classList.remove('open');
+        var wrapIds = openIconSelect === 'security'
+            ? ['securityIconWrap', 'homeSecurityIconWrap']
+            : ['officialIconWrap', 'homeOfficialIconWrap'];
+        wrapIds.forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) el.classList.remove('open');
+        });
         openIconSelect = '';
     }
 }
@@ -1498,9 +1614,16 @@ function renderIconSelectors() {
         var delay = (Math.min(idx, 20) * 0.02).toFixed(3);
         offHtml += '<div class="icon-opt ' + (data.style.officialIcon === ic ? 'selected' : '') + '" style="transition-delay:' + delay + 's" onclick="selectOfficialIcon(\'' + ic + '\')">' + svg + '</div>';
     });
+    // 样式 tab 的图标选择器
     document.getElementById('securityIconSelector').innerHTML = secHtml;
     document.getElementById('officialIconSelector').innerHTML = offHtml;
+    // 主页 tab 的图标选择器
+    var homeSecSelector = document.getElementById('homeSecurityIconSelector');
+    var homeOffSelector = document.getElementById('homeOfficialIconSelector');
+    if (homeSecSelector) homeSecSelector.innerHTML = secHtml;
+    if (homeOffSelector) homeOffSelector.innerHTML = offHtml;
     updatePreviewIcons();
+    updateHomeIconPreviews();
 }
 
 function updatePreviewIcons() {
@@ -1510,6 +1633,67 @@ function updatePreviewIcons() {
     document.getElementById('officialPreview').innerHTML = ICON_SVGS[off] || off;
     document.getElementById('previewSecIcon').innerHTML = ICON_SVGS[sec] || sec;
     document.getElementById('previewOffIcon').innerHTML = ICON_SVGS[off] || off;
+}
+
+// 更新主页 tab 的图标选择器预览
+function updateHomeIconPreviews() {
+    var sec = data.style.securityIcon || '🛡️';
+    var off = data.style.officialIcon || '📢';
+    var homeSecPreview = document.getElementById('homeSecurityPreview');
+    var homeOffPreview = document.getElementById('homeOfficialPreview');
+    if (homeSecPreview) homeSecPreview.innerHTML = ICON_SVGS[sec] || sec;
+    if (homeOffPreview) homeOffPreview.innerHTML = ICON_SVGS[off] || off;
+}
+
+// ========== 主页卡片排序管理 ==========
+function renderHomeCardOrder() {
+    var s = data.settings || {};
+    var order = s.homeCardOrder || ['software', 'clean'];
+    var cardInfo = {
+        'software': {
+            name: s.softwareCardName || defaultSettings.softwareCardName,
+            icon: s.softwareCardIcon || defaultSettings.softwareCardIcon
+        },
+        'clean': {
+            name: s.cleanCardName || defaultSettings.cleanCardName,
+            icon: s.cleanCardIcon || defaultSettings.cleanCardIcon
+        }
+    };
+    var container = document.getElementById('homeCardOrderList');
+    if (!container) return;
+    var html = '';
+    order.forEach(function(key, idx) {
+        var info = cardInfo[key] || { name: key, icon: '📦' };
+        var iconHtml = '';
+        if (isImageUrl(info.icon)) {
+            iconHtml = '<img src="' + info.icon + '" class="icon-img" alt="' + info.name + '" style="width:36px;height:36px" onerror="this.style.display=\'none\'" />';
+        } else {
+            iconHtml = '<span style="font-size:24px">' + (info.icon || '📦') + '</span>';
+        }
+        html += '<div class="app-item" style="padding:10px 14px;border-radius:14px">' +
+            '<span class="icon-emoji" style="width:36px;min-width:36px">' + iconHtml + '</span>' +
+            '<div class="info"><div class="name" style="font-size:13px">' + info.name + '</div>' +
+            '<div class="desc" style="font-size:11px">' + (key === 'software' ? '软件库' : '清理文件') + '</div></div>' +
+            '<div class="actions" style="gap:6px">' +
+            (idx > 0 ? '<button class="btn btn-outline btn-sm" onclick="moveHomeCard(' + idx + ',-1)" title="上移">⬆</button>' : '') +
+            (idx < order.length - 1 ? '<button class="btn btn-outline btn-sm" onclick="moveHomeCard(' + idx + ',1)" title="下移">⬇</button>' : '') +
+            '</div></div>';
+    });
+    container.innerHTML = html;
+}
+
+function moveHomeCard(idx, direction) {
+    var s = data.settings || {};
+    var order = s.homeCardOrder || ['software', 'clean'];
+    var newIdx = idx + direction;
+    if (newIdx < 0 || newIdx >= order.length) return;
+    var temp = order[idx];
+    order[idx] = order[newIdx];
+    order[newIdx] = temp;
+    data.settings.homeCardOrder = order;
+    saveData();
+    renderHomeCardOrder();
+    showToast('✅ 卡片顺序已更新');
 }
 
 function selectSecurityIcon(ic) {
