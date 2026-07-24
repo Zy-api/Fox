@@ -95,6 +95,13 @@
     "official": "官方渠道",
     "footer": "所有软件均来自官方渠道 · 安全无毒",
     "telegram": "https://t.me/NeverSttle888",
-    "homeUrl": ""
+    "homeUrl": "",
+    "badgeText": "✦ 资源站",
+    "softwareCardName": "软件",
+    "softwareCardIcon": "https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEXumFqYbgvYG8o_fLpZzjvmCmVtj4tHQACyyEAAmrvCVc3GBY7xK-q4z0E.png",
+    "cleanCardName": "清理文件",
+    "cleanCardIcon": "https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEXukdqYbduk0CniKV2BbB8r_Lg9DPdRwACryEAAmrvCVeC9HGvJ9ZmRT0E.png",
+    "libTitle": "📦 软件库",
+    "cleanTitle": "🧹 清理文件"
   }
 }
