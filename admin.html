@@ -510,6 +510,17 @@
             <div class="setting-item"><label>底部版权</label><input type="text" id="settingFooter" placeholder="所有软件均来自官方渠道 · 安全无毒" onchange="saveSettings()"></div>
             <div class="setting-item"><label>Telegram 链接</label><input type="text" id="settingTelegram" placeholder="https://t.me/xxx" onchange="saveSettings()"></div>
             <div class="setting-item"><label>首页链接</label><input type="text" id="settingHomeUrl" placeholder="https://example.com 或 index.html" onchange="saveSettings()"></div>
+            <!-- 资源站标签文字（前台顶部 "✦ 资源站" 徽章） -->
+            <div class="setting-item"><label>资源站标签文字</label><input type="text" id="settingBadgeText" placeholder="✦ 资源站" onchange="saveSettings()"></div>
+            <!-- 软件卡片名称与图标（前台首页 "软件" 卡片） -->
+            <div class="setting-item"><label>软件卡片名称</label><input type="text" id="settingSoftwareCardName" placeholder="软件" onchange="saveSettings()"></div>
+            <div class="setting-item"><label>软件卡片图标URL</label><input type="text" id="settingSoftwareCardIcon" placeholder="图片URL或表情" onchange="saveSettings()"></div>
+            <!-- 清理文件卡片名称与图标（前台首页 "清理文件" 卡片） -->
+            <div class="setting-item"><label>清理文件卡片名称</label><input type="text" id="settingCleanCardName" placeholder="清理文件" onchange="saveSettings()"></div>
+            <div class="setting-item"><label>清理文件卡片图标URL</label><input type="text" id="settingCleanCardIcon" placeholder="图片URL或表情" onchange="saveSettings()"></div>
+            <!-- 软件库页面标题 / 清理文件页面标题 -->
+            <div class="setting-item"><label>软件库标题</label><input type="text" id="settingLibTitle" placeholder="📦 软件库" onchange="saveSettings()"></div>
+            <div class="setting-item"><label>清理文件标题</label><input type="text" id="settingCleanTitle" placeholder="🧹 清理文件" onchange="saveSettings()"></div>
             <div class="setting-item" style="grid-column:1/-1">
                 <div class="recovery-box">
                     <div class="title">🔄 数据恢复</div>
@@ -600,6 +611,17 @@ var defaultStyle = {
     primaryColor: '#0277bd', bgColor: '#f0f4fa',
     cardRadius: '24px', cardOpacity: '0.45', toastStyle: 'glass',
     securityIcon: '🛡️', officialIcon: '📢'
+};
+
+// 设置项默认值（前台首页可编辑字段，缺省时回退使用）
+var defaultSettings = {
+    badgeText: '✦ 资源站',                                                                 // 资源站标签文字
+    softwareCardName: '软件',                                                              // 软件卡片名称
+    softwareCardIcon: 'https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEXumFqYbgvYG8o_fLpZzjvmCmVtj4tHQACyyEAAmrvCVc3GBY7xK-q4z0E.png', // 软件卡片图标
+    cleanCardName: '清理文件',                                                             // 清理文件卡片名称
+    cleanCardIcon: 'https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEXukdqYbduk0CniKV2BbB8r_Lg9DPdRwACryEAAmrvCVeC9HGvJ9ZmRT0E.png',     // 清理文件卡片图标
+    libTitle: '📦 软件库',                                                                 // 软件库页面标题
+    cleanTitle: '🧹 清理文件'                                                              // 清理文件页面标题
 };
 
 // ========== GitHub API 配置 ==========
@@ -1216,6 +1238,14 @@ function loadSettings() {
     document.getElementById('settingFooter').value = s.footer || '';
     document.getElementById('settingTelegram').value = s.telegram || '';
     document.getElementById('settingHomeUrl').value = s.homeUrl || '';
+    // 加载前台首页可编辑字段（缺省时回退到 defaultSettings 默认值）
+    document.getElementById('settingBadgeText').value = s.badgeText || defaultSettings.badgeText;
+    document.getElementById('settingSoftwareCardName').value = s.softwareCardName || defaultSettings.softwareCardName;
+    document.getElementById('settingSoftwareCardIcon').value = s.softwareCardIcon || defaultSettings.softwareCardIcon;
+    document.getElementById('settingCleanCardName').value = s.cleanCardName || defaultSettings.cleanCardName;
+    document.getElementById('settingCleanCardIcon').value = s.cleanCardIcon || defaultSettings.cleanCardIcon;
+    document.getElementById('settingLibTitle').value = s.libTitle || defaultSettings.libTitle;
+    document.getElementById('settingCleanTitle').value = s.cleanTitle || defaultSettings.cleanTitle;
     var frontLink = document.getElementById('frontLink');
     if (frontLink) frontLink.href = s.homeUrl || 'index.html';
 }
@@ -1228,7 +1258,15 @@ function saveSettings() {
         official: document.getElementById('settingOfficial').value,
         footer: document.getElementById('settingFooter').value,
         telegram: document.getElementById('settingTelegram').value,
-        homeUrl: document.getElementById('settingHomeUrl').value
+        homeUrl: document.getElementById('settingHomeUrl').value,
+        // 前台首页可编辑字段
+        badgeText: document.getElementById('settingBadgeText').value,
+        softwareCardName: document.getElementById('settingSoftwareCardName').value,
+        softwareCardIcon: document.getElementById('settingSoftwareCardIcon').value,
+        cleanCardName: document.getElementById('settingCleanCardName').value,
+        cleanCardIcon: document.getElementById('settingCleanCardIcon').value,
+        libTitle: document.getElementById('settingLibTitle').value,
+        cleanTitle: document.getElementById('settingCleanTitle').value
     };
     saveData();
 }
