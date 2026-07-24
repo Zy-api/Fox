@@ -55,6 +55,15 @@
       "tag": "",
       "desc": "",
       "icon": "📂"
+    },
+    {
+      "name": "三角洲清理",
+      "url": "无",
+      "version": "",
+      "size": "25KB",
+      "tag": "",
+      "desc": "",
+      "icon": "📂"
     }
   ],
   "style": {
@@ -68,7 +77,7 @@
     "cardOpacity": "0.45",
     "toastStyle": "glass",
     "securityIcon": "🛡️",
-    "officialIcon": "🌐"
+    "officialIcon": "🔗"
   },
   "settings": {
     "title": "资源分享",
