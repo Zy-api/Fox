@@ -20,12 +20,12 @@
     },
     {
       "name": "MT管理器",
+      "url": "4",
       "version": "v2.26.3",
       "size": "6.2 MB",
-      "url": "",
-      "icon": "",
       "tag": "工具",
-      "desc": "文件管理 · APK编辑 · 逆向工具"
+      "desc": "文件管理 · APK编辑 · 逆向工具",
+      "icon": "📦"
     },
     {
       "name": "Telegram",
