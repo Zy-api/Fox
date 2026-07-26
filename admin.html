@@ -1609,12 +1609,12 @@ function renderHomeCardOrder() {
     cards.forEach(function(card, idx) {
         var iconHtml = '';
         if (isImageUrl(card.icon)) {
-            iconHtml = '<img src="' + card.icon + '" class="icon-img" alt="' + card.name + '" style="width:36px;height:36px" onerror="this.style.display=\'none\'" />';
+            iconHtml = '<img src="' + card.icon + '" alt="' + card.name + '" style="width:36px;height:36px;min-width:36px;max-width:36px;max-height:36px;border-radius:10px;object-fit:contain;flex-shrink:0;background:rgba(255,255,255,0.5);padding:3px;border:1px solid rgba(255,255,255,0.2)" onerror="this.style.display=\'none\'" />';
         } else {
-            iconHtml = '<span style="font-size:24px">' + (card.icon || '📦') + '</span>';
+            iconHtml = '<span style="font-size:24px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;flex-shrink:0">' + (card.icon || '📦') + '</span>';
         }
         html += '<div class="app-item" style="padding:10px 14px;border-radius:14px">' +
-            '<span class="icon-emoji" style="width:36px;min-width:36px">' + iconHtml + '</span>' +
+            '<span style="width:36px;min-width:36px;height:36px;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden">' + iconHtml + '</span>' +
             '<div class="info"><div class="name" style="font-size:13px">' + escapeHtml(card.name) + '</div>' +
             '<div class="desc" style="font-size:11px">' + escapeHtml(card.link) + '</div></div>' +
             '<div class="actions" style="gap:6px">' +
