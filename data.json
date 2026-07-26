@@ -2,12 +2,12 @@
   "apps": [
     {
       "name": "3A加速器",
+      "url": "https://1851738406.share.123pan.cn/123pan/nluBvd-SuvZ3",
       "version": "v1.0.1",
       "size": "12.5 MB",
-      "url": "",
-      "icon": "",
       "tag": "官方",
-      "desc": "稳定加速 · 低延迟 · 多节点"
+      "desc": "稳定加速 · 低延迟 · 多节点",
+      "icon": "📦"
     },
     {
       "name": "绿茶VPN",
