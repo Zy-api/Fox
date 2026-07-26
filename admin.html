@@ -497,16 +497,7 @@
     </div>
     <div id="tab-home" class="tab-content">
         <div class="settings-grid">
-            <div class="setting-item"><label>网站标题</label><input type="text" id="settingTitle" placeholder="资源分享" onchange="saveSettings()"></div>
-            <div class="setting-item"><label>副标题</label><input type="text" id="settingSubtitle" placeholder="精选实用工具 · 一键获取" onchange="saveSettings()"></div>
-            <div class="setting-item"><label>资源站标签文字</label><input type="text" id="settingBadgeText" placeholder="✦ 资源站" onchange="saveSettings()"></div>
-            <div class="setting-item"><label>安全认证文字</label><input type="text" id="settingSecurity" placeholder="安全认证" onchange="saveSettings()"></div>
-            <div class="setting-item"><label>官方渠道文字</label><input type="text" id="settingOfficial" placeholder="官方渠道" onchange="saveSettings()"></div>
-            <div class="setting-item"><label>Telegram 链接</label><input type="text" id="settingTelegram" placeholder="https://t.me/xxx" onchange="saveSettings()"></div>
-            <div class="setting-item"><label>Telegram 按钮文字</label><input type="text" id="settingTelegramBtnText" placeholder="Telegram" onchange="saveSettings()"></div>
-            <div class="setting-item"><label>底部版权文字</label><input type="text" id="settingFooter" placeholder="所有软件均来自官方渠道 · 安全无毒" onchange="saveSettings()"></div>
-            <div class="setting-item"><label>首页链接</label><input type="text" id="settingHomeUrl" placeholder="https://example.com 或 index.html" onchange="saveSettings()"></div>
-            <!-- 安全认证图标选择器 -->
+            <!-- 安全认证图标选择器（移至顶部） -->
             <div class="setting-item" style="grid-column:1/-1">
                 <label style="color:#3a7acc;font-weight:700">🛡️ 安全认证图标</label>
                 <div class="icon-select-wrap" id="homeSecurityIconWrap" onclick="toggleIconSelect('security', event)">
@@ -520,7 +511,7 @@
                     </div>
                 </div>
             </div>
-            <!-- 官方渠道图标选择器 -->
+            <!-- 官方渠道图标选择器（移至顶部） -->
             <div class="setting-item" style="grid-column:1/-1">
                 <label style="color:#3a7acc;font-weight:700">📢 官方渠道图标</label>
                 <div class="icon-select-wrap" id="homeOfficialIconWrap" onclick="toggleIconSelect('official', event)">
@@ -534,15 +525,24 @@
                     </div>
                 </div>
             </div>
+            <!-- 文本设置项 -->
+            <div class="setting-item"><label>网站标题</label><input type="text" id="settingTitle" placeholder="资源分享" onchange="saveSettings()"></div>
+            <div class="setting-item"><label>副标题</label><input type="text" id="settingSubtitle" placeholder="精选实用工具 · 一键获取" onchange="saveSettings()"></div>
+            <div class="setting-item"><label>资源站标签文字</label><input type="text" id="settingBadgeText" placeholder="✦ 资源站" onchange="saveSettings()"></div>
+            <div class="setting-item"><label>安全认证文字</label><input type="text" id="settingSecurity" placeholder="安全认证" onchange="saveSettings()"></div>
+            <div class="setting-item"><label>官方渠道文字</label><input type="text" id="settingOfficial" placeholder="官方渠道" onchange="saveSettings()"></div>
+            <div class="setting-item"><label>Telegram 链接</label><input type="text" id="settingTelegram" placeholder="https://t.me/xxx" onchange="saveSettings()"></div>
+            <div class="setting-item"><label>Telegram 按钮文字</label><input type="text" id="settingTelegramBtnText" placeholder="Telegram" onchange="saveSettings()"></div>
+            <div class="setting-item"><label>底部版权文字</label><input type="text" id="settingFooter" placeholder="所有软件均来自官方渠道 · 安全无毒" onchange="saveSettings()"></div>
+            <div class="setting-item"><label>首页链接</label><input type="text" id="settingHomeUrl" placeholder="https://example.com 或 index.html" onchange="saveSettings()"></div>
             <!-- 主页卡片管理 -->
             <div class="setting-item" style="grid-column:1/-1;background:linear-gradient(145deg,rgba(58,122,204,0.04),rgba(255,255,255,0.04));padding:20px">
                 <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
                     <label style="color:#3a7acc;font-weight:700;font-size:14px;margin:0;display:block">🎴 主页卡片管理</label>
                     <button class="btn btn-primary btn-sm" onclick="openAddCardModal()" style="border-radius:50px">➕ 添加卡片</button>
                 </div>
-                <!-- 卡片排列顺序管理 -->
                 <div>
-                    <label style="font-size:12px;font-weight:700;color:#3a4d64;display:block;margin-bottom:10px">📋 卡片排列顺序</label>
+                    <label style="font-size:12px;font-weight:700;color:#3a4d64;display:block;margin-bottom:10px">📋 卡片列表（可编辑 / 排序 / 删除）</label>
                     <div id="homeCardOrderList" class="app-list" style="gap:8px"></div>
                 </div>
             </div>
@@ -577,7 +577,8 @@
 <!-- 添加卡片模态框 -->
 <div class="modal" id="addCardModal">
     <div class="modal-content">
-        <h2>➕ 添加主页卡片</h2>
+        <h2 id="cardModalTitle">➕ 添加主页卡片</h2>
+        <input type="hidden" id="cardEditIndex" value="-1">
         <label>卡片名称 *</label><input type="text" id="newCardName" placeholder="如：软件、清理文件">
         <label>卡片图标（支持表情或图片URL）</label><input type="text" id="newCardIcon" placeholder="输入表情或图片URL" style="margin-bottom:4px">
         <div class="icon-grid" id="cardIconGrid">
@@ -1614,9 +1615,10 @@ function renderHomeCardOrder() {
         }
         html += '<div class="app-item" style="padding:10px 14px;border-radius:14px">' +
             '<span class="icon-emoji" style="width:36px;min-width:36px">' + iconHtml + '</span>' +
-            '<div class="info"><div class="name" style="font-size:13px">' + card.name + '</div>' +
-            '<div class="desc" style="font-size:11px">' + card.link + '</div></div>' +
+            '<div class="info"><div class="name" style="font-size:13px">' + escapeHtml(card.name) + '</div>' +
+            '<div class="desc" style="font-size:11px">' + escapeHtml(card.link) + '</div></div>' +
             '<div class="actions" style="gap:6px">' +
+            '<button class="btn btn-primary btn-sm" onclick="editHomeCard(' + idx + ')" title="编辑">✎</button>' +
             (idx > 0 ? '<button class="btn btn-outline btn-sm" onclick="moveHomeCard(' + idx + ',-1)" title="上移">⬆</button>' : '') +
             (idx < cards.length - 1 ? '<button class="btn btn-outline btn-sm" onclick="moveHomeCard(' + idx + ',1)" title="下移">⬇</button>' : '') +
             '<button class="btn btn-danger btn-sm" onclick="deleteHomeCard(' + idx + ')" title="删除">✕</button>' +
@@ -1661,12 +1663,30 @@ function deleteHomeCard(idx) {
     showToast('🗑️ 卡片已删除');
 }
 
-// ========== 添加卡片模态框 ==========
+// ========== 添加/编辑卡片模态框 ==========
 function openAddCardModal() {
+    document.getElementById('cardModalTitle').textContent = '➕ 添加主页卡片';
+    document.getElementById('cardEditIndex').value = '-1';
     document.getElementById('newCardName').value = '';
     document.getElementById('newCardIcon').value = '';
     document.getElementById('newCardLink').value = '';
     document.querySelectorAll('#cardIconGrid .icon-option').forEach(function(el) { el.classList.remove('selected'); });
+    document.getElementById('addCardModal').classList.add('show');
+}
+
+function editHomeCard(idx) {
+    var s = data.settings || {};
+    var cards = s.homeCards || defaultSettings.homeCards || [];
+    if (!cards[idx]) return;
+    var card = cards[idx];
+    document.getElementById('cardModalTitle').textContent = '✎ 编辑卡片';
+    document.getElementById('cardEditIndex').value = String(idx);
+    document.getElementById('newCardName').value = card.name || '';
+    document.getElementById('newCardIcon').value = card.icon || '';
+    document.getElementById('newCardLink').value = card.link || '';
+    document.querySelectorAll('#cardIconGrid .icon-option').forEach(function(el) {
+        el.classList.toggle('selected', el.textContent === card.icon);
+    });
     document.getElementById('addCardModal').classList.add('show');
 }
 
@@ -1685,6 +1705,7 @@ function saveHomeCard() {
     var name = document.getElementById('newCardName').value.trim();
     var icon = document.getElementById('newCardIcon').value.trim();
     var link = document.getElementById('newCardLink').value.trim();
+    var editIdx = parseInt(document.getElementById('cardEditIndex').value);
     if (!name || !link) {
         showToast('⚠️ 卡片名称和链接不能为空');
         return;
@@ -1692,11 +1713,21 @@ function saveHomeCard() {
     if (!data.settings.homeCards) {
         data.settings.homeCards = JSON.parse(JSON.stringify(defaultSettings.homeCards));
     }
-    data.settings.homeCards.push({ name: name, icon: icon || '📦', link: link });
-    saveData();
-    closeAddCardModal();
-    renderHomeCardOrder();
-    showToast('💾 卡片已添加');
+    if (editIdx >= 0 && data.settings.homeCards[editIdx]) {
+        // 编辑模式
+        data.settings.homeCards[editIdx] = { name: name, icon: icon || '📦', link: link };
+        saveData();
+        closeAddCardModal();
+        renderHomeCardOrder();
+        showToast('💾 卡片已更新');
+    } else {
+        // 添加模式
+        data.settings.homeCards.push({ name: name, icon: icon || '📦', link: link });
+        saveData();
+        closeAddCardModal();
+        renderHomeCardOrder();
+        showToast('💾 卡片已添加');
+    }
 }
 
 function selectSecurityIcon(ic) {
