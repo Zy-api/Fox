@@ -103,8 +103,8 @@
         .app-list{display:flex;flex-direction:column;gap:10px}
         .app-item{display:flex;align-items:center;gap:14px;padding:14px 18px;background:rgba(255,255,255,0.5);backdrop-filter:blur(24px);border-radius:18px;border:1px solid rgba(255,255,255,0.3);transition:all .4s cubic-bezier(0.22,1,0.36,1)}
         .app-item:hover{transform:translateY(-4px);box-shadow:0 16px 40px rgba(0,0,0,0.04)}
-        .app-item .icon-img{width:48px!important;height:48px!important;max-width:48px!important;max-height:48px!important;border-radius:12px;object-fit:contain!important;-o-object-fit:contain!important;flex-shrink:0;background:rgba(255,255,255,0.5);transition:all .35s cubic-bezier(0.22,1,0.36,1)}
-        .app-item .icon-emoji{font-size:30px;width:48px;height:48px;min-width:48px;max-width:48px;text-align:center;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .4s cubic-bezier(0.22,1,0.36,1)}
+        .app-item .icon-img{width:48px;height:48px;border-radius:12px;object-fit:contain;flex-shrink:0;background:rgba(255,255,255,0.5);transition:all .35s cubic-bezier(0.22,1,0.36,1)}
+        .app-item .icon-emoji{font-size:30px;width:48px;height:48px;min-width:48px;text-align:center;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .4s cubic-bezier(0.22,1,0.36,1)}
         .app-item .info{flex:1;min-width:0}
         .app-item .info .name{font-size:15px;font-weight:700;letter-spacing:-0.2px}
         .app-item .info .desc{font-size:12px;color:#7a8ba5;margin-top:2px;line-height:1.4}
@@ -1120,13 +1120,13 @@ function renderApps() {
             var idx = data.apps.indexOf(a);
             var iconHtml = '';
             if (isImageUrl(a.icon)) {
-                iconHtml = '<img src="' + a.icon + '" class="icon-img" style="width:48px!important;height:48px!important;max-width:48px!important;max-height:48px!important;object-fit:contain!important;border-radius:12px;flex-shrink:0;display:block" alt="' + a.name + '" onerror="this.style.display=\'none\';this.parentElement.innerHTML=\'📦\'" />';
+                iconHtml = '<img src="' + a.icon + '" class="icon-img" alt="' + a.name + '" onerror="this.outerHTML=\'<span class=&quot;icon-emoji&quot;>📦</span>\'" />';
             } else {
-                iconHtml = a.icon || '📦';
+                iconHtml = '<span class="icon-emoji">' + (a.icon || '📦') + '</span>';
             }
             html += '<div class="app-wrap" id="appWrap' + idx + '">' +
                 '<div class="app-item" id="appItem' + idx + '">' +
-                '<span class="icon-emoji">' + iconHtml + '</span>' +
+                iconHtml +
                 '<div class="info">' +
                 '<div class="name">' + a.name + '</div>' +
                 (a.desc ? '<div class="desc">' + a.desc + '</div>' : '') +
@@ -1183,13 +1183,13 @@ function renderClean() {
             var idx = data.clean.indexOf(a);
             var iconHtml = '';
             if (isImageUrl(a.icon)) {
-                iconHtml = '<img src="' + a.icon + '" class="icon-img" style="width:48px!important;height:48px!important;max-width:48px!important;max-height:48px!important;object-fit:contain!important;border-radius:12px;flex-shrink:0;display:block" alt="' + a.name + '" onerror="this.style.display=\'none\';this.parentElement.innerHTML=\'🧹\'" />';
+                iconHtml = '<img src="' + a.icon + '" class="icon-img" alt="' + a.name + '" onerror="this.outerHTML=\'<span class=&quot;icon-emoji&quot;>🧹</span>\'" />';
             } else {
-                iconHtml = a.icon || '🧹';
+                iconHtml = '<span class="icon-emoji">' + (a.icon || '🧹') + '</span>';
             }
             html += '<div class="app-wrap" id="cleanWrap' + idx + '">' +
                 '<div class="app-item" id="cleanItem' + idx + '">' +
-                '<span class="icon-emoji">' + iconHtml + '</span>' +
+                iconHtml +
                 '<div class="info">' +
                 '<div class="name">' + a.name + '</div>' +
                 (a.desc ? '<div class="desc">' + a.desc + '</div>' : '') +
