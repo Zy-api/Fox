@@ -477,7 +477,8 @@ function renderApps() {
             if (app.desc) html += '<div class="app-desc">' + app.desc + '</div>';
             html += '</div>';
             html += '<div class="app-action">';
-            html += '<a class="app-download-btn" href="' + app.url + '" target="_blank">';
+            var appUrl = app.url || '#';
+            html += '<a class="app-download-btn" href="' + appUrl + '" target="_blank" rel="noopener">';
             html += '<svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>下载';
             html += '</a>';
             html += '</div></div>';
@@ -504,7 +505,8 @@ function renderClean() {
                 html += '<span class="icon" style="font-size:32px;">' + iconDisplay + '</span>';
             }
             html += '<span class="card-name">' + item.name + '</span>';
-            html += '<a class="download-btn" href="' + item.url + '" target="_blank">下载</a>';
+            var cleanUrl = item.url || '#';
+            html += '<a class="download-btn" href="' + cleanUrl + '" target="_blank" rel="noopener">下载</a>';
             html += '</div>';
         });
     }
@@ -646,6 +648,12 @@ document.getElementById('container').addEventListener('click', function(e) {
     // 软件库下载按钮
     var appBtn = e.target.closest('.app-download-btn');
     if (appBtn) {
+        var url = appBtn.getAttribute('href');
+        if (!url || url === '#' || url === 'undefined') {
+            e.preventDefault();
+            showToast('⚠️ 暂无下载链接');
+            return;
+        }
         var ripple = document.createElement('span');
         ripple.className = 'ripple';
         var rect = appBtn.getBoundingClientRect();
@@ -658,19 +666,39 @@ document.getElementById('container').addEventListener('click', function(e) {
         var card = appBtn.closest('.app-card');
         var name = card ? card.querySelector('.app-name').textContent : '软件';
         showToast('正在下载 ' + name);
+        // 不阻止默认行为，让 <a> 标签正常打开链接
         return;
     }
     // 清理文件下载按钮
     var cleanBtn = e.target.closest('.card .download-btn');
     if (cleanBtn) {
+        var cleanUrl = cleanBtn.getAttribute('href');
+        if (!cleanUrl || cleanUrl === '#' || cleanUrl === 'undefined') {
+            e.preventDefault();
+            showToast('⚠️ 暂无下载链接');
+            return;
+        }
         var card = cleanBtn.closest('.card');
         var name = card ? card.querySelector('.card-name').textContent : '文件';
         showToast('正在下载 ' + name);
+        // 不阻止默认行为，让 <a> 标签正常打开链接
         return;
     }
 });
 
 backBtn.classList.remove('show');
+
+// ===== 监听 localStorage 变化，后台保存数据后实时更新前台 =====
+window.addEventListener('storage', function(e) {
+    if (e.key === STORAGE_KEY && e.newValue) {
+        try {
+            var newData = JSON.parse(e.newValue);
+            if (newData && isDataChanged(adminData, newData)) {
+                applyRemoteData(newData);
+            }
+        } catch(err) {}
+    }
+});
 </script>
 
 </body>
