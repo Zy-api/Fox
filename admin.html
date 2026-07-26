@@ -674,7 +674,8 @@ var GITHUB_CONFIG = {
     }
 };
 
-var STORAGE_KEY = 'admin_data';
+var STORAGE_KEY = 'resource_admin_data';
+var OLD_STORAGE_KEY = 'admin_data'; // 旧key，用于迁移
 var data = null;
 var githubFileSha = null;  // 缓存 data.json 的当前 sha，用于 GitHub API 更新
 
@@ -744,7 +745,14 @@ var ICON_SVGS = {
 // ========== 工具函数 ==========
 function isImageUrl(url) {
     if (!url) return false;
-    return url.startsWith('http') && /\.(png|jpg|jpeg|gif|webp|svg|ico)/i.test(url);
+    if (url.startsWith('data:image')) return true;
+    if (url.startsWith('http')) {
+        // 以图片扩展名结尾
+        if (/\.(png|jpg|jpeg|gif|webp|svg|ico)/i.test(url)) return true;
+        // 常见图片托管服务URL（不含扩展名但确实是图片）
+        if (/img\.remit\.ee|imgur\.com|telegra\.ph|telegram|\.githubusercontent\.com/i.test(url)) return true;
+    }
+    return false;
 }
 
 function escapeHtml(str) {
@@ -924,6 +932,15 @@ function loadFromGitHub(callback) {
 function loadData() {
     // 先检查 localStorage 是否有数据
     var saved = localStorage.getItem(STORAGE_KEY);
+    // 迁移旧数据：如果新key没有数据但旧key有，则迁移过来
+    if (!saved) {
+        var oldSaved = localStorage.getItem(OLD_STORAGE_KEY);
+        if (oldSaved) {
+            localStorage.setItem(STORAGE_KEY, oldSaved);
+            localStorage.removeItem(OLD_STORAGE_KEY);
+            saved = oldSaved;
+        }
+    }
     if (saved) {
         // localStorage 优先：直接使用本地数据
         try {
@@ -1103,7 +1120,7 @@ function renderApps() {
             var idx = data.apps.indexOf(a);
             var iconHtml = '';
             if (isImageUrl(a.icon)) {
-                iconHtml = '<img src="' + a.icon + '" class="icon-img" alt="' + a.name + '" onerror="this.style.display=\'none\'" />';
+                iconHtml = '<img src="' + a.icon + '" class="icon-img" style="width:44px;height:44px;max-width:44px;max-height:44px;object-fit:contain" alt="' + a.name + '" onerror="this.style.display=\'none\'" />';
             } else {
                 iconHtml = a.icon || '📦';
             }
@@ -1166,7 +1183,7 @@ function renderClean() {
             var idx = data.clean.indexOf(a);
             var iconHtml = '';
             if (isImageUrl(a.icon)) {
-                iconHtml = '<img src="' + a.icon + '" class="icon-img" alt="' + a.name + '" onerror="this.style.display=\'none\'" />';
+                iconHtml = '<img src="' + a.icon + '" class="icon-img" style="width:44px;height:44px;max-width:44px;max-height:44px;object-fit:contain" alt="' + a.name + '" onerror="this.style.display=\'none\'" />';
             } else {
                 iconHtml = a.icon || '🧹';
             }
