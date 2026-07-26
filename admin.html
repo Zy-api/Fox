@@ -1120,7 +1120,7 @@ function renderApps() {
             var idx = data.apps.indexOf(a);
             var iconHtml = '';
             if (isImageUrl(a.icon)) {
-                iconHtml = '<img src="' + a.icon + '" class="icon-img" alt="' + a.name + '" onerror="this.style.display=\'none\';this.parentElement.innerHTML=\'📦\'" />';
+                iconHtml = '<img src="' + a.icon + '" class="icon-img" style="width:48px!important;height:48px!important;max-width:48px!important;max-height:48px!important;object-fit:contain!important;border-radius:12px;flex-shrink:0;display:block" alt="' + a.name + '" onerror="this.style.display=\'none\';this.parentElement.innerHTML=\'📦\'" />';
             } else {
                 iconHtml = a.icon || '📦';
             }
@@ -1183,7 +1183,7 @@ function renderClean() {
             var idx = data.clean.indexOf(a);
             var iconHtml = '';
             if (isImageUrl(a.icon)) {
-                iconHtml = '<img src="' + a.icon + '" class="icon-img" alt="' + a.name + '" onerror="this.style.display=\'none\';this.parentElement.innerHTML=\'🧹\'" />';
+                iconHtml = '<img src="' + a.icon + '" class="icon-img" style="width:48px!important;height:48px!important;max-width:48px!important;max-height:48px!important;object-fit:contain!important;border-radius:12px;flex-shrink:0;display:block" alt="' + a.name + '" onerror="this.style.display=\'none\';this.parentElement.innerHTML=\'🧹\'" />';
             } else {
                 iconHtml = a.icon || '🧹';
             }
@@ -1626,12 +1626,12 @@ function renderHomeCardOrder() {
     cards.forEach(function(card, idx) {
         var iconHtml = '';
         if (isImageUrl(card.icon)) {
-            iconHtml = '<img src="' + card.icon + '" alt="' + card.name + '" style="width:36px;height:36px;min-width:36px;max-width:36px;max-height:36px;border-radius:10px;object-fit:contain;flex-shrink:0;background:rgba(255,255,255,0.5);padding:3px;border:1px solid rgba(255,255,255,0.2)" onerror="this.style.display=\'none\'" />';
+            iconHtml = '<img src="' + card.icon + '" alt="' + card.name + '" style="width:36px!important;height:36px!important;max-width:36px!important;max-height:36px!important;object-fit:contain!important;border-radius:8px;flex-shrink:0;display:block" onerror="this.style.display=\'none\';this.parentElement.innerHTML=\'📦\'" />';
         } else {
             iconHtml = '<span style="font-size:24px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;flex-shrink:0">' + (card.icon || '📦') + '</span>';
         }
         html += '<div class="app-item" style="padding:10px 14px;border-radius:14px">' +
-            '<span style="width:36px;min-width:36px;height:36px;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden">' + iconHtml + '</span>' +
+            '<span style="width:36px;min-width:36px;height:36px;display:flex;align-items:center;justify-content:center;flex-shrink:0">' + iconHtml + '</span>' +
             '<div class="info"><div class="name" style="font-size:13px">' + escapeHtml(card.name) + '</div>' +
             '<div class="desc" style="font-size:11px">' + escapeHtml(card.link) + '</div></div>' +
             '<div class="actions" style="gap:6px">' +
