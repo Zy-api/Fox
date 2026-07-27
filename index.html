@@ -463,7 +463,7 @@ function renderApps() {
             var isImage = iconDisplay.indexOf('http') === 0 || iconDisplay.indexOf('data:') === 0 || iconDisplay.indexOf('.png') !== -1 || iconDisplay.indexOf('.jpg') !== -1;
             html += '<div class="app-card">';
             if (isImage) {
-                html += '<img class="app-icon" src="' + iconDisplay + '" alt="' + app.name + '" onerror="this.style.display=\'none\';this.outerHTML=\'<span class=\\\'app-icon\\\' style=\\\'font-size:32px;display:flex;align-items:center;justify-content:center;width:50px;height:50px\\\'>📦</span>\'">';
+                html += '<img class="app-icon" src="' + iconDisplay + '" alt="' + app.name + '" referrerpolicy="no-referrer" onerror="this.style.opacity=\'0.3\'">';
             } else {
                 html += '<span class="app-icon" style="font-size:32px;display:flex;align-items:center;justify-content:center;width:50px;height:50px;background:rgba(255,255,255,0.3);border-radius:12px;padding:4px">' + iconDisplay + '</span>';
             }
@@ -500,7 +500,7 @@ function renderClean() {
             var isImage = iconDisplay.indexOf('http') === 0 || iconDisplay.indexOf('data:') === 0 || iconDisplay.indexOf('.png') !== -1 || iconDisplay.indexOf('.jpg') !== -1;
             html += '<div class="card" style="cursor:default">';
             if (isImage) {
-                html += '<img class="icon-img" src="' + iconDisplay + '" alt="' + item.name + '" onerror="this.style.display=\'none\';this.outerHTML=\'<span class=\\\'icon\\\' style=\\\'font-size:32px;\\\'>🧹</span>\'">';
+                html += '<img class="icon-img" src="' + iconDisplay + '" alt="' + item.name + '" referrerpolicy="no-referrer" onerror="this.style.opacity=\'0.3\'">';
             } else {
                 html += '<span class="icon" style="font-size:32px;">' + iconDisplay + '</span>';
             }
