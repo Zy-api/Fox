@@ -749,10 +749,10 @@ function isImageUrl(url) {
     if (!url) return false;
     if (url.startsWith('data:image')) return true;
     if (url.startsWith('http')) {
-        // 以图片扩展名结尾
-        if (/\.(png|jpg|jpeg|gif|webp|svg|ico)/i.test(url)) return true;
+        // 以图片扩展名结尾（支持URL中带查询参数）
+        if (/\.(png|jpg|jpeg|gif|webp|svg|ico)(\?|#|$)/i.test(url)) return true;
         // 常见图片托管服务URL（不含扩展名但确实是图片）
-        if (/img\.remit\.ee|imgur\.com|telegra\.ph|telegram|\.githubusercontent\.com/i.test(url)) return true;
+        if (/img\.remit\.ee|imgur\.com|telegra\.ph|telegram|\.githubusercontent\.com|i\.loli\.net|s2\.loli\.net|sm\.ms|cdn\.jsdelivr\.net|raw\.githubusercontent\.com/i.test(url)) return true;
     }
     return false;
 }
@@ -1121,21 +1121,23 @@ function renderApps() {
         list.forEach(function(a, i) {
             var idx = data.apps.indexOf(a);
             var iconHtml = '';
+            var safeIcon = escapeHtml(a.icon);
+            var safeName = escapeHtml(a.name);
             if (isImageUrl(a.icon)) {
-                iconHtml = '<img src="' + a.icon + '" class="icon-img" alt="' + a.name + '" onerror="this.outerHTML=\'<span class=&quot;icon-emoji&quot;>📦</span>\'" />';
+                iconHtml = '<img src="' + safeIcon + '" alt="' + safeName + '" class="icon-img" width="36" height="36" style="width:36px!important;height:36px!important;max-width:36px!important;max-height:36px!important;object-fit:contain!important;border-radius:8px;flex-shrink:0;display:block" onerror="this.style.display=\'none\';this.parentElement.innerHTML=\'📦\'" />';
             } else {
-                iconHtml = '<span class="icon-emoji">' + (a.icon || '📦') + '</span>';
+                iconHtml = '<span class="icon-emoji">' + (safeIcon || '📦') + '</span>';
             }
             html += '<div class="app-wrap" id="appWrap' + idx + '">' +
                 '<div class="app-item" id="appItem' + idx + '">' +
-                iconHtml +
+                '<span style="width:36px;min-width:36px;height:36px;display:flex;align-items:center;justify-content:center;flex-shrink:0">' + iconHtml + '</span>' +
                 '<div class="info">' +
-                '<div class="name">' + a.name + '</div>' +
-                (a.desc ? '<div class="desc">' + a.desc + '</div>' : '') +
+                '<div class="name">' + safeName + '</div>' +
+                (a.desc ? '<div class="desc">' + escapeHtml(a.desc) + '</div>' : '') +
                 '<div class="meta">' +
-                '<span>' + (a.version || '') + '</span>' +
-                '<span>' + (a.size || '') + '</span>' +
-                (a.tag ? '<span class="tag">' + a.tag + '</span>' : '') +
+                '<span>' + escapeHtml(a.version || '') + '</span>' +
+                '<span>' + escapeHtml(a.size || '') + '</span>' +
+                (a.tag ? '<span class="tag">' + escapeHtml(a.tag) + '</span>' : '') +
                 '</div>' +
                 '</div>' +
                 '<div class="actions">' +
@@ -1184,21 +1186,23 @@ function renderClean() {
         list.forEach(function(a, i) {
             var idx = data.clean.indexOf(a);
             var iconHtml = '';
+            var safeIcon = escapeHtml(a.icon);
+            var safeName = escapeHtml(a.name);
             if (isImageUrl(a.icon)) {
-                iconHtml = '<img src="' + a.icon + '" class="icon-img" alt="' + a.name + '" onerror="this.outerHTML=\'<span class=&quot;icon-emoji&quot;>🧹</span>\'" />';
+                iconHtml = '<img src="' + safeIcon + '" alt="' + safeName + '" class="icon-img" width="36" height="36" style="width:36px!important;height:36px!important;max-width:36px!important;max-height:36px!important;object-fit:contain!important;border-radius:8px;flex-shrink:0;display:block" onerror="this.style.display=\'none\';this.parentElement.innerHTML=\'🧹\'" />';
             } else {
-                iconHtml = '<span class="icon-emoji">' + (a.icon || '🧹') + '</span>';
+                iconHtml = '<span class="icon-emoji">' + (safeIcon || '🧹') + '</span>';
             }
             html += '<div class="app-wrap" id="cleanWrap' + idx + '">' +
                 '<div class="app-item" id="cleanItem' + idx + '">' +
-                iconHtml +
+                '<span style="width:36px;min-width:36px;height:36px;display:flex;align-items:center;justify-content:center;flex-shrink:0">' + iconHtml + '</span>' +
                 '<div class="info">' +
-                '<div class="name">' + a.name + '</div>' +
-                (a.desc ? '<div class="desc">' + a.desc + '</div>' : '') +
+                '<div class="name">' + safeName + '</div>' +
+                (a.desc ? '<div class="desc">' + escapeHtml(a.desc) + '</div>' : '') +
                 '<div class="meta">' +
-                '<span>' + (a.version || '') + '</span>' +
-                '<span>' + (a.size || '') + '</span>' +
-                (a.tag ? '<span class="tag">' + a.tag + '</span>' : '') +
+                '<span>' + escapeHtml(a.version || '') + '</span>' +
+                '<span>' + escapeHtml(a.size || '') + '</span>' +
+                (a.tag ? '<span class="tag">' + escapeHtml(a.tag) + '</span>' : '') +
                 '</div>' +
                 '</div>' +
                 '<div class="actions">' +
@@ -1627,14 +1631,16 @@ function renderHomeCardOrder() {
     var html = '';
     cards.forEach(function(card, idx) {
         var iconHtml = '';
+        var safeIcon = escapeHtml(card.icon);
+        var safeName = escapeHtml(card.name);
         if (isImageUrl(card.icon)) {
-            iconHtml = '<img src="' + card.icon + '" alt="' + card.name + '" style="width:36px!important;height:36px!important;max-width:36px!important;max-height:36px!important;object-fit:contain!important;border-radius:8px;flex-shrink:0;display:block" onerror="this.style.display=\'none\';this.parentElement.innerHTML=\'📦\'" />';
+            iconHtml = '<img src="' + safeIcon + '" alt="' + safeName + '" class="icon-img" width="36" height="36" style="width:36px!important;height:36px!important;max-width:36px!important;max-height:36px!important;object-fit:contain!important;border-radius:8px;flex-shrink:0;display:block" onerror="this.style.display=\'none\';this.parentElement.innerHTML=\'📦\'" />';
         } else {
-            iconHtml = '<span style="font-size:24px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;flex-shrink:0">' + (card.icon || '📦') + '</span>';
+            iconHtml = '<span class="icon-emoji" style="font-size:24px">' + (safeIcon || '📦') + '</span>';
         }
         html += '<div class="app-item" style="padding:10px 14px;border-radius:14px">' +
             '<span style="width:36px;min-width:36px;height:36px;display:flex;align-items:center;justify-content:center;flex-shrink:0">' + iconHtml + '</span>' +
-            '<div class="info"><div class="name" style="font-size:13px">' + escapeHtml(card.name) + '</div>' +
+            '<div class="info"><div class="name" style="font-size:13px">' + safeName + '</div>' +
             '<div class="desc" style="font-size:11px">' + escapeHtml(card.link) + '</div></div>' +
             '<div class="actions" style="gap:6px">' +
             '<button class="btn btn-primary btn-sm" onclick="editHomeCard(' + idx + ')" title="编辑">✎</button>' +
