@@ -747,13 +747,10 @@ var ICON_SVGS = {
 // ========== 工具函数 ==========
 function isImageUrl(url) {
     if (!url) return false;
+    // 只要以 http 或 data:image 开头，就当作图片尝试加载
+    // 如果加载失败，onerror 会自动回退到默认图标
     if (url.startsWith('data:image')) return true;
-    if (url.startsWith('http')) {
-        // 以图片扩展名结尾（支持URL中带查询参数）
-        if (/\.(png|jpg|jpeg|gif|webp|svg|ico)(\?|#|$)/i.test(url)) return true;
-        // 常见图片托管服务URL（不含扩展名但确实是图片）
-        if (/img\.remit\.ee|imgur\.com|telegra\.ph|telegram|\.githubusercontent\.com|i\.loli\.net|s2\.loli\.net|sm\.ms|cdn\.jsdelivr\.net|raw\.githubusercontent\.com/i.test(url)) return true;
-    }
+    if (url.startsWith('http://') || url.startsWith('https://')) return true;
     return false;
 }
 
