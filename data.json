@@ -11,12 +11,12 @@
     },
     {
       "name": "绿茶VPN",
-      "url": "无",
       "version": "v2.6.7",
       "size": "8.7 MB",
+      "url": "",
+      "icon": "https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEX9-tqZwonk2cygZA5fHLQa82pdBKNOQAC-SIAAj4IOVfp-tykpef4ez0E.png",
       "tag": "推荐",
-      "desc": "隐私保护 · 全球节点 · 高速稳定",
-      "icon": "https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEX9-tqZwonk2cygZA5fHLQa82pdBKNOQAC-SIAAj4IOVfp-tykpef4ez0E.png"
+      "desc": "隐私保护 · 全球节点 · 高速稳定"
     },
     {
       "name": "MT管理器",
@@ -29,12 +29,12 @@
     },
     {
       "name": "Telegram",
-      "url": "无",
       "version": "v10.5.0",
       "size": "32.1 MB",
+      "url": "",
+      "icon": "https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEX9-1qZwpRLapqCF12wCK39wxVfZQCQgAC_CIAAj4IOVcSREKrySxxHT0E.png",
       "tag": "通讯",
-      "desc": "安全通讯 · 频道 · 机器人",
-      "icon": "https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEX9-1qZwpRLapqCF12wCK39wxVfZQCQgAC_CIAAj4IOVcSREKrySxxHT0E.png"
+      "desc": "安全通讯 · 频道 · 机器人"
     }
   ],
   "clean": [
