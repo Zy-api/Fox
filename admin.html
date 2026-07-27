@@ -794,6 +794,7 @@ function saveInlineEdit(idx) {
         showToast('⚠️ 软件名称和下载链接不能为空');
         return;
     }
+    var iconVal = document.getElementById('ieIcon' + idx).value.trim();
     data.apps[idx] = {
         name: name,
         url: url,
@@ -801,12 +802,16 @@ function saveInlineEdit(idx) {
         size: document.getElementById('ieSize' + idx).value.trim(),
         tag: document.getElementById('ieTag' + idx).value.trim(),
         desc: document.getElementById('ieDesc' + idx).value.trim(),
-        icon: document.getElementById('ieIcon' + idx).value.trim() || '📦'
+        icon: iconVal || '📦'
     };
     saveData();
     closeAllInlinePanels();
     renderApps();
-    showToast('💾 软件已保存');
+    showToast('💾 软件已保存，正在同步...');
+    syncToGitHub(function(success) {
+        if (success) showToast('✅ 已同步到云端，前台刷新即可看到');
+        else showToast('⚠️ 云端同步失败，已保存到本地');
+    });
 }
 
 // ========== 清理内联编辑 ==========
@@ -838,6 +843,7 @@ function saveCleanInlineEdit(idx) {
         showToast('⚠️ 工具名称和下载链接不能为空');
         return;
     }
+    var iconVal = document.getElementById('ceIcon' + idx).value.trim();
     data.clean[idx] = {
         name: name,
         url: url,
@@ -845,12 +851,16 @@ function saveCleanInlineEdit(idx) {
         size: document.getElementById('ceSize' + idx).value.trim(),
         tag: document.getElementById('ceTag' + idx).value.trim(),
         desc: document.getElementById('ceDesc' + idx).value.trim(),
-        icon: document.getElementById('ceIcon' + idx).value.trim() || '🧹'
+        icon: iconVal || '🧹'
     };
     saveData();
     closeAllInlinePanels();
     renderClean();
-    showToast('💾 清理工具已保存');
+    showToast('💾 清理工具已保存，正在同步...');
+    syncToGitHub(function(success) {
+        if (success) showToast('✅ 已同步到云端，前台刷新即可看到');
+        else showToast('⚠️ 云端同步失败，已保存到本地');
+    });
 }
 
 // 关闭所有内联编辑面板
@@ -898,14 +908,35 @@ function loadFromGitHub(callback) {
         })
         .then(function(json) {
             try {
-                // 如果 localStorage 已有数据，仅做合并（不覆盖）
+                // 如果 localStorage 已有数据，做智能合并
                 var saved = localStorage.getItem(STORAGE_KEY);
                 if (saved) {
                     var parsed = JSON.parse(saved);
-                    // 合并策略：以 localStorage 为准，GitHub 数据仅补充空字段
+                    // 合并策略：
+                    // - apps/clean: 以 localStorage 为准，但如果本地 icon 是 emoji 而 GitHub 上是图片URL，
+                    //   说明本地 icon 被 onerror 污染了，用 GitHub 的正确值覆盖
+                    var localApps = (parsed.apps && parsed.apps.length) ? parsed.apps : (json.apps && json.apps.length ? json.apps : JSON.parse(JSON.stringify(defaultApps)));
+                    var ghApps = (json.apps && json.apps.length) ? json.apps : [];
+                    if (ghApps.length === localApps.length) {
+                        for (var i = 0; i < localApps.length; i++) {
+                            // 本地 icon 不是图片URL，但 GitHub 上是图片URL → 用 GitHub 值纠正
+                            if (!isImageUrl(localApps[i].icon) && isImageUrl(ghApps[i].icon)) {
+                                localApps[i].icon = ghApps[i].icon;
+                            }
+                        }
+                    }
+                    var localClean = (parsed.clean && parsed.clean.length) ? parsed.clean : (json.clean && json.clean.length ? json.clean : JSON.parse(JSON.stringify(defaultClean)));
+                    var ghClean = (json.clean && json.clean.length) ? json.clean : [];
+                    if (ghClean.length === localClean.length) {
+                        for (var j = 0; j < localClean.length; j++) {
+                            if (!isImageUrl(localClean[j].icon) && isImageUrl(ghClean[j].icon)) {
+                                localClean[j].icon = ghClean[j].icon;
+                            }
+                        }
+                    }
                     data = {
-                        apps: (parsed.apps && parsed.apps.length) ? parsed.apps : (json.apps && json.apps.length ? json.apps : JSON.parse(JSON.stringify(defaultApps))),
-                        clean: (parsed.clean && parsed.clean.length) ? parsed.clean : (json.clean && json.clean.length ? json.clean : JSON.parse(JSON.stringify(defaultClean))),
+                        apps: localApps,
+                        clean: localClean,
                         style: Object.assign({}, defaultStyle, json.style || {}, parsed.style || {}),
                         settings: Object.assign({}, json.settings || {}, parsed.settings || {})
                     };
@@ -1124,7 +1155,7 @@ function renderApps() {
             var safeIcon = escapeHtml(a.icon);
             var safeName = escapeHtml(a.name);
             if (isImageUrl(a.icon)) {
-                iconHtml = '<img src="' + safeIcon + '" alt="' + safeName + '" class="icon-img" width="36" height="36" style="width:36px!important;height:36px!important;max-width:36px!important;max-height:36px!important;object-fit:contain!important;border-radius:8px;flex-shrink:0;display:block" onerror="this.style.display=\'none\';this.parentElement.innerHTML=\'📦\'" />';
+                iconHtml = '<img src="' + safeIcon + '" alt="' + safeName + '" class="icon-img" width="36" height="36" style="width:36px!important;height:36px!important;max-width:36px!important;max-height:36px!important;object-fit:contain!important;border-radius:8px;flex-shrink:0;display:block" referrerpolicy="no-referrer" onerror="this.style.opacity=\'0.3\'" />';
             } else {
                 iconHtml = '<span class="icon-emoji">' + (safeIcon || '📦') + '</span>';
             }
@@ -1189,7 +1220,7 @@ function renderClean() {
             var safeIcon = escapeHtml(a.icon);
             var safeName = escapeHtml(a.name);
             if (isImageUrl(a.icon)) {
-                iconHtml = '<img src="' + safeIcon + '" alt="' + safeName + '" class="icon-img" width="36" height="36" style="width:36px!important;height:36px!important;max-width:36px!important;max-height:36px!important;object-fit:contain!important;border-radius:8px;flex-shrink:0;display:block" onerror="this.style.display=\'none\';this.parentElement.innerHTML=\'🧹\'" />';
+                iconHtml = '<img src="' + safeIcon + '" alt="' + safeName + '" class="icon-img" width="36" height="36" style="width:36px!important;height:36px!important;max-width:36px!important;max-height:36px!important;object-fit:contain!important;border-radius:8px;flex-shrink:0;display:block" referrerpolicy="no-referrer" onerror="this.style.opacity=\'0.3\'" />';
             } else {
                 iconHtml = '<span class="icon-emoji">' + (safeIcon || '🧹') + '</span>';
             }
@@ -1634,7 +1665,7 @@ function renderHomeCardOrder() {
         var safeIcon = escapeHtml(card.icon);
         var safeName = escapeHtml(card.name);
         if (isImageUrl(card.icon)) {
-            iconHtml = '<img src="' + safeIcon + '" alt="' + safeName + '" class="icon-img" width="36" height="36" style="width:36px!important;height:36px!important;max-width:36px!important;max-height:36px!important;object-fit:contain!important;border-radius:8px;flex-shrink:0;display:block" onerror="this.style.display=\'none\';this.parentElement.innerHTML=\'📦\'" />';
+            iconHtml = '<img src="' + safeIcon + '" alt="' + safeName + '" class="icon-img" width="36" height="36" style="width:36px!important;height:36px!important;max-width:36px!important;max-height:36px!important;object-fit:contain!important;border-radius:8px;flex-shrink:0;display:block" referrerpolicy="no-referrer" onerror="this.style.opacity=\'0.3\'" />';
         } else {
             iconHtml = '<span class="icon-emoji" style="font-size:24px">' + (safeIcon || '📦') + '</span>';
         }
