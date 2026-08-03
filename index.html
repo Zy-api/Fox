@@ -166,15 +166,7 @@
             Telegram
         </div>
 
-        <div class="card-grid">
-            <div class="card" id="cardSoftware">
-                <img class="icon-img" id="softwareCardIcon" src="https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEXumFqYbgvYG8o_fLpZzjvmCmVtj4tHQACyyEAAmrvCVc3GBY7xK-q4z0E.png" alt="软件图标">
-                <span class="card-name" id="softwareCardName">软件</span>
-            </div>
-            <div class="card" id="cardClean">
-                <img class="icon-img" id="cleanCardIcon" src="https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEXukdqYbduk0CniKV2BbB8r_Lg9DPdRwACryEAAmrvCVeC9HGvJ9ZmRT0E.png" alt="清理文件图标">
-                <span class="card-name" id="cleanCardName">清理文件</span>
-            </div>
+        <div class="card-grid" id="homeCardGrid">
         </div>
 
         <p class="footer" id="footerText">所有软件均来自官方渠道 · 安全无毒</p>
@@ -357,11 +349,11 @@ var defaultSettings = {
     telegram: 'https://t.me/NeverSttle888',
     // ===== 新增字段默认值 =====
     badgeText: '✦ 资源站', // 资源站标签文字
-    softwareCardName: '软件', // 软件卡片名称
-    softwareCardIcon: 'https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEXumFqYbgvYG8o_fLpZzjvmCmVtj4tHQACyyEAAmrvCVc3GBY7xK-q4z0E.png', // 软件卡片图标
-    cleanCardName: '清理文件', // 清理文件卡片名称
-    cleanCardIcon: 'https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEXukdqYbduk0CniKV2BbB8r_Lg9DPdRwACryEAAmrvCVeC9HGvJ9ZmRT0E.png', // 清理文件卡片图标
-    cleanTitle: '🧹 清理文件' // 清理文件页面标题
+    cleanTitle: '🧹 清理文件', // 清理文件页面标题
+    homeCards: [ // 主页卡片列表
+        { name: "软件", icon: "https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEXumFqYbgvYG8o_fLpZzjvmCmVtj4tHQACyyEAAmrvCVc3GBY7xK-q4z0E.png", link: "#software" },
+        { name: "清理文件", icon: "https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEXukdqYbduk0CniKV2BbB8r_Lg9DPdRwACryEAAmrvCVeC9HGvJ9ZmRT0E.png", link: "#clean" }
+    ]
 };
 
 var defaultStyle = {
@@ -424,10 +416,7 @@ document.getElementById('footerText3').textContent = settings.footer || '所有�
 document.getElementById('libTitle').textContent = settings.libTitle || '📦 软件库';
 // ===== 从后台 settings 渲染新增字段 =====
 document.getElementById('badgeText').textContent = settings.badgeText || '✦ 资源站'; // 资源站标签文字
-document.getElementById('softwareCardName').textContent = settings.softwareCardName || '软件'; // 软件卡片名称
-document.getElementById('softwareCardIcon').src = settings.softwareCardIcon || 'https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEXumFqYbgvYG8o_fLpZzjvmCmVtj4tHQACyyEAAmrvCVc3GBY7xK-q4z0E.png'; // 软件卡片图标（动态设置 img src）
-document.getElementById('cleanCardName').textContent = settings.cleanCardName || '清理文件'; // 清理文件卡片名称
-document.getElementById('cleanCardIcon').src = settings.cleanCardIcon || 'https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEXukdqYbduk0CniKV2BbB8r_Lg9DPdRwACryEAAmrvCVeC9HGvJ9ZmRT0E.png'; // 清理文件卡片图标（动态设置 img src）
+renderHomeCards(); // 渲染主页卡片（从 homeCards 数据）
 document.getElementById('cleanTitle').textContent = settings.cleanTitle || '🧹 清理文件'; // 清理文件页面标题
 
 // ===== 安全认证图标（从后台读取，渲染蓝色SVG） =====
@@ -449,6 +438,34 @@ renderIcon('officialIconDisplay', officialIcon);
 // Telegram
 var telegramUrl = settings.telegram || 'https://t.me/NeverSttle888';
 document.getElementById('telegramBtnTop').setAttribute('data-url', telegramUrl);
+
+// ============================================================
+// 渲染主页卡片（从 homeCards 数据动态生成）
+// ============================================================
+function renderHomeCards() {
+    var grid = document.getElementById('homeCardGrid');
+    if (!grid) return;
+    var cards = (settings && settings.homeCards && settings.homeCards.length > 0) ? settings.homeCards : [
+        { name: "软件", icon: "https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEXumFqYbgvYG8o_fLpZzjvmCmVtj4tHQACyyEAAmrvCVc3GBY7xK-q4z0E.png", link: "#software" },
+        { name: "清理文件", icon: "https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEXukdqYbduk0CniKV2BbB8r_Lg9DPdRwACryEAAmrvCVeC9HGvJ9ZmRT0E.png", link: "#clean" }
+    ];
+    var html = '';
+    cards.forEach(function(card, idx) {
+        var cardName = card.name || '';
+        var cardIcon = card.icon || '';
+        var cardLink = card.link || '#';
+        var isImage = cardIcon.indexOf('http') === 0 || cardIcon.indexOf('data:') === 0;
+        html += '<div class="card" data-link="' + cardLink + '" style="cursor:pointer">';
+        if (isImage) {
+            html += '<img class="icon-img" src="' + cardIcon + '" alt="' + cardName + '" referrerpolicy="no-referrer" onerror="this.style.opacity=\'0.3\'">';
+        } else {
+            html += '<span class="icon" style="font-size:32px;">' + (cardIcon || '📦') + '</span>';
+        }
+        html += '<span class="card-name">' + cardName + '</span>';
+        html += '</div>';
+    });
+    grid.innerHTML = html;
+}
 
 // ============================================================
 // 渲染软件库
@@ -537,10 +554,7 @@ function applyRemoteData(remoteData) {
     document.getElementById('libTitle').textContent = settings.libTitle || '📦 软件库';
     // ===== 从后台 settings 重新渲染新增字段 =====
     document.getElementById('badgeText').textContent = settings.badgeText || '✦ 资源站'; // 资源站标签文字
-    document.getElementById('softwareCardName').textContent = settings.softwareCardName || '软件'; // 软件卡片名称
-    document.getElementById('softwareCardIcon').src = settings.softwareCardIcon || 'https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEXumFqYbgvYG8o_fLpZzjvmCmVtj4tHQACyyEAAmrvCVc3GBY7xK-q4z0E.png'; // 软件卡片图标（动态设置 img src）
-    document.getElementById('cleanCardName').textContent = settings.cleanCardName || '清理文件'; // 清理文件卡片名称
-    document.getElementById('cleanCardIcon').src = settings.cleanCardIcon || 'https://img.remit.ee/api/file/BQACAgUAAyEGAASHRsPbAAEXukdqYbduk0CniKV2BbB8r_Lg9DPdRwACryEAAmrvCVeC9HGvJ9ZmRT0E.png'; // 清理文件卡片图标（动态设置 img src）
+    renderHomeCards(); // 重新渲染主页卡片
     document.getElementById('cleanTitle').textContent = settings.cleanTitle || '🧹 清理文件'; // 清理文件页面标题
     renderIcon('securityIconDisplay', (style && style.securityIcon) || '🛡️');
     renderIcon('officialIconDisplay', (style && style.officialIcon) || '📢');
@@ -635,12 +649,19 @@ document.getElementById('telegramBtnTop').addEventListener('click', function(e) 
     window.open(url, '_blank');
 });
 
-document.getElementById('cardSoftware').addEventListener('click', function() {
-    switchPage('page2');
-});
-
-document.getElementById('cardClean').addEventListener('click', function() {
-    switchPage('page3');
+// ===== 主页卡片点击事件委托（支持动态渲染的卡片） =====
+document.getElementById('container').addEventListener('click', function(e) {
+    var card = e.target.closest('#homeCardGrid .card');
+    if (card) {
+        var link = card.getAttribute('data-link') || '#';
+        if (link === '#software' || link === 'page2') {
+            switchPage('page2');
+        } else if (link === '#clean' || link === 'page3') {
+            switchPage('page3');
+        } else if (link && link !== '#') {
+            window.open(link, '_blank');
+        }
+    }
 });
 
 // ===== 下载按钮事件委托（兼容重新渲染后事件不丢失） =====
