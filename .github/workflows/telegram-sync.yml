@@ -1,0 +1,50 @@
+name: Telegram Auto Sync
+
+on:
+  schedule:
+    # 每小时运行一次
+    - cron: '0 * * * *'
+  
+  # 允许手动触发
+  workflow_dispatch:
+    inputs:
+      channel:
+        description: 'Telegram 频道用户名（不带@）'
+        required: false
+        default: 'PNAyyds'
+      pattern:
+        description: '文件名匹配规则'
+        required: false
+        default: 'PAN-*.zip'
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Run Telegram scraper sync
+        env:
+          TG_CHANNEL: ${{ github.event.inputs.channel || 'PNAyyds' }}
+          FILE_PATTERN: ${{ github.event.inputs.pattern || 'PAN-*.zip' }}
+          FILE_TYPES: '.zip,.rar,.7z'
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 telegram_scraper_sync.py --once
+      
+      - name: Commit and push if changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "Telegram Sync Bot"
+          git add -A
+          git diff --quiet && git diff --staged --quiet || (git commit -m "auto-sync: Telegram频道同步更新 [skip ci]" && git push)
