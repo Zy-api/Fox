@@ -28,7 +28,7 @@ from datetime import datetime, timezone, timedelta
 
 # ========== 配置 ==========
 CHANNEL_USERNAME = os.environ.get('TG_CHANNEL', 'PNAyyds')
-FILE_PATTERN = os.environ.get('FILE_PATTERN', 'PAN-*.zip')
+FILE_PATTERN = os.environ.get('FILE_PATTERN', 'PNA-*.zip')
 FILE_TYPES = os.environ.get('FILE_TYPES', '.zip,.rar,.7z')
 
 GITHUB_TOKEN = os.environ.get('GITHUB_TOKEN', '')
@@ -142,15 +142,15 @@ def extract_messages(html):
     # 保存HTML以便调试
     log(f'   HTML长度: {len(html)} 字符')
     
-    # 方法1: 匹配文件名称 (tgme_widget_message_document_name)
-    doc_names = re.findall(r'class="tgme_widget_message_document_name[^"]*">([^<]+)</div>', html)
-    doc_sizes = re.findall(r'class="tgme_widget_message_document_extra[^"]*">([^<]+)</div>', html)
-    
+    # 方法1: 匹配文件名称 (tgme_widget_message_document_title)
+    doc_names = re.findall(r'class="tgme_widget_message_document_title[^"]*"[^>]*>([^<]+)</div>', html)
+    doc_sizes = re.findall(r'class="tgme_widget_message_document_extra[^"]*"[^>]*>([^<]+)</div>', html)
     log(f'   方法1找到文件: {len(doc_names)} 个')
     
-    # 方法2: 尝试匹配其他可能的文件类名
+    # 方法2: 旧版类名兼容
     if not doc_names:
-        doc_names = re.findall(r'tgme_widget_message_document[^>]*>([^<]+)</', html)
+        doc_names = re.findall(r'class="tgme_widget_message_document_name[^"]*">([^<]+)</div>', html)
+        doc_sizes = re.findall(r'class="tgme_widget_message_document_extra[^"]*">([^<]+)</div>', html)
         log(f'   方法2找到文件: {len(doc_names)} 个')
     
     # 方法3: 从消息文本中提取文件名（带.zip/.rar/.7z后缀的）
@@ -262,52 +262,6 @@ def save_remote_data(data, sha):
     return result is not None and 'content' in result
 
 
-
-
-# ========== 调试：保存抓取到的HTML ==========
-def save_debug_html(html, filename='debug_channel.html'):
-    """保存HTML到GitHub仓库，方便调试"""
-    import base64 as _b64
-    try:
-        # 先获取当前文件SHA
-        url = f'https://api.github.com/repos/{GITHUB_OWNER}/{GITHUB_REPO}/contents/{filename}?ref={GITHUB_BRANCH}'
-        headers = {
-            'Authorization': f'token {GITHUB_TOKEN}',
-            'Accept': 'application/vnd.github.v3+json',
-        }
-        req = urllib.request.Request(url, headers=headers)
-        sha = None
-        try:
-            with urllib.request.urlopen(req, timeout=10) as resp:
-                data = json.loads(resp.read().decode('utf-8'))
-                sha = data.get('sha')
-        except:
-            pass
-        
-        content_b64 = _b64.b64encode(html.encode('utf-8')).decode('utf-8')
-        payload = {
-            'message': 'debug: 保存频道HTML用于调试',
-            'content': content_b64,
-            'branch': GITHUB_BRANCH
-        }
-        if sha:
-            payload['sha'] = sha
-        
-        req = urllib.request.Request(
-            f'https://api.github.com/repos/{GITHUB_OWNER}/{GITHUB_REPO}/contents/{filename}',
-            data=json.dumps(payload).encode('utf-8'),
-            headers={
-                'Authorization': f'token {GITHUB_TOKEN}',
-                'Accept': 'application/vnd.github.v3+json',
-                'Content-Type': 'application/json'
-            },
-            method='PUT'
-        )
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            log(f'🐛 调试HTML已保存到 {filename}')
-    except Exception as e:
-        log(f'🐛 保存调试HTML失败: {e}')
-
 def sync_once():
     """运行一次同步"""
     state = load_state()
@@ -325,9 +279,6 @@ def sync_once():
         return 0
 
     # 提取消息中的文件
-    # 调试：保存HTML
-    if GITHUB_TOKEN:
-        save_debug_html(html)
     messages = extract_messages(html)
     log(f'   找到 {len(messages)} 个文件')
 
