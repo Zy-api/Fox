@@ -11,24 +11,6 @@
       "file_unique_id": "PNA-失控进化6.5.zip_45.5 MB",
       "msg_id": 180,
       "source": "telegram_scraper"
-    },
-    {
-      "name": "PAN-失控进化6.5.zip",
-      "size": "325 MB",
-      "date": "2026-08-01",
-      "url": "#",
-      "tag": "最新",
-      "desc": "失控进化最新版本",
-      "icon": ""
-    },
-    {
-      "name": "PAN-星辰大海3.2.zip",
-      "size": "198 MB",
-      "date": "2026-07-28",
-      "url": "#",
-      "tag": "热门",
-      "desc": "星辰大海系列",
-      "icon": ""
     }
   ],
   "settings": {
@@ -39,7 +21,7 @@
     "footer": "所有资源均来自网络 · 仅供学习交流",
     "tgChannel": "PNAyyds",
     "tgBotToken": "",
-    "tgFilePattern": "PAN-*.zip",
+    "tgFilePattern": "PNA-*.zip",
     "tgFileTypes": ".zip,.rar,.7z"
   }
 }
