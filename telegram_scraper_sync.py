@@ -262,6 +262,52 @@ def save_remote_data(data, sha):
     return result is not None and 'content' in result
 
 
+
+
+# ========== 调试：保存抓取到的HTML ==========
+def save_debug_html(html, filename='debug_channel.html'):
+    """保存HTML到GitHub仓库，方便调试"""
+    import base64 as _b64
+    try:
+        # 先获取当前文件SHA
+        url = f'https://api.github.com/repos/{GITHUB_OWNER}/{GITHUB_REPO}/contents/{filename}?ref={GITHUB_BRANCH}'
+        headers = {
+            'Authorization': f'token {GITHUB_TOKEN}',
+            'Accept': 'application/vnd.github.v3+json',
+        }
+        req = urllib.request.Request(url, headers=headers)
+        sha = None
+        try:
+            with urllib.request.urlopen(req, timeout=10) as resp:
+                data = json.loads(resp.read().decode('utf-8'))
+                sha = data.get('sha')
+        except:
+            pass
+        
+        content_b64 = _b64.b64encode(html.encode('utf-8')).decode('utf-8')
+        payload = {
+            'message': 'debug: 保存频道HTML用于调试',
+            'content': content_b64,
+            'branch': GITHUB_BRANCH
+        }
+        if sha:
+            payload['sha'] = sha
+        
+        req = urllib.request.Request(
+            f'https://api.github.com/repos/{GITHUB_OWNER}/{GITHUB_REPO}/contents/{filename}',
+            data=json.dumps(payload).encode('utf-8'),
+            headers={
+                'Authorization': f'token {GITHUB_TOKEN}',
+                'Accept': 'application/vnd.github.v3+json',
+                'Content-Type': 'application/json'
+            },
+            method='PUT'
+        )
+        with urllib.request.urlopen(req, timeout=10) as resp:
+            log(f'🐛 调试HTML已保存到 {filename}')
+    except Exception as e:
+        log(f'🐛 保存调试HTML失败: {e}')
+
 def sync_once():
     """运行一次同步"""
     state = load_state()
@@ -279,6 +325,9 @@ def sync_once():
         return 0
 
     # 提取消息中的文件
+    # 调试：保存HTML
+    if GITHUB_TOKEN:
+        save_debug_html(html)
     messages = extract_messages(html)
     log(f'   找到 {len(messages)} 个文件')
 
