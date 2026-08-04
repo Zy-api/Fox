@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telegram 登录 · 生成会话字符串</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0a0a1a;
+            color: #fff;
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 40px 20px;
+        }
+        .container {
+            width: 100%;
+            max-width: 420px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 20px;
+            padding: 28px 24px;
+            backdrop-filter: blur(20px);
+        }
+        h1 {
+            font-size: 22px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #a78bfa, #22d3ee);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .subtitle {
+            text-align: center;
+            font-size: 13px;
+            color: #94a3b8;
+            margin-bottom: 24px;
+        }
+        .step {
+            margin-bottom: 20px;
+        }
+        .step-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #a78bfa;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+        input {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            font-size: 14px;
+            color: #fff;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+        input:focus {
+            outline: none;
+            border-color: rgba(139,92,246,0.5);
+            background: rgba(255,255,255,0.08);
+        }
+        input::placeholder {
+            color: #475569;
+        }
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(139,92,246,0.3);
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+        }
+        .result-box {
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(139,92,246,0.3);
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 16px;
+            word-break: break-all;
+            font-size: 12px;
+            font-family: monospace;
+            color: #a78bfa;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .hint {
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 8px;
+            line-height: 1.6;
+        }
+        .hint a {
+            color: #22d3ee;
+            text-decoration: none;
+        }
+        .status {
+            text-align: center;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 13px;
+            margin-bottom: 16px;
+            display: none;
+        }
+        .status.loading {
+            display: block;
+            background: rgba(34,211,238,0.1);
+            color: #22d3ee;
+            border: 1px solid rgba(34,211,238,0.2);
+        }
+        .status.error {
+            display: block;
+            background: rgba(239,68,68,0.1);
+            color: #f87171;
+            border: 1px solid rgba(239,68,68,0.2);
+        }
+        .status.success {
+            display: block;
+            background: rgba(34,197,94,0.1);
+            color: #4ade80;
+            border: 1px solid rgba(34,197,94,0.2);
+        }
+        .copy-btn {
+            margin-top: 10px;
+            padding: 10px 20px;
+            background: rgba(139,92,246,0.2);
+            border: 1px solid rgba(139,92,246,0.3);
+            border-radius: 8px;
+            font-size: 12px;
+            color: #a78bfa;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .step-guide {
+            background: rgba(139,92,246,0.08);
+            border: 1px solid rgba(139,92,246,0.15);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 24px;
+        }
+        .step-guide h3 {
+            font-size: 14px;
+            color: #a78bfa;
+            margin-bottom: 10px;
+        }
+        .step-guide ol {
+            padding-left: 20px;
+            font-size: 12px;
+            color: #94a3b8;
+            line-height: 1.8;
+        }
+        .step-guide code {
+            background: rgba(0,0,0,0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 11px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Telegram 登录工具</h1>
+        <p class="subtitle">生成会话字符串，用于自动同步</p>
+
+        <div class="step-guide">
+            <h3>📋 前置准备</h3>
+            <ol>
+                <li>打开 <a href="https://my.telegram.org" target="_blank" style="color:#22d3ee">my.telegram.org</a></li>
+                <li>用你的 Telegram 账号登录</li>
+                <li>点击 "API development tools"</li>
+                <li>获取 <code>App api_id</code> 和 <code>App api_hash</code></li>
+            </ol>
+        </div>
+
+        <div id="status" class="status"></div>
+
+        <div id="step1">
+            <div class="step">
+                <div class="step-label">第 1 步：输入 API 信息</div>
+                <input type="text" id="apiId" placeholder="API ID（纯数字）">
+            </div>
+            <div class="step">
+                <input type="text" id="apiHash" placeholder="API Hash（一串字母数字）">
+            </div>
+            <button class="btn" onclick="step1Next()">下一步 →</button>
+        </div>
+
+        <div id="step2" style="display:none">
+            <div class="step">
+                <div class="step-label">第 2 步：输入手机号</div>
+                <input type="text" id="phone" placeholder="例如：+8613800138000">
+                <p class="hint">请输入带国家代码的完整手机号，中国手机号前面加 <code style="background:rgba(0,0,0,0.3);padding:2px 6px;border-radius:4px;">+86</code></p>
+            </div>
+            <button class="btn" onclick="sendCode()">发送验证码</button>
+            <br><br>
+            <button class="btn btn-secondary" onclick="backToStep1()">← 返回</button>
+        </div>
+
+        <div id="step3" style="display:none">
+            <div class="step">
+                <div class="step-label">第 3 步：输入验证码</div>
+                <input type="text" id="code" placeholder="Telegram 发给你的验证码">
+                <p class="hint">验证码会发送到你的 Telegram 消息里</p>
+            </div>
+            <div class="step">
+                <div class="step-label">二级密码（可选）</div>
+                <input type="password" id="password" placeholder="如果开启了两步验证，请输入密码">
+            </div>
+            <button class="btn" onclick="login()">登录并生成会话</button>
+            <br><br>
+            <button class="btn btn-secondary" onclick="backToStep2()">← 返回</button>
+        </div>
+
+        <div id="step4" style="display:none">
+            <div class="step-label">✅ 登录成功！</div>
+            <p style="font-size:13px;color:#94a3b8;margin-bottom:12px;">
+                下面是你的会话字符串，请复制并保存到 GitHub Secrets：
+            </p>
+            <div class="result-box" id="sessionResult"></div>
+            <button class="copy-btn" onclick="copySession()">📋 复制会话字符串</button>
+            <br><br>
+            <div class="hint">
+                <strong>⚠️ 重要：</strong>会话字符串相当于你的账号密码，请妥善保管，不要泄露给他人！
+                <br><br>
+                <strong>下一步：</strong>
+                <ol style="padding-left:20px;margin-top:8px;">
+                    <li>打开 GitHub 仓库的 Settings → Secrets and variables → Actions</li>
+                    <li>点击 "New repository secret"</li>
+                    <li>Name 填 <code>TG_SESSION</code></li>
+                    <li>Secret 粘贴刚才复制的会话字符串</li>
+                    <li>还需要添加 <code>TG_API_ID</code> 和 <code>TG_API_HASH</code> 两个 Secret</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/telegram@2.19.20/browser/telegram.min.js"></script>
+    <script>
+        let apiId, apiHash, phone, phoneCodeHash;
+        let client;
+
+        function showStatus(text, type) {
+            const el = document.getElementById('status');
+            el.className = 'status ' + type;
+            el.textContent = text;
+        }
+
+        function hideStatus() {
+            document.getElementById('status').className = 'status';
+        }
+
+        function step1Next() {
+            apiId = document.getElementById('apiId').value.trim();
+            apiHash = document.getElementById('apiHash').value.trim();
+            
+            if (!apiId || !apiHash) {
+                showStatus('请填写 API ID 和 API Hash', 'error');
+                return;
+            }
+            
+            hideStatus();
+            document.getElementById('step1').style.display = 'none';
+            document.getElementById('step2').style.display = 'block';
+        }
+
+        function backToStep1() {
+            document.getElementById('step2').style.display = 'none';
+            document.getElementById('step1').style.display = 'block';
+        }
+
+        function backToStep2() {
+            document.getElementById('step3').style.display = 'none';
+            document.getElementById('step2').style.display = 'block';
+        }
+
+        async function sendCode() {
+            phone = document.getElementById('phone').value.trim();
+            
+            if (!phone) {
+                showStatus('请输入手机号', 'error');
+                return;
+            }
+            
+            showStatus('正在连接 Telegram...', 'loading');
+            
+            try {
+                const { TelegramClient } = telegram;
+                const { StringSession } = telegram.sessions;
+                
+                client = new TelegramClient(new StringSession(''), parseInt(apiId), apiHash, {
+                    connectionRetries: 5,
+                });
+                
+                await client.connect();
+                
+                const result = await client.invoke(
+                    new telegram.Api.auth.SendCode({
+                        phoneNumber: phone,
+                        apiId: parseInt(apiId),
+                        apiHash: apiHash,
+                        settings: new telegram.Api.CodeSettings({}),
+                    })
+                );
+                
+                phoneCodeHash = result.phoneCodeHash;
+                
+                hideStatus();
+                document.getElementById('step2').style.display = 'none';
+                document.getElementById('step3').style.display = 'block';
+                
+            } catch (e) {
+                showStatus('发送验证码失败：' + e.message, 'error');
+                console.error(e);
+            }
+        }
+
+        async function login() {
+            const code = document.getElementById('code').value.trim();
+            const password = document.getElementById('password').value.trim();
+            
+            if (!code) {
+                showStatus('请输入验证码', 'error');
+                return;
+            }
+            
+            showStatus('正在登录...', 'loading');
+            
+            try {
+                const { StringSession } = telegram.sessions;
+                
+                try {
+                    await client.invoke(
+                        new telegram.Api.auth.SignIn({
+                            phoneNumber: phone,
+                            phoneCodeHash: phoneCodeHash,
+                            phoneCode: code,
+                        })
+                    );
+                } catch (e) {
+                    if (e.errorMessage === 'SESSION_PASSWORD_NEEDED' && password) {
+                        const passwordResult = await client.invoke(
+                            new telegram.Api.account.GetPassword()
+                        );
+                        
+                        const passwordHash = await client._crypto.pbkdf2(
+                            new TextEncoder().encode(password),
+                            passwordResult.currentSalt,
+                            passwordResult.currentAlgo.iterations
+                        );
+                        
+                        await client.invoke(
+                            new telegram.Api.auth.CheckPassword({
+                                password: new telegram.Api.InputCheckPasswordSRP({
+                                    srpId: passwordResult.currentSrpId,
+                                    a: passwordHash.slice(0, 256),
+                                    m1: passwordHash.slice(256, 512),
+                                }),
+                            })
+                        );
+                    } else {
+                        throw e;
+                    }
+                }
+                
+                const sessionString = client.session.save();
+                
+                document.getElementById('step3').style.display = 'none';
+                document.getElementById('step4').style.display = 'block';
+                document.getElementById('sessionResult').textContent = sessionString;
+                
+                hideStatus();
+                showStatus('登录成功！', 'success');
+                
+                await client.disconnect();
+                
+            } catch (e) {
+                showStatus('登录失败：' + e.message, 'error');
+                console.error(e);
+            }
+        }
+
+        function copySession() {
+            const text = document.getElementById('sessionResult').textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = '✅ 已复制！';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>
