@@ -19,7 +19,9 @@ from datetime import datetime, timezone, timedelta
 # ========== 配置 ==========
 # 多个频道配置：频道用户名|关键词1,关键词2|文件类型
 # 用 | 分隔频道和关键词，用 , 分隔多个关键词
-CHANNELS_CONFIG = os.environ.get('CHANNELS_CONFIG', '')
+# 用 ; 分隔多个频道
+CHANNELS_CONFIG = os.environ.get('CHANNELS_CONFIG', 
+    'PNAyyds|PNA|.zip,.rar,.7z;hhhhp|芒果,客户端|.zip,.rar,.7z,.apk,.ipa')
 
 # 兼容旧版单频道配置
 DEFAULT_CHANNEL = os.environ.get('TG_CHANNEL', 'PNAyyds')
