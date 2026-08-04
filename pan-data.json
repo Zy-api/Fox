@@ -4,7 +4,7 @@
       "name": "芒果客户端3.7版本b.apk",
       "size": "56.9 MB",
       "date": "2026-06-26",
-      "url": "https://t.me/hhhhp/17662",
+      "url": "https://t.me/hhhhp/17670",
       "direct_url": "",
       "tag": "hhhhp",
       "desc": "来自 @hhhhp",
@@ -12,7 +12,7 @@
       "file_unique_id": "hhhhp_芒果客户端3.7版本b.apk",
       "msg_id": 17670,
       "channel": "hhhhp",
-      "source": "telegram_scraper"
+      "source": "webscrape"
     },
     {
       "name": "PNA-失控进化6.5.zip",
@@ -26,7 +26,7 @@
       "file_unique_id": "PNAyyds_PNA-失控进化6.5.zip",
       "msg_id": 180,
       "channel": "PNAyyds",
-      "source": "telegram_scraper"
+      "source": "webscrape"
     }
   ],
   "settings": {
