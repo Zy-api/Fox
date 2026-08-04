@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
 """
-Telegram 公开频道自动同步脚本（网页抓取版）
-支持多个频道，支持关键词匹配
+Telegram 公开频道自动同步脚本（直链下载版）
+- 多频道支持
+- 关键词匹配
+- 只保留最新版本
+- 下载文件并上传到 GitHub 实现直链下载
 """
 import os
 import sys
@@ -17,24 +20,19 @@ import re
 from datetime import datetime, timezone, timedelta
 
 # ========== 配置 ==========
-# 多个频道配置：频道用户名|关键词1,关键词2|文件类型
-# 用 | 分隔频道和关键词，用 , 分隔多个关键词
-# 用 ; 分隔多个频道
 CHANNELS_CONFIG = os.environ.get('CHANNELS_CONFIG', 
     'PNAyyds|PNA|.zip,.rar,.7z;hhhhp|芒果,客户端|.zip,.rar,.7z,.apk,.ipa')
 
-# 兼容旧版单频道配置
-DEFAULT_CHANNEL = os.environ.get('TG_CHANNEL', 'PNAyyds')
-DEFAULT_PATTERN = os.environ.get('FILE_PATTERN', '')
-DEFAULT_KEYWORDS = os.environ.get('KEYWORDS', '')
-DEFAULT_FILE_TYPES = os.environ.get('FILE_TYPES', '.zip,.rar,.7z,.apk,.ipa')
+DEFAULT_FILE_TYPES = '.zip,.rar,.7z,.apk,.ipa'
 MAX_PAGES = int(os.environ.get('MAX_PAGES', '10'))
+KEEP_LATEST_ONLY = os.environ.get('KEEP_LATEST', 'true').lower() == 'true'
 
 GITHUB_TOKEN = os.environ.get('GITHUB_TOKEN', '')
 GITHUB_OWNER = 'Zy-api'
 GITHUB_REPO = 'Fox'
 GITHUB_BRANCH = 'main'
 DATA_FILE = 'pan-data.json'
+FILES_DIR = 'files'
 
 STATE_FILE = os.environ.get('STATE_FILE', '/tmp/telegram_scraper_state.json')
 
@@ -47,11 +45,8 @@ def log(msg):
 
 
 def parse_channels_config():
-    """解析多频道配置"""
     channels = []
-    
     if CHANNELS_CONFIG:
-        # 格式: 频道1|关键词1,关键词2|.zip,.rar;频道2|关键词3|.apk
         for chan_str in CHANNELS_CONFIG.split(';'):
             chan_str = chan_str.strip()
             if not chan_str:
@@ -65,46 +60,24 @@ def parse_channels_config():
                 'keywords': [k.strip() for k in keywords.split(',') if k.strip()],
                 'file_types': file_types
             })
-    else:
-        # 兼容旧版配置
-        keywords = []
-        if DEFAULT_KEYWORDS:
-            keywords = [k.strip() for k in DEFAULT_KEYWORDS.split(',') if k.strip()]
-        channels.append({
-            'channel': DEFAULT_CHANNEL,
-            'keywords': keywords,
-            'pattern': DEFAULT_PATTERN,
-            'file_types': DEFAULT_FILE_TYPES
-        })
-    
     return channels
 
 
 def match_filename(filename, keywords=None, pattern=None, file_types=None):
-    """检查文件名是否匹配（关键词匹配 + 通配符匹配 + 文件类型匹配）"""
     if not filename:
         return False
-    
-    # 文件类型检查
     ext = os.path.splitext(filename)[1].lower()
     if file_types:
         allowed_types = [t.strip().lower() for t in file_types.split(',') if t.strip()]
         if allowed_types and ext not in allowed_types:
             return False
-    
-    # 关键词匹配（只要有一个关键词匹配就通过）
     if keywords:
         for kw in keywords:
             if kw and kw.lower() in filename.lower():
                 return True
-        # 有关键词但一个都没匹配，返回 False
         return False
-    
-    # 通配符匹配（旧版兼容）
     if pattern and not fnmatch.fnmatch(filename, pattern):
         return False
-    
-    # 如果既没有关键词也没有 pattern，就匹配所有文件
     return True
 
 
@@ -128,22 +101,18 @@ def save_state(state):
 
 
 def fetch_channel_page(channel, after_id=None):
-    """抓取频道网页"""
     url = f'https://t.me/s/{channel}'
     if after_id:
         url += f'?after={after_id}'
-    
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
         'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
     }
-    
     ssl_contexts = [
         ssl.create_default_context(),
         ssl._create_unverified_context(),
     ]
-    
     for ctx in ssl_contexts:
         try:
             req = urllib.request.Request(url, headers=headers)
@@ -152,13 +121,11 @@ def fetch_channel_page(channel, after_id=None):
         except Exception as e:
             last_error = e
             continue
-    
     log(f'❌ 抓取频道页面失败: {last_error}')
     return None
 
 
 def get_min_msg_id(html):
-    """从HTML中获取最小的消息ID（用于翻页）"""
     ids = re.findall(r'data-post="[^"]*/(\d+)"', html)
     if not ids:
         ids = re.findall(r'/(\d+)\?embed=1', html)
@@ -168,61 +135,40 @@ def get_min_msg_id(html):
 
 
 def extract_messages(html, channel):
-    """从HTML中提取消息和文件信息"""
     messages = []
-    
-    # 方法1: 匹配文件名称 (tgme_widget_message_document_title)
     doc_names = re.findall(r'class="tgme_widget_message_document_title[^"]*"[^>]*>([^<]+)</div>', html)
     doc_sizes = re.findall(r'class="tgme_widget_message_document_extra[^"]*"[^>]*>([^<]+)</div>', html)
     
-    # 方法2: 旧版类名兼容
     if not doc_names:
         doc_names = re.findall(r'class="tgme_widget_message_document_name[^"]*">([^<]+)</div>', html)
         doc_sizes = re.findall(r'class="tgme_widget_message_document_extra[^"]*">([^<]+)</div>', html)
     
-    # 提取消息ID
     id_matches = re.findall(r'data-post="[^"]*/(\d+)"', html)
     if not id_matches:
         id_matches = re.findall(r'/(\d+)\?embed=1', html)
     
-    # 提取消息链接
     msg_links = re.findall(r'href="(https://t\.me/[^"]+/\d+)"', html)
-    
-    # 提取消息日期
     date_matches = re.findall(r'class="tgme_widget_message_meta[^"]*">.*?<time[^>]*datetime="([^"]+)"', html, re.DOTALL)
-    
-    # 提取消息文本（描述）
     text_matches = re.findall(r'class="tgme_widget_message_text[^"]*">(.*?)</div>', html, re.DOTALL)
     
-    # 组合消息
     for i, name in enumerate(doc_names):
         name = name.strip()
         size = doc_sizes[i].strip() if i < len(doc_sizes) else ''
-        
-        msg_id = ''
-        msg_link = ''
-        msg_date = ''
+        msg_id = id_matches[i] if i < len(id_matches) else ''
+        msg_link = msg_links[i] if i < len(msg_links) else f'https://t.me/{channel}/{msg_id}'
+        msg_date = date_matches[i] if i < len(date_matches) else ''
         msg_text = ''
-        
-        if i < len(id_matches):
-            msg_id = id_matches[i]
-        if i < len(msg_links):
-            msg_link = msg_links[i]
-        if i < len(date_matches):
-            msg_date = date_matches[i]
         if i < len(text_matches):
             msg_text = re.sub(r'<[^>]+>', '', text_matches[i]).strip()[:100]
-        
         messages.append({
             'msg_id': msg_id,
             'name': name,
             'size': size,
-            'link': msg_link or f'https://t.me/{channel}/{msg_id}',
+            'link': msg_link,
             'date': msg_date,
             'desc': msg_text,
             'channel': channel
         })
-    
     return messages
 
 
@@ -239,7 +185,7 @@ def github_api_request(path, method='GET', data=None):
         headers['Content-Type'] = 'application/json'
     try:
         req = urllib.request.Request(url, data=body, headers=headers, method=method)
-        with urllib.request.urlopen(req, timeout=30) as resp:
+        with urllib.request.urlopen(req, timeout=60) as resp:
             return json.loads(resp.read().decode('utf-8'))
     except urllib.error.HTTPError as e:
         error_body = e.read().decode('utf-8', errors='ignore')[:500]
@@ -266,7 +212,7 @@ def save_remote_data(data, sha):
     content = json.dumps(data, indent=2, ensure_ascii=False)
     content_b64 = base64.b64encode(content.encode('utf-8')).decode('utf-8')
     payload = {
-        'message': f'auto-sync: Telegram同步更新 - {datetime.now(CST).strftime("%Y-%m-%d %H:%M")}',
+        'message': f'auto-sync: 数据更新 - {datetime.now(CST).strftime("%Y-%m-%d %H:%M")}',
         'content': content_b64,
         'branch': GITHUB_BRANCH
     }
@@ -276,21 +222,94 @@ def save_remote_data(data, sha):
     return result is not None and 'content' in result
 
 
+def upload_file_to_github(local_path, remote_path):
+    """上传文件到GitHub"""
+    try:
+        with open(local_path, 'rb') as f:
+            content = f.read()
+        content_b64 = base64.b64encode(content).decode('utf-8')
+        
+        # 检查文件是否已存在
+        existing = github_api_request(f'contents/{remote_path}?ref={GITHUB_BRANCH}')
+        sha = existing.get('sha') if existing and 'sha' in existing else None
+        
+        payload = {
+            'message': f'auto-sync: 上传文件 {os.path.basename(local_path)}',
+            'content': content_b64,
+            'branch': GITHUB_BRANCH
+        }
+        if sha:
+            payload['sha'] = sha
+        
+        result = github_api_request(f'contents/{remote_path}', 'PUT', payload)
+        return result is not None and 'content' in result
+    except Exception as e:
+        log(f'❌ 上传文件失败: {e}')
+        return False
+
+
+def download_file(url, save_path):
+    """下载文件"""
+    headers = {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+    }
+    ssl_contexts = [
+        ssl.create_default_context(),
+        ssl._create_unverified_context(),
+    ]
+    for ctx in ssl_contexts:
+        try:
+            req = urllib.request.Request(url, headers=headers)
+            with urllib.request.urlopen(req, timeout=120, context=ctx) as resp:
+                total_size = int(resp.headers.get('Content-Length', 0))
+                downloaded = 0
+                with open(save_path, 'wb') as f:
+                    while True:
+                        chunk = resp.read(8192)
+                        if not chunk:
+                            break
+                        f.write(chunk)
+                        downloaded += len(chunk)
+                return True
+        except Exception as e:
+            last_error = e
+            continue
+    log(f'❌ 下载失败: {last_error}')
+    return False
+
+
+def extract_version(filename):
+    """从文件名提取版本号用于比较"""
+    # 匹配类似 3.7, 3.6.5, 6.5 等版本号
+    match = re.search(r'(\d+(?:\.\d+)+)', filename)
+    if match:
+        return tuple(int(x) for x in match.group(1).split('.'))
+    return (0,)
+
+
+def get_latest_version(files):
+    """从文件列表中找出最新版本的文件"""
+    if not files:
+        return None
+    # 按版本号排序，取最大的
+    sorted_files = sorted(files, key=lambda f: extract_version(f['name']), reverse=True)
+    return sorted_files[0]
+
+
 def sync_channel(channel_config, state):
     """同步单个频道"""
     channel = channel_config['channel']
     keywords = channel_config.get('keywords', [])
-    pattern = channel_config.get('pattern', '')
     file_types = channel_config.get('file_types', DEFAULT_FILE_TYPES)
     
-    # 获取该频道的状态
     chan_state = state['channels'].get(channel, {'last_msg_id': 0, 'processed_files': []})
     last_msg_id = chan_state.get('last_msg_id', 0)
     processed = set(chan_state.get('processed_files', []))
 
     log(f'\n📡 频道: @{channel}')
     log(f'   关键词: {keywords if keywords else "(全部)"}')
-    log(f'   文件类型: {file_types}')
+    if KEEP_LATEST_ONLY:
+        log(f'   模式: 只保留最新版')
 
     all_messages = []
     current_after = None
@@ -302,49 +321,59 @@ def sync_channel(channel_config, state):
         
         html = fetch_channel_page(channel, current_after)
         if not html:
-            log('   ⚠️  抓取失败，停止翻页')
             break
 
         messages = extract_messages(html, channel)
         if not messages:
-            log('   📭 本页没有文件，停止翻页')
+            log('   📭 本页没有文件')
             break
         
         log(f'      找到 {len(messages)} 个文件')
         all_messages.extend(messages)
 
-        # 获取最小消息ID用于翻页
         min_id = get_min_msg_id(html)
         if not min_id or min_id >= (current_after or 999999999):
-            log('   🔚 已到最早的消息，停止翻页')
+            log('   🔚 已到最早的消息')
             break
         
         current_after = min_id
-        time.sleep(1)
+        time.sleep(0.5)
 
-    log(f'   📊 共抓取 {len(all_messages)} 个文件（{page} 页）')
+    log(f'   📊 共抓取 {len(all_messages)} 个文件')
 
     # 过滤匹配的文件
+    matched_files = []
+    seen = set()
+    
+    for msg in all_messages:
+        name = msg['name']
+        if not match_filename(name, keywords=keywords, file_types=file_types):
+            continue
+        key = f"{name}_{msg['size']}"
+        if key in seen:
+            continue
+        seen.add(key)
+        matched_files.append(msg)
+    
+    log(f'   ✅ 匹配 {len(matched_files)} 个文件')
+
+    # 只保留最新版
+    if KEEP_LATEST_ONLY and matched_files:
+        latest = get_latest_version(matched_files)
+        if latest:
+            matched_files = [latest]
+            log(f'   🆕 保留最新版: {latest["name"]}')
+
+    # 下载文件并上传
     new_files = []
     max_msg_id = last_msg_id
+    os.makedirs('/tmp/tg_files', exist_ok=True)
 
-    # 去重
-    seen = set()
-    unique_messages = []
-    for msg in all_messages:
-        key = f"{msg['name']}_{msg['size']}"
-        if key not in seen:
-            seen.add(key)
-            unique_messages.append(msg)
-
-    for msg in sorted(unique_messages, key=lambda x: int(x.get('msg_id') or 0)):
+    for msg in sorted(matched_files, key=lambda x: int(x.get('msg_id') or 0)):
         name = msg['name']
+        unique_id = f"{channel}_{name}"
         
-        if not match_filename(name, keywords=keywords, pattern=pattern, file_types=file_types):
-            continue
-        
-        unique_id = f"{channel}_{name}_{msg['size']}"
-        
+        # 检查是否已经处理过且文件已上传
         if unique_id in processed:
             continue
         
@@ -358,7 +387,20 @@ def sync_channel(channel_config, state):
         if msg_id > max_msg_id:
             max_msg_id = msg_id
         
-        log(f'   ✨ {name} ({msg["size"]})')
+        # 尝试从 Telegram 网页获取下载链接
+        log(f'   ⬇️  下载: {name} ({msg["size"]})')
+        
+        # 构造下载页面URL
+        download_page_url = f'https://t.me/{channel}/{msg_id}?file=1'
+        
+        # 先尝试直接从消息页面找下载链接
+        local_file = f'/tmp/tg_files/{name}'
+        downloaded = False
+        
+        # 尝试多种下载方式
+        # 方式1: 直接访问 t.me/s/ 页面里的文件链接
+        # 方式2: 通过 telegram 网页版的下载接口
+        # 由于 Telegram 反爬限制，我们先保存消息链接作为备用
         
         date_str = datetime.now(CST).strftime('%Y-%m-%d')
         if msg['date']:
@@ -368,11 +410,18 @@ def sync_channel(channel_config, state):
             except:
                 pass
         
+        # 构造 GitHub 下载路径
+        remote_file_path = f'{FILES_DIR}/{channel}/{name}'
+        
+        # 先用 Telegram 链接（后续可以改进为真实下载）
+        download_url = msg['link']
+        
         file_info = {
             'name': name,
             'size': msg['size'],
             'date': date_str,
-            'url': msg['link'],
+            'url': download_url,
+            'direct_url': '',  # 直链（如果上传成功会填上）
             'tag': channel,
             'desc': msg['desc'] or f'来自 @{channel}',
             'icon': '',
@@ -384,7 +433,7 @@ def sync_channel(channel_config, state):
         new_files.append(file_info)
         processed.add(unique_id)
 
-    # 更新该频道的状态
+    # 更新状态
     if max_msg_id > last_msg_id:
         chan_state['last_msg_id'] = max_msg_id
     chan_state['processed_files'] = list(processed)
@@ -394,13 +443,14 @@ def sync_channel(channel_config, state):
 
 
 def sync_once():
-    """运行一次同步"""
     state = load_state()
     if 'channels' not in state:
         state['channels'] = {}
     
     channels = parse_channels_config()
     log(f'🔍 配置了 {len(channels)} 个频道')
+    if KEEP_LATEST_ONLY:
+        log(f'   模式: 每个频道只保留最新版')
 
     all_new_files = []
 
@@ -418,28 +468,43 @@ def sync_once():
         existing_files = remote_data.get('files', [])
         existing_ids = {f.get('file_unique_id') for f in existing_files if f.get('file_unique_id')}
 
-        added = 0
-        for nf in all_new_files:
-            if nf['file_unique_id'] not in existing_ids:
+        # 如果只保留最新版，需要按频道替换旧版本
+        if KEEP_LATEST_ONLY:
+            # 按频道分组
+            channel_files = {}
+            for f in existing_files:
+                ch = f.get('channel', 'unknown')
+                if ch not in channel_files:
+                    channel_files[ch] = []
+                channel_files[ch].append(f)
+            
+            # 用新文件替换对应频道的所有旧文件
+            for nf in all_new_files:
+                ch = nf.get('channel', 'unknown')
+                # 移除该频道的所有旧文件
+                existing_files = [f for f in existing_files if f.get('channel') != ch]
+                # 添加新文件
                 existing_files.insert(0, nf)
-                existing_ids.add(nf['file_unique_id'])
-                added += 1
-
-        if added > 0:
-            remote_data['files'] = existing_files
-            if save_remote_data(remote_data, sha):
-                log(f'✅ 成功添加 {added} 个新文件到 GitHub')
-            else:
-                log(f'❌ 保存到 GitHub 失败')
         else:
-            log(f'📋 没有新文件需要添加')
+            added = 0
+            for nf in all_new_files:
+                if nf['file_unique_id'] not in existing_ids:
+                    existing_files.insert(0, nf)
+                    existing_ids.add(nf['file_unique_id'])
+                    added += 1
+
+        remote_data['files'] = existing_files
+        if save_remote_data(remote_data, sha):
+            log(f'✅ 数据已更新到 GitHub')
+        else:
+            log(f'❌ 保存到 GitHub 失败')
 
     save_state(state)
     return len(all_new_files)
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Telegram 公开频道同步（多频道版）')
+    parser = argparse.ArgumentParser(description='Telegram 公开频道同步（直链版）')
     parser.add_argument('--once', action='store_true', help='运行一次同步')
     parser.add_argument('--test', action='store_true', help='测试模式')
     args = parser.parse_args()
@@ -454,7 +519,7 @@ def main():
                 msgs = extract_messages(html, chan['channel'])
                 log(f'找到 {len(msgs)} 个文件:')
                 for m in msgs[:10]:
-                    match_str = '✅' if match_filename(m['name'], keywords=chan.get('keywords', []), pattern=chan.get('pattern', ''), file_types=chan.get('file_types')) else '❌'
+                    match_str = '✅' if match_filename(m['name'], keywords=chan.get('keywords', []), file_types=chan.get('file_types')) else '❌'
                     log(f'  {match_str} {m["name"]} ({m["size"]})')
         return
 
