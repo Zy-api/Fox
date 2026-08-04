@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """
-Telegram 公开频道自动同步 + 直接下载脚本
+Telegram 公开频道自动同步 + 直接下载脚本 v2
 使用 Playwright 浏览器下载文件，上传到 GitHub Releases
-注意：此脚本会自动安装 Playwright 和 Chromium
 """
 import os
 import sys
@@ -38,35 +37,48 @@ def log(msg):
     print(f'[{ts}] {msg}', flush=True)
 
 
+def run_cmd(cmd):
+    """运行命令并返回输出"""
+    log(f'   执行: {cmd[:80]}...')
+    try:
+        result = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=300)
+        if result.returncode == 0:
+            log(f'   ✅ 成功')
+            return True, result.stdout
+        else:
+            log(f'   ❌ 失败 (退出码: {result.returncode})')
+            log(f'   错误: {result.stderr[:300]}')
+            return False, result.stderr
+    except Exception as e:
+        log(f'   ❌ 异常: {e}')
+        return False, str(e)
+
+
 def install_playwright():
-    """自动安装 Playwright 和 Chromium"""
-    log('📦 检查 Playwright...')
-    try:
-        import playwright
-        log('   Playwright 已安装')
-    except ImportError:
-        log('   正在安装 Playwright...')
-        subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'playwright', '-q'])
-        log('   Playwright 安装完成')
+    """安装 Playwright 和 Chromium"""
+    log('📦 安装 Playwright...')
     
-    # 检查 Chromium
-    try:
-        from playwright.sync_api import sync_playwright
-        with sync_playwright() as p:
-            browser = p.chromium.launch()
-            browser.close()
-        log('   Chromium 就绪')
-        return True
-    except Exception:
-        log('   正在安装 Chromium 浏览器...')
-        try:
-            subprocess.check_call([sys.executable, '-m', 'playwright', 'install', 'chromium'])
-            subprocess.check_call([sys.executable, '-m', 'playwright', 'install-deps', 'chromium'])
-            log('   Chromium 安装完成')
-            return True
-        except Exception as e:
-            log(f'   ❌ Chromium 安装失败: {e}')
-            return False
+    # 安装 playwright
+    ok, _ = run_cmd(f'{sys.executable} -m pip install playwright --quiet')
+    if not ok:
+        log('❌ Playwright pip 安装失败')
+        return False
+    
+    # 安装系统依赖
+    log('📦 安装系统依赖...')
+    ok, _ = run_cmd(f'{sys.executable} -m playwright install-deps chromium')
+    if not ok:
+        log('⚠️  系统依赖安装可能有问题，继续尝试...')
+    
+    # 安装 Chromium
+    log('📦 安装 Chromium...')
+    ok, _ = run_cmd(f'{sys.executable} -m playwright install chromium')
+    if not ok:
+        log('❌ Chromium 安装失败')
+        return False
+    
+    log('✅ Playwright + Chromium 安装完成')
+    return True
 
 
 def match_keywords(filename, keywords):
@@ -170,6 +182,8 @@ def get_or_create_release():
             'draft': False,
             'prerelease': False,
         })
+        if release:
+            log('✅ Release 创建成功')
     
     return release
 
@@ -181,11 +195,11 @@ def upload_file_to_release(file_path, file_name, release):
         log('❌ 无法获取上传地址')
         return None
     
-    log(f'⬆️  上传文件: {file_name}')
+    log(f'⬆️  上传: {file_name}')
     
     try:
         file_size = os.path.getsize(file_path)
-        log(f'   文件大小: {file_size / 1024 / 1024:.1f} MB')
+        log(f'   大小: {file_size / 1024 / 1024:.1f} MB')
         
         with open(file_path, 'rb') as f:
             file_data = f.read()
@@ -205,12 +219,13 @@ def upload_file_to_release(file_path, file_name, release):
             log(f'   ❌ 上传失败')
             return None
     except Exception as e:
-        log(f'❌ 上传文件失败: {e}')
+        log(f'❌ 上传失败: {e}')
         return None
 
 
 def delete_release_asset(asset_id):
-    return github_api_request(f'releases/assets/{asset_id}', 'DELETE')
+    result = github_api_request(f'releases/assets/{asset_id}', 'DELETE')
+    return result is not None
 
 
 def fetch_channel_files(channel_username):
@@ -289,115 +304,197 @@ def fetch_channel_files(channel_username):
     return all_messages
 
 
-def download_file_with_playwright(telegram_url, save_path):
+def download_file_playwright(telegram_url, save_path):
     """用 Playwright 下载 Telegram 文件"""
+    log(f'   🌐 浏览器访问: {telegram_url}')
+    
     try:
         from playwright.sync_api import sync_playwright
     except ImportError:
-        log('⚠️  Playwright 未安装')
+        log('   ❌ Playwright 未安装')
         return False
-    
-    log(f'   🌐 打开页面: {telegram_url}')
     
     try:
         with sync_playwright() as p:
-            browser = p.chromium.launch()
+            log('   启动浏览器...')
+            browser = p.chromium.launch(headless=True)
             context = browser.new_context(
                 user_agent='Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
                 accept_downloads=True,
+                viewport={'width': 1920, 'height': 1080},
             )
             page = context.new_page()
             
+            # 访问消息页面
+            log('   加载页面...')
             try:
-                page.goto(telegram_url, wait_until='domcontentloaded', timeout=30000)
+                page.goto(telegram_url, wait_until='networkidle', timeout=30000)
+            except Exception as e:
+                log(f'   ⚠️  页面加载警告: {e}')
+            
+            time.sleep(5)
+            
+            # 截图调试
+            screenshot_path = '/tmp/tg_page.png'
+            try:
+                page.screenshot(path=screenshot_path, full_page=True)
+                log(f'   📸 已截图')
             except:
                 pass
             
-            time.sleep(3)
+            # 打印页面标题和内容预览
+            title = page.title()
+            log(f'   页面标题: {title}')
             
-            download_triggered = False
+            # 获取页面上所有链接
+            all_links = page.eval_on_selector_all('a', 'elements => elements.map(e => ({text: e.textContent.trim(), href: e.href, class: e.className}))')
+            log(f'   页面链接数: {len(all_links)}')
             
-            # 尝试找下载链接
-            selectors = [
-                'a.tgme_widget_message_download_button',
-                '.tgme_widget_message_document_action_download',
-                'a[download]',
-                '.tgme_widget_message_document a',
-                'a.tgme_widget_message_document_wrap',
-            ]
+            # 找可能的下载链接
+            download_links = []
+            for link in all_links:
+                href = link.get('href', '')
+                text = link.get('text', '')
+                cls = link.get('class', '')
+                if any(k in href.lower() for k in ['download', 'file', 'cdn', 'document']) or \
+                   any(k in text.lower() for k in ['下载', 'download', 'save']) or \
+                   'download' in cls.lower():
+                    download_links.append(link)
             
-            # 方法1: 直接获取href并下载
-            for selector in selectors:
+            log(f'   候选下载链接: {len(download_links)}')
+            for dl in download_links[:5]:
+                log(f'     - {dl.get("text", "")[:30]} -> {dl.get("href", "")[:60]}')
+            
+            # 方法1: 找带 download 属性的链接
+            download_url = None
+            
+            # 找所有带 download 属性的元素
+            download_els = page.query_selector_all('[download]')
+            if download_els:
+                log(f'   找到 {len(download_els)} 个带 download 属性的元素')
+                for el in download_els:
+                    href = el.get_attribute('href')
+                    if href:
+                        download_url = href
+                        log(f'   download链接: {href[:80]}')
+                        break
+            
+            # 方法2: 找文档下载按钮
+            if not download_url:
+                selectors_to_try = [
+                    'a.tgme_widget_message_download_button',
+                    '.tgme_widget_message_document_action_download',
+                    'a.tgme_widget_message_document_action',
+                    '.tgme_widget_message_document_wrap a',
+                    'a.tgme_widget_message_document',
+                    '.tgme_widget_message_bubble a',
+                ]
+                
+                for sel in selectors_to_try:
+                    try:
+                        el = page.query_selector(sel)
+                        if el:
+                            href = el.get_attribute('href')
+                            if href and href.startswith('http'):
+                                download_url = href
+                                log(f'   找到下载链接 ({sel}): {href[:80]}')
+                                break
+                    except:
+                        continue
+            
+            # 方法3: 直接用urllib从所有候选链接下载
+            if not download_url and download_links:
+                for dl in download_links:
+                    href = dl.get('href', '')
+                    if href.startswith('http') and ('file' in href or 'cdn' in href or 'download' in href):
+                        download_url = href
+                        log(f'   使用候选链接: {href[:80]}')
+                        break
+            
+            # 如果找到了下载链接，直接下载
+            if download_url:
+                log(f'   📥 开始下载...')
+                ctx = ssl._create_unverified_context()
+                headers = {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                    'Referer': 'https://t.me/',
+                }
                 try:
-                    element = page.query_selector(selector)
-                    if element:
-                        href = element.get_attribute('href')
-                        if href and href.startswith('http'):
-                            log(f'   找到下载链接: {href[:80]}...')
-                            ctx = ssl._create_unverified_context()
-                            headers = {
-                                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-                                'Referer': 'https://t.me/',
-                            }
-                            req = urllib.request.Request(href, headers=headers)
-                            with urllib.request.urlopen(req, timeout=300, context=ctx) as resp:
-                                with open(save_path, 'wb') as f:
-                                    while True:
-                                        chunk = resp.read(8192)
-                                        if not chunk:
-                                            break
-                                        f.write(chunk)
-                            download_triggered = True
-                            break
-                except:
-                    continue
-            
-            # 方法2: 点击触发下载
-            if not download_triggered:
-                try:
-                    with page.expect_download(timeout=30000) as download_info:
-                        for selector in selectors:
-                            try:
-                                element = page.query_selector(selector)
-                                if element:
-                                    element.click()
+                    req = urllib.request.Request(download_url, headers=headers)
+                    with urllib.request.urlopen(req, timeout=300, context=ctx) as resp:
+                        content_type = resp.headers.get('Content-Type', '')
+                        content_length = int(resp.headers.get('Content-Length', 0))
+                        log(f'   Content-Type: {content_type}')
+                        log(f'   大小: {content_length / 1024 / 1024:.1f} MB')
+                        
+                        with open(save_path, 'wb') as f:
+                            while True:
+                                chunk = resp.read(8192)
+                                if not chunk:
                                     break
-                            except:
-                                continue
-                    download = download_info.value
-                    download.save_as(save_path)
-                    download_triggered = True
+                                f.write(chunk)
+                    
+                    if os.path.exists(save_path) and os.path.getsize(save_path) > 1000:
+                        size_mb = os.path.getsize(save_path) / 1024 / 1024
+                        log(f'   ✅ 下载成功 ({size_mb:.1f} MB)')
+                        browser.close()
+                        return True
+                    else:
+                        log('   ❌ 文件太小或不存在')
                 except Exception as e:
-                    log(f'   点击下载失败: {e}')
+                    log(f'   ❌ 直接下载失败: {e}')
+            
+            # 方法4: 点击触发下载
+            log('   尝试点击下载...')
+            try:
+                with page.expect_download(timeout=15000) as download_info:
+                    # 尝试各种点击
+                    for sel in [
+                        'a.tgme_widget_message_download_button',
+                        '.tgme_widget_message_document_action_download',
+                        '.tgme_widget_message_document_wrap',
+                        '.tgme_widget_message_document',
+                    ]:
+                        try:
+                            el = page.query_selector(sel)
+                            if el:
+                                el.click()
+                                break
+                        except:
+                            continue
+                
+                download = download_info.value
+                download.save_as(save_path)
+                browser.close()
+                
+                if os.path.exists(save_path):
+                    size_mb = os.path.getsize(save_path) / 1024 / 1024
+                    log(f'   ✅ 点击下载成功 ({size_mb:.1f} MB)')
+                    return True
+            except Exception as e:
+                log(f'   点击下载失败: {e}')
             
             browser.close()
-            
-            if download_triggered and os.path.exists(save_path):
-                size_mb = os.path.getsize(save_path) / 1024 / 1024
-                log(f'   ✅ 下载成功 ({size_mb:.1f} MB)')
-                return True
-            
             return False
     except Exception as e:
         log(f'❌ Playwright 错误: {e}')
+        import traceback
+        traceback.print_exc()
         return False
 
 
 def sync_once():
-    state = load_state()
-    processed = set(state.get('processed_files', []))
-
     log('🚀 开始 Telegram 同步')
-    log(f'   频道数: {len(CHANNELS)}')
+    log(f'   频道: {", ".join(c["username"] for c in CHANNELS)}')
 
-    all_new_files = []
+    all_matched_files = []
 
     for channel in CHANNELS:
         ch_name = channel['username']
         keywords = channel['keywords']
         tag = channel['tag']
         
-        log(f'\n📡 频道: @{ch_name}')
+        log(f'\n📡 频道: @{ch_name} (关键词: {", ".join(keywords)})')
         
         messages = fetch_channel_files(ch_name)
         
@@ -407,13 +504,6 @@ def sync_once():
             if not match_keywords(name, keywords):
                 continue
             
-            unique_id = f"{ch_name}_{name}"
-            
-            if unique_id in processed:
-                continue
-            
-            processed.add(unique_id)
-            
             date_str = datetime.now(CST).strftime('%Y-%m-%d')
             if msg['date']:
                 try:
@@ -422,12 +512,15 @@ def sync_once():
                 except:
                     pass
             
+            unique_id = f"{ch_name}_{name}"
+            
             file_info = {
                 'name': name,
                 'size': msg['size'],
                 'date': date_str,
                 'url': msg['link'],
                 'download_url': '',
+                'direct_url': '',
                 'tag': f'{tag}',
                 'desc': msg['desc'] or f'来自 @{ch_name}',
                 'icon': '',
@@ -436,15 +529,16 @@ def sync_once():
                 'channel': ch_name,
                 'source': 'telegram'
             }
-            all_new_files.append(file_info)
+            all_matched_files.append(file_info)
             log(f'  ✨ {tag} {name} ({msg["size"]})')
 
     # 只保留每个频道最新版
-    if all_new_files:
-        log(f'\n📊 发现 {len(all_new_files)} 个匹配文件，筛选最新版...')
+    if all_matched_files:
+        log(f'\n📊 共发现 {len(all_matched_files)} 个匹配文件')
+        log(f'   筛选每个频道最新版...')
         
         latest_by_channel = {}
-        for f in all_new_files:
+        for f in all_matched_files:
             ch = f['channel']
             try:
                 msg_id = int(f['msg_id'].split('/')[-1]) if f['msg_id'] else 0
@@ -465,14 +559,11 @@ def sync_once():
         if pw_ok and GITHUB_TOKEN:
             release = get_or_create_release()
             if release:
-                # 删除旧的同频道文件
+                # 删除所有旧文件
                 existing_assets = release.get('assets', [])
-                for f in latest_files:
-                    ch = f['channel']
-                    for asset in existing_assets:
-                        if ch in asset.get('name', ''):
-                            log(f'   删除旧文件: {asset["name"]}')
-                            delete_release_asset(asset['id'])
+                for asset in existing_assets:
+                    log(f'   删除旧文件: {asset["name"]}')
+                    delete_release_asset(asset['id'])
                 
                 # 下载并上传新文件
                 os.makedirs('/tmp/downloads', exist_ok=True)
@@ -481,50 +572,42 @@ def sync_once():
                     safe_name = f['name'].replace(' ', '_')
                     local_path = f'/tmp/downloads/{f["channel"]}_{safe_name}'
                     
-                    log(f'\n📥 下载: {f["name"]}')
-                    success = download_file_with_playwright(f['url'], local_path)
+                    log(f'\n📥 处理: {f["name"]}')
+                    success = download_file_playwright(f['url'], local_path)
                     
                     if success and os.path.exists(local_path):
                         upload_name = f'{f["channel"]}_{safe_name}'
                         dl_url = upload_file_to_release(local_path, upload_name, release)
                         if dl_url:
                             f['download_url'] = dl_url
-                            log(f'   🔗 下载链接已获取')
+                            f['direct_url'] = dl_url
+                            log(f'   🔗 直链已就绪')
                     
                     time.sleep(1)
+        else:
+            log('⚠️  Playwright 安装失败或无 Token，跳过下载')
 
-        # 更新 GitHub 数据
+        # 更新数据
         if GITHUB_TOKEN:
             remote_data, sha = load_remote_data()
             if remote_data is None:
                 remote_data = {'files': [], 'settings': {}}
 
-            existing_files = remote_data.get('files', [])
-            
-            # 移除旧版本
-            updated_channels = set(f['channel'] for f in latest_files)
-            existing_files = [f for f in existing_files if f.get('channel') not in updated_channels]
-            
-            # 添加新版本
+            # 只保留最新版文件
             for nf in latest_files:
                 nf.pop('_msg_id_num', None)
-                existing_files.insert(0, nf)
 
-            remote_data['files'] = existing_files
+            remote_data['files'] = latest_files
             if save_remote_data(remote_data, sha):
-                log(f'\n✅ 同步完成！共 {len(latest_files)} 个最新版文件')
+                log(f'\n✅ 同步完成！{len(latest_files)} 个最新版文件')
             else:
                 log(f'❌ 保存失败')
         else:
             log('⚠️  无 GitHub Token')
     else:
-        log('📭 没有新文件')
+        log('📭 没有匹配的文件')
 
-    state['processed_files'] = list(processed)
-    state['last_sync'] = datetime.now(CST).isoformat()
-    save_state(state)
-
-    return len(all_new_files)
+    return len(all_matched_files)
 
 
 def main():
