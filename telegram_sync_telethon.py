@@ -28,8 +28,9 @@ DATA_FILE = 'pan-data.json'
 LOG_FILE = 'sync-log.txt'
 
 # Telegram 配置（从环境变量读取）
-API_ID = os.environ.get('TG_API_ID', '')
-API_HASH = os.environ.get('TG_API_HASH', '')
+# 使用 Telegram Web Z 官方公开 API 凭证
+API_ID = int(os.environ.get('TG_API_ID', '2496'))
+API_HASH = os.environ.get('TG_API_HASH', '8da85b0d5bfe62527e5b244c209159c3')
 SESSION_STRING = os.environ.get('TG_SESSION', '')
 
 CST = timezone(timedelta(hours=8))
