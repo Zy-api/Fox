@@ -985,6 +985,7 @@
       <h2>保存</h2>
       <div class="actions">
         <button class="btn btn-primary" onclick="saveToGithub()">保存并同步前台</button>
+        <button class="btn btn-ghost" onclick="openFrontend()">立即查看前台</button>
       </div>
       <p id="status" class="status"></p>
     </section>
@@ -1098,6 +1099,37 @@
     let content = normalizeContent(window.SITE_CONTENT || DEFAULT_CONTENT);
     let currentSha = "";
     const draftKey = "az_admin_content_draft";
+
+    // 启动时从 jsDelivr 加载 GitHub 仓库最新内容（不依赖 Pages 部署）
+    (function loadLatestFromCDN() {
+      const s = document.createElement("script");
+      s.src = "https://cdn.jsdelivr.net/gh/Zy-api/Az@main/site-content.js?t=" + Date.now();
+      s.onload = function () {
+        if (window.SITE_CONTENT && window.SITE_CONTENT.files) {
+          content = normalizeContent(window.SITE_CONTENT);
+          renderForm();
+          setStatus("已从 GitHub 加载最新内容。");
+        }
+        s.remove();
+      };
+      s.onerror = function () {
+        s.remove();
+        // jsDelivr 失败尝试 raw
+        const s2 = document.createElement("script");
+        s2.src = "https://raw.githubusercontent.com/Zy-api/Az/main/site-content.js?t=" + Date.now();
+        s2.onload = function () {
+          if (window.SITE_CONTENT && window.SITE_CONTENT.files) {
+            content = normalizeContent(window.SITE_CONTENT);
+            renderForm();
+            setStatus("已从 GitHub 加载最新内容。");
+          }
+          s2.remove();
+        };
+        s2.onerror = function () { s2.remove(); };
+        document.head.appendChild(s2);
+      };
+      document.head.appendChild(s);
+    })();
 
     const fields = document.querySelectorAll("[data-key]");
     const statusBox = document.getElementById("status");
@@ -1460,10 +1492,29 @@
         const result = await saveRes.json();
         currentSha = result.content.sha;
         clearDraft();
-        setStatus("保存成功。等待 1 到 3 分钟后，前台会同步更新。");
+        setStatus("保存成功！正在刷新 CDN 缓存...");
+        // 清除 jsDelivr CDN 缓存，让前台能立即获取最新内容
+        try {
+          await fetch("https://purge.jsdelivr.net/gh/" + encodeURIComponent(cfg.owner) + "/" + encodeURIComponent(cfg.repo) + "@" + (cfg.branch || "main") + "/site-content.js", { method: "GET" });
+          setStatus("保存成功！前台会在 15 秒内自动更新。\n点击查看前台：" + pagesUrl(cfg));
+        } catch (e) {
+          setStatus("保存成功！前台会在 15 秒内自动更新。\n点击查看前台：" + pagesUrl(cfg));
+        }
       } catch (error) {
         setStatus("保存失败：\n" + error.message);
       }
+    }
+
+    // 生成带缓存清除参数的前台地址
+    function pagesUrl(cfg) {
+      var base = "https://" + encodeURIComponent(cfg.owner) + ".github.io/" + encodeURIComponent(cfg.repo) + "/";
+      return base + "?t=" + Date.now();
+    }
+
+    // 打开前台页面（带缓存清除）
+    function openFrontend() {
+      var cfg = getConfig();
+      window.open(pagesUrl(cfg), "_blank");
     }
 
     function getConfig() {
@@ -1740,7 +1791,16 @@
       if (adminStarted) return;
       adminStarted = true;
       loadSettings();
-      if (!loadDraft()) renderForm();
+      if (!loadDraft()) {
+        // 没有本地草稿时，自动从 GitHub 加载最新内容
+        const cfg = getConfig();
+        if (cfg.token) {
+          loadFromGithub();
+        } else {
+          renderForm();
+          setStatus("请先填写 GitHub Token 并保存，然后点"从 GitHub 读取最新内容"。");
+        }
+      }
     }
 
     function showAdmin() {
