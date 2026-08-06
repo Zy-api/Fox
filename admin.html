@@ -286,6 +286,18 @@
       font-weight: 800;
     }
 
+    .field-pair {
+      display: grid;
+      gap: 0;
+    }
+
+    .field-pair > label:last-child {
+      margin-bottom: 0;
+    }
+
+    .en-head { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+    .en-badge { display: inline-flex; align-items: center; justify-content: center; min-width: 28px; height: 20px; padding: 0 6px; border-radius: 6px; font-size: 11px; font-weight: 700; letter-spacing: .04em; background: linear-gradient(135deg, #38bdf8, #2563eb); color: #fff; }
+
     input,
     textarea,
     select {
@@ -863,22 +875,35 @@
       <div id="animationPicker" class="choice-selector"></div>
       <h2>前台顶部导航栏</h2>
       <div class="grid">
-        <label>前台导航第 1 个按钮<input data-key="navFeatures"></label>
-        <label>前台导航第 2 个按钮<input data-key="navDownloads"></label>
-        <label>前台导航第 3 个按钮<input data-key="navAbout"></label>
+        <div class="field-pair">
+          <label>前台导航第 1 个按钮<input data-key="navFeatures"></label>
+        </div>
+        <div class="field-pair">
+          <label>前台导航第 2 个按钮<input data-key="navDownloads"></label>
+        </div>
+        <div class="field-pair">
+          <label>前台导航第 3 个按钮<input data-key="navAbout"></label>
+        </div>
       </div>
       <h2>前台首页主标题区域</h2>
       <label>首页大标题上方的小标签<input data-key="badge"></label>
       <label>首页最大那行标题<input data-key="heroTitle"></label>
       <label>首页大标题下面的说明文字<textarea data-key="heroSubtitle"></textarea></label>
       <div class="grid">
-        <label>首页第 1 个按钮文字<input data-key="primaryButton"></label>
-        <label>首页第 2 个按钮文字<input data-key="secondaryButton"></label>
+        <div class="field-pair">
+          <label>首页第 1 个按钮文字<input data-key="primaryButton"></label>
+        </div>
+        <div class="field-pair">
+          <label>首页第 2 个按钮文字<input data-key="secondaryButton"></label>
+        </div>
       </div>
       <h2>前台首页右侧预览卡</h2>
       <label>右侧预览卡顶部小字<input data-key="topCard"></label>
       <label>右侧预览卡中间说明<input data-key="previewText"></label>
+      <label>右侧预览卡中间大标题（英文 Secure Download）<span class="current-hint">前台现在显示：<code>Secure Download</code></span><input data-key="previewTitle" placeholder="输入新内容"></label>
       <label>右侧预览卡底部小字<input data-key="bottomCard"></label>
+      <label>右侧预览卡指标文字 1（英文 Free）<span class="current-hint">前台现在显示：<code>Free</code></span><input data-key="metricFree" placeholder="输入新内容"></label>
+      <label>右侧预览卡指标文字 2（英文 GitHub Pages）<span class="current-hint">前台现在显示：<code>GitHub Pages</code></span><input data-key="metricPages" placeholder="输入新内容"></label>
       <h2>前台介绍区</h2>
       <label>前台介绍区标题<input data-key="aboutTitle"></label>
       <label>前台介绍区正文<textarea data-key="aboutText"></textarea></label>
@@ -886,6 +911,7 @@
 
     <section class="panel" id="edit-feature" data-tab-panel="feature">
       <h2>前台功能三卡片</h2>
+      <label>功能区上方小标签（英文 What it does）<span class="current-hint">前台现在显示：<code>What it does</code></span><input data-key="sectionKicker1" placeholder="输入新内容"></label>
       <div class="file-card edit-accordion">
         <button class="accordion-toggle" type="button" onclick="toggleAccordion(this)">
           <span class="accordion-title-main">功能卡片 1：<span data-title-for="feature1Title">高级视觉设计</span><small>对应前台功能区第 1 张卡片</small></span>
@@ -917,6 +943,8 @@
 
     <section class="panel" id="edit-bottom" data-tab-panel="bottom">
       <h2>前台下载区标题说明</h2>
+      <label>下载区上方小标签（英文 Downloads）<span class="current-hint">前台现在显示：<code>Downloads</code></span><input data-key="sectionKicker2" placeholder="输入新内容"></label>
+      <label>说明区上方小标签（英文 How to edit）<span class="current-hint">前台现在显示：<code>How to edit</code></span><input data-key="sectionKicker3" placeholder="输入新内容"></label>
       <label>下载三张卡片上方的大标题<input data-key="downloadsTitle"></label>
       <label>下载三张卡片上方的说明文字<textarea data-key="downloadsText"></textarea></label>
       <h2>前台底部说明区</h2>
@@ -924,6 +952,7 @@
       <label>底部说明区正文<textarea data-key="editText"></textarea></label>
       <label>前台最底部页脚文字<input data-key="footer"></label>
     </section>
+
 
     <section class="panel" id="edit-downloads" data-tab-panel="downloads">
       <h2>前台下载三张卡片</h2>
@@ -1029,30 +1058,40 @@
       navDownloads: "下载",
       navAbout: "说明",
       badge: "Premium Digital Downloads",
-      heroTitle: "高级资源下载中心",
-      heroSubtitle: "这是一个适合手机访问的永久公开网站。页面采用蓝白高级风格，别人可以直接打开你的链接，并点击按钮下载资源。",
+      heroTitle: "资源分享平台",
+      heroSubtitle: "本站无需注册付费，无需安装额外程序，进入页面即可获取所需资源。",
       primaryButton: "查看下载文件",
       secondaryButton: "了解网站亮点",
       topCard: "永久免费公开访问",
       previewText: "高级前台页面 + 静态真实下载体验",
       bottomCard: "手机也能访问",
-      aboutTitle: "适合公开展示和下载",
-      aboutText: "这个版本不需要服务器、不需要银行卡、不需要后台运行。只要上传到 GitHub Pages，就会得到一个长期可访问的网址，例如 https://zy-api.github.io/Az/。",
+      aboutTitle: "关于MT管理器",
+      aboutText: "这里提供 MT 管理器相关资源介绍与下载入口。MT 管理器支持安卓文件管理、压缩解压、文本编辑、APK 资源查看与编辑等功能，适合需要管理文件和研究应用结构的用户使用",
       feature1Title: "高级视觉设计",
       feature1Text: "蓝白配色、玻璃卡片、柔和光效和更克制的字号，让页面更清爽、更干净。",
       feature2Title: "永久公网访问",
-      feature2Text: "使用 GitHub Pages 发布后，别人可以直接通过公开网址访问，不是 localhost。",
+      feature2Text: "全网公开访问渠道，网址长期稳定在线，多设备均可无障碍浏览下载。",
       feature3Title: "文件下载",
-      feature3Text: "下面的按钮会下载真实文件。你可以把按钮链接改成自己的网盘、GitHub 文件或服务器文件地址。",
-      downloadsTitle: "可下载文件",
-      downloadsText: "这里的文件卡片都在 site-content.js 里编辑。你可以新增、删除、改标题、改说明、改下载链接。",
+      feature3Text: "点击对应卡片内的下载按钮，即可保存所需文件资源。",
+      downloadsTitle: "资源分享",
+      downloadsText: "下方汇集各类实用资源，点击对应卡片即可免费下载所需文件。",
       editTitle: "怎么编辑前台",
       editText: "用手机打开 GitHub 仓库里的 site-content.js，点编辑按钮，修改文字或下载链接后提交。GitHub Pages 会自动更新前台页面。",
-      footer: "© 2026 AZ Premium Downloads. Powered by GitHub Pages.",
+      footer: "© 2026 AZ Premium Downloads.",
+      sectionKicker1: "What it does",
+      sectionKicker2: "Downloads",
+      sectionKicker3: "How to edit",
+      previewTitle: "Secure Download",
+      metricFree: "Free",
+      metricPages: "GitHub Pages",
       files: [
-        { icon: "cloud", title: "示例说明文件", description: "点击后会下载一个真实的 TXT 文件，用来证明下载功能可用。", type: "TXT", meta: "可直接下载", button: "立即下载", primary: true, download: "", url: "https://1851738406.share.123pan.cn/123pan/nluBvd-22EZ3" },
-        { icon: "rocket", title: "外部文件链接", description: "如果你的文件放在网盘、GitHub Release 或其他服务器，可以把这个按钮换成那个链接。", type: "LINK", meta: "可替换", button: "查看修改方法", primary: false, download: "", url: "#about" },
-        { icon: "shield", title: "高级展示位", description: "你可以把这里改成产品资料、软件安装包、课程附件、压缩包或其他资源。", type: "PREMIUM", meta: "展示卡片", button: "发布到 Pages", primary: false, download: "", url: "#about" }
+        { icon: "folder", title: "PUBG清理文件", description: "用于清理封号残留，可防止封禁7天", type: "ZIP", meta: "可直接下载", button: "立即下载", primary: true, download: "", url: "https://hk.gh-proxy.com/https://github.com/Zy-api/AppShare/releases/download/Az888/default.zip" },
+        { icon: "folder", title: "MT管理器", description: "专业安卓文件管理工具，内置解压、代码编辑、APK修改等多种功能", type: "APK", meta: "可直接下载", button: "立即下载", primary: true, download: "", url: "https://hk.gh-proxy.com/https://github.com/Zy-api/AppShare/releases/download/Az888/MT._2.26.3-clone.apk" },
+        { icon: "folder", title: "Telegram", description: "全球热门加密通讯软件，支持跨设备云同步、大文件传输与私密聊天功能。", type: "APK", meta: "可直接下载", button: "立即下载", primary: true, download: "", url: "https://hk.gh-proxy.com/https://github.com/Zy-api/AppShare/releases/download/Az888/_3.7.apk" },
+        { icon: "folder", title: "3A加速器", description: "专业游戏网络加速工具，一键优化外服游戏网络，缓解卡顿、高延迟与掉线问题。", type: "APK", meta: "可直接下载", button: "立即下载", primary: true, download: "", url: "https://hk.gh-proxy.org/https:/github.com/Zy-api/AppShare/releases/download/Az888/3A._1.0.1.apk" },
+        { icon: "folder", title: "甲壳虫ADB助手", description: "专业ADB调试工具，内置多设备管理、应用管控、文件互传、日志捕获等多种功能。", type: "APK", meta: "可以直接下载", button: "立即下载", primary: true, download: "", url: "https://hk.gh-proxy.com/https://github.com/Zy-api/AppShare/releases/download/Az888/ADB.apk" },
+        { icon: "folder", title: "VPN", description: "VPN加密节点，保护隐私不泄露，一键切换全球节点。", type: "APK", meta: "可直接下载", button: "立即下载", primary: true, download: "", url: "https://sh01-httpdown.guangyacdn.com/download/?fid=5+0RvtFXKZEn6rEzZ6j97BgpS+o7V8MCAAAAAPAPmTExPAEhTACK0Y3mm3qXDjba&mid=666&threshold=102400&tid=3F9050E2BCD20288F1B2183D73C2F1F6&srcid=0&verno=2&ms=104857600&th=104857600&p=Z5uuEof4UxC4zDonIEk3sYsPvoQSX2i1ivmw7G50pCEok43Mql-_kYHYJjpP_S7FJhAO3TVh63itSawdrkgQ-kiijQVaavssDAIrZB0Z5BGWEa7L-n2vJWyOQr6Fg44ZZ-iNKaBhWoFXBd1ByxeV0WgxXOURnAJnDXwUZ5CVcHfa3e9DpHq309qMCuSxbQ-EWwMcVmDj-6WChfFqGLtLrkSEo56VkV_3kmwNJXV_fpIKl0GfsATFqbZqGn-GqDw1MMOSltWorc0T8weYRMQ&g=F00F9931313C01214C008AD18DE69B7A970E36DA&f=46356283&ts=1785916642&s=f3261ae958b3857&at=B8CC5E72C6DA69EFBD0B57BB911EB4F7" },
+        { icon: "folder", title: "和平精英清理文件", description: "清理封号残留，防止黑设备", type: "ZIP", meta: "可直接下载", button: "立即下载", primary: true, download: "", url: "https://hk.gh-proxy.com/https://github.com/Zy-api/AppShare/releases/download/Az888/HPQl.zip" }
       ]
     };
 
@@ -1106,17 +1145,19 @@
       content.brandIcon = content.brandIcon || "crystal";
       content.heroIcon = content.heroIcon || "vault";
       content.animationStyle = content.animationStyle || "smooth";
-      content.files = [...document.querySelectorAll(".download-file-card")].map((card) => ({
-        icon: card.dataset.icon || "cloud",
-        title: getFileValue(card, "title", "未命名文件"),
-        description: getFileValue(card, "description", "点击按钮下载文件。"),
-        type: getFileValue(card, "type", "FILE"),
-        meta: getFileValue(card, "meta", "可下载"),
-        button: getFileValue(card, "button", "立即下载"),
-        primary: card.querySelector("[data-file='primary']").checked,
-        download: getFileValue(card, "download", ""),
-        url: getFileValue(card, "url", "#")
-      }));
+      content.files = [...document.querySelectorAll(".download-file-card")].map((card) => {
+        return {
+          icon: card.dataset.icon || "cloud",
+          title: getFileValue(card, "title", "未命名文件"),
+          description: getFileValue(card, "description", "点击按钮下载文件。"),
+          type: getFileValue(card, "type", "FILE"),
+          meta: getFileValue(card, "meta", "可下载"),
+          button: getFileValue(card, "button", "立即下载"),
+          primary: card.querySelector("[data-file='primary']").checked,
+          download: getFileValue(card, "download", ""),
+          url: getFileValue(card, "url", "#")
+        };
+      });
     }
 
     function getFileValue(card, key, fallback) {
@@ -1215,8 +1256,12 @@
           <label>这张下载卡片的大标题<span class="current-hint">前台现在显示：<code>${escapeHtml(file.title || "")}</code></span><input data-file="title" placeholder="输入新内容"></label>
           <label>这张下载卡片标题下面的说明文字<span class="current-hint">前台现在显示：<code>${escapeHtml(file.description || "")}</code></span><textarea data-file="description" placeholder="输入新内容"></textarea></label>
           <div class="grid">
-            <label>这张下载卡片底部右侧小字<span class="current-hint">前台现在显示：<code>${escapeHtml(file.meta || "可下载")}</code></span><input data-file="meta" placeholder="输入新内容"></label>
-            <label>这张下载卡片按钮文字<span class="current-hint">前台按钮显示：<code>${escapeHtml(file.button || "立即下载")}</code></span><input data-file="button" placeholder="输入新内容"></label>
+            <div class="field-pair">
+              <label>这张下载卡片底部右侧小字<span class="current-hint">前台现在显示：<code>${escapeHtml(file.meta || "可下载")}</code></span><input data-file="meta" placeholder="输入新内容"></label>
+            </div>
+            <div class="field-pair">
+              <label>这张下载卡片按钮文字<span class="current-hint">前台按钮显示：<code>${escapeHtml(file.button || "立即下载")}</code></span><input data-file="button" placeholder="输入新内容"></label>
+            </div>
           </div>
           <label>这张下载卡片点击后下载的文件名，可不填<span class="current-hint">当前文件名：<code>${escapeHtml(file.download || "不设置")}</code></span><input data-file="download" placeholder="输入新内容"></label>
           <label>这张下载卡片按钮跳转或下载链接<span class="current-hint">当前链接：<code>${escapeHtml(file.url || "#")}</code></span><input data-file="url" placeholder="输入新内容"></label>
@@ -1338,12 +1383,14 @@
         url: "#"
       });
       renderFiles();
+      bindDraftEvents();
     }
 
     function removeFile(index) {
       collectForm();
       content.files.splice(index, 1);
       renderFiles();
+      bindDraftEvents();
     }
 
     async function loadFromGithub() {

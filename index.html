@@ -563,6 +563,77 @@
       .file-card { min-height: auto; gap: 18px; }
       .feature-card, .file-card { border-radius: 20px; }
     }
+
+    /* 滚动入场 */
+    .reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.5s cubic-bezier(0.25, 0.1, 0.25, 1),
+                  transform 0.5s cubic-bezier(0.25, 0.1, 0.25, 1);
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Hero 入场 */
+    .hero > div:first-child,
+    .hero-panel {
+      animation: heroFadeIn 0.5s cubic-bezier(0.25, 0.1, 0.25, 1) both;
+    }
+    .hero-panel { animation-delay: 0.08s; }
+    @keyframes heroFadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 卡片动画 */
+    .file-card {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+                  transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
+      will-change: transform, opacity;
+    }
+    .file-card.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* 悬停效果 */
+    .feature-card {
+      transition: transform 0.3s cubic-bezier(0.25, 0.1, 0.25, 1),
+                  box-shadow 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+    }
+    .feature-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 60px rgba(37, 99, 235, 0.16);
+    }
+    .file-card.visible {
+      transition: opacity 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+                  transform 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+                  box-shadow 0.3s cubic-bezier(0.25, 0.1, 0.25, 1);
+    }
+    .file-card.visible:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 60px rgba(37, 99, 235, 0.16);
+    }
+
+    .btn {
+      transition: transform 0.2s cubic-bezier(0.25, 0.1, 0.25, 1),
+                  box-shadow 0.2s cubic-bezier(0.25, 0.1, 0.25, 1),
+                  background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    }
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .filter-btn {
+      transition: all 0.25s cubic-bezier(0.25, 0.1, 0.25, 1);
+    }
+    .filter-btn:active {
+      transform: scale(0.95);
+    }
   </style>
 </head>
 <body>
@@ -614,7 +685,7 @@
       </div>
     </section>
 
-    <section id="features" class="section split-section">
+    <section id="features" class="section split-section reveal">
       <div>
         <p class="section-kicker">What it does</p>
         <h2 data-site="aboutTitle">适合公开展示和下载</h2>
@@ -622,7 +693,7 @@
       <p data-site="aboutText">这个版本不需要服务器、不需要银行卡、不需要后台运行。只要上传到 GitHub Pages，就会得到一个长期可访问的网址，例如 https://zy-api.github.io/Az/。</p>
     </section>
 
-    <section class="feature-grid">
+    <section class="feature-grid reveal">
       <article class="feature-card">
         <span class="card-number">01</span>
         <h3 data-site="feature1Title">高级视觉设计</h3>
@@ -640,7 +711,7 @@
       </article>
     </section>
 
-    <section id="downloads" class="section downloads-section">
+    <section id="downloads" class="section downloads-section reveal">
       <div class="section-heading">
         <p class="section-kicker">Downloads</p>
         <h2 data-site="downloadsTitle">可下载文件</h2>
@@ -656,7 +727,7 @@
       <div class="file-grid" id="downloadsGrid"></div>
     </section>
 
-    <section id="about" class="section split-section">
+    <section id="about" class="section split-section reveal">
       <div>
         <p class="section-kicker">How to edit</p>
         <h2 data-site="editTitle">怎么改成你的内容</h2>
@@ -743,13 +814,82 @@
     renderFiles("all");
 
     const filterBar = document.getElementById("filterBar");
+
+    // 分类切换动画
+    let currentFilter = "all";
+    function getVisibleCards(filter) {
+      if (filter === "app") return files.filter(isAppFile);
+      if (filter === "file") return files.filter((f) => !isAppFile(f));
+      return files;
+    }
+
     filterBar.addEventListener("click", (e) => {
       const btn = e.target.closest(".filter-btn");
       if (!btn) return;
+      if (btn.classList.contains("active")) return;
       filterBar.querySelectorAll(".filter-btn").forEach((b) => b.classList.remove("active"));
       btn.classList.add("active");
-      renderFiles(btn.dataset.filter);
+      const filter = btn.dataset.filter;
+      currentFilter = filter;
+      renderFiles(filter);
+
+      // 卡片逐个淡入
+      const cards = downloadsGrid.querySelectorAll(".file-card");
+      cards.forEach((card) => {
+        card.classList.remove("visible");
+        card.style.transitionDelay = "0s";
+      });
+      downloadsGrid.offsetHeight;
+      cards.forEach((card, i) => {
+        requestAnimationFrame(() => {
+          card.style.transitionDelay = (i * 0.08) + "s";
+          card.classList.add("visible");
+        });
+      });
     });
+
+    // 滚动入场 - Downloads 区域进入视野时卡片逐个出现
+    const downloadsSection = document.getElementById("downloads");
+    const cardObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const visible = getVisibleCards(currentFilter);
+          visible.forEach((card, i) => {
+            setTimeout(() => {
+              const cards = downloadsGrid.querySelectorAll(".file-card");
+              if (cards[i]) cards[i].classList.add("visible");
+            }, i * 80);
+          });
+          cardObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0, rootMargin: "0px 0px 100px 0px" });
+
+    if (downloadsSection) {
+      cardObserver.observe(downloadsSection);
+    }
+
+    // 兜底：0.6秒后强制显示
+    setTimeout(() => {
+      const cards = downloadsGrid.querySelectorAll(".file-card");
+      cards.forEach((card, i) => {
+        if (!card.classList.contains("visible")) {
+          card.style.transitionDelay = (i * 0.08) + "s";
+          card.classList.add("visible");
+        }
+      });
+    }, 600);
+
+    // 板块滚动入场
+    const revealObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("visible");
+          revealObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1 });
+    document.querySelectorAll(".reveal").forEach((el) => revealObserver.observe(el));
   </script>
 </body>
 </html>
