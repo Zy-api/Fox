@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>DeployFlow 验证码接收器</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Noto Sans CJK SC","Microsoft YaHei",sans-serif;background:#0a0a0a;color:#fff;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:20px}
+.container{max-width:560px;width:100%}
+.header{text-align:center;margin-bottom:32px}
+.logo{display:inline-flex;align-items:center;gap:10px;margin-bottom:8px}
+.logo svg{width:32px;height:32px}
+.logo span{font-size:22px;font-weight:700;color:#4d8bf5}
+.subtitle{color:#888;font-size:14px}
+.card{background:#141414;border:1px solid #2a2a2a;border-radius:16px;padding:32px;margin-bottom:20px}
+.latest-code{text-align:center}
+.latest-label{font-size:13px;color:#888;margin-bottom:12px}
+.code-display{font-size:56px;font-weight:800;letter-spacing:12px;color:#4d8bf5;font-family:'Courier New',monospace;padding:20px;background:#0a0a0a;border-radius:12px;border:2px solid #2a2a2a;min-height:100px;display:flex;align-items:center;justify-content:center}
+.code-display.empty{color:#555;font-size:18px;letter-spacing:0}
+.code-display.expired{color:#ef4444}
+.code-info{margin-top:16px;font-size:13px;color:#888;display:flex;justify-content:center;gap:20px;flex-wrap:wrap}
+.code-info span{display:flex;align-items:center;gap:4px}
+.status-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.status-dot.live{background:#22c55e;animation:pulse 2s infinite}
+.status-dot.idle{background:#555}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.history-title{font-size:15px;font-weight:600;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+.history-list{display:flex;flex-direction:column;gap:8px;max-height:300px;overflow-y:auto}
+.history-item{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:#1a1a1a;border-radius:8px;border:1px solid #2a2a2a}
+.history-code{font-size:20px;font-weight:700;font-family:'Courier New',monospace;color:#4d8bf5;letter-spacing:4px}
+.history-code.expired{color:#666}
+.history-meta{font-size:12px;color:#888;text-align:right}
+.history-email{color:#aaa;font-size:11px;margin-top:2px}
+.empty-history{text-align:center;color:#555;font-size:14px;padding:24px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 20px;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;text-decoration:none}
+.btn-primary{background:#4d8bf5;color:#fff}
+.btn-primary:hover{background:#3a78e0}
+.btn-ghost{background:transparent;color:#888;border:1px solid #333}
+.btn-ghost:hover{color:#fff;border-color:#555}
+.copy-btn{background:#1e1e1e;color:#4d8bf5;border:1px solid #333;padding:6px 12px;font-size:12px}
+.copy-btn:hover{background:#2a2a2a}
+.footer{text-align:center;color:#555;font-size:12px;margin-top:20px;padding:16px}
+.back-link{color:#4d8bf5;text-decoration:none;font-size:13px;display:inline-flex;align-items:center;gap:4px}
+.back-link:hover{text-decoration:underline}
+.notification{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-100px);background:#22c55e;color:#fff;padding:12px 24px;border-radius:8px;font-size:14px;font-weight:600;z-index:1000;transition:transform .3s}
+.notification.show{transform:translateX(-50%) translateY(0)}
+@media(max-width:480px){
+  .code-display{font-size:42px;letter-spacing:8px}
+  .card{padding:20px}
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="logo">
+      <svg viewBox="0 0 24 24" fill="#4d8bf5"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+      <span>DeployFlow</span>
+    </div>
+    <div class="subtitle">验证码接收器 - 实时接收 DeployFlow 发送的验证码</div>
+  </div>
+
+  <div class="card">
+    <div class="latest-code">
+      <div class="latest-label">
+        <span class="status-dot idle" id="statusDot"></span>
+        <span id="statusText">等待接收验证码...</span>
+      </div>
+      <div class="code-display empty" id="codeDisplay">暂无验证码</div>
+      <div class="code-info" id="codeInfo" style="display:none">
+        <span id="emailInfo"></span>
+        <span id="timeInfo"></span>
+      </div>
+      <div style="margin-top:16px">
+        <button class="btn copy-btn" id="copyBtn" onclick="copyCode()" style="display:none">复制验证码</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="history-title">
+      <span>验证码历史</span>
+      <button class="btn btn-ghost" onclick="clearDisplay()" style="padding:4px 12px;font-size:12px">清屏</button>
+    </div>
+    <div class="history-list" id="historyList">
+      <div class="empty-history">暂无验证码记录</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <a href="/index.html" class="back-link">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      返回 DeployFlow
+    </a>
+    <p style="margin-top:8px">自动刷新间隔: 2秒 | 仅显示最近 5 分钟内的验证码</p>
+  </div>
+</div>
+
+<div class="notification" id="notification">验证码已复制到剪贴板</div>
+
+<script>
+var lastCodeId = null;
+var pollTimer = null;
+
+function fetchLatestCode() {
+  fetch('/api/codes/latest')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var display = document.getElementById('codeDisplay');
+      var info = document.getElementById('codeInfo');
+      var copyBtn = document.getElementById('copyBtn');
+      var statusDot = document.getElementById('statusDot');
+      var statusText = document.getElementById('statusText');
+
+      if (!data.code) {
+        display.className = 'code-display empty';
+        display.textContent = '暂无验证码';
+        info.style.display = 'none';
+        copyBtn.style.display = 'none';
+        statusDot.className = 'status-dot idle';
+        statusText.textContent = '等待接收验证码...';
+        return;
+      }
+
+      var isExpired = data.expired;
+      display.className = isExpired ? 'code-display expired' : 'code-display';
+      display.textContent = data.code;
+      info.style.display = 'flex';
+      document.getElementById('emailInfo').innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg> ' + (data.email || '未知');
+      document.getElementById('timeInfo').innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> ' + timeAgo(data.timestamp) + (isExpired ? ' (已过期)' : '');
+      copyBtn.style.display = isExpired ? 'none' : 'inline-flex';
+      
+      statusDot.className = isExpired ? 'status-dot idle' : 'status-dot live';
+      statusText.textContent = isExpired ? '验证码已过期' : '已收到验证码';
+
+      // New code notification
+      if (data.id !== lastCodeId) {
+        lastCodeId = data.id;
+        if (!isExpired) {
+          showNotification('新验证码: ' + data.code);
+          // Try to play a sound
+          try {
+            var ctx = new (window.AudioContext || window.webkitAudioContext)();
+            var osc = ctx.createOscillator();
+            var gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.frequency.value = 880;
+            gain.gain.setValueAtTime(0.3, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+            osc.start(ctx.currentTime);
+            osc.stop(ctx.currentTime + 0.5);
+          } catch(e) {}
+        }
+      }
+    })
+    .catch(function() {
+      document.getElementById('statusText').textContent = '连接服务器失败，正在重试...';
+    });
+}
+
+function fetchAllCodes() {
+  fetch('/api/codes')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      var list = document.getElementById('historyList');
+      var codes = data.codes || [];
+      
+      if (codes.length === 0) {
+        list.innerHTML = '<div class="empty-history">暂无验证码记录</div>';
+        return;
+      }
+
+      list.innerHTML = codes.map(function(c) {
+        var timeStr = new Date(c.timestamp * 1000).toLocaleTimeString('zh-CN');
+        return '<div class="history-item">' +
+          '<div class="history-code' + (c.expired ? ' expired' : '') + '">' + c.code + (c.expired ? '' : '') + '</div>' +
+          '<div class="history-meta">' +
+            '<div>' + timeStr + (c.expired ? ' · 已过期' : ' · 有效') + '</div>' +
+            '<div class="history-email">' + (c.email || '') + '</div>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+    })
+    .catch(function() {});
+}
+
+function timeAgo(timestamp) {
+  if (!timestamp) return '未知';
+  var diff = Math.floor(Date.now() / 1000) - timestamp;
+  if (diff < 10) return '刚刚';
+  if (diff < 60) return diff + ' 秒前';
+  if (diff < 3600) return Math.floor(diff / 60) + ' 分钟前';
+  return Math.floor(diff / 3600) + ' 小时前';
+}
+
+function copyCode() {
+  var code = document.getElementById('codeDisplay').textContent;
+  if (code && code !== '暂无验证码') {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(code).then(function() {
+        showNotification('验证码已复制: ' + code);
+      });
+    } else {
+      var textarea = document.createElement('textarea');
+      textarea.value = code;
+      document.body.appendChild(textarea);
+      textarea.select();
+      try { document.execCommand('copy'); showNotification('验证码已复制: ' + code); } catch(e) {}
+      document.body.removeChild(textarea);
+    }
+  }
+}
+
+function clearDisplay() {
+  var display = document.getElementById('codeDisplay');
+  display.className = 'code-display empty';
+  display.textContent = '暂无验证码';
+  document.getElementById('codeInfo').style.display = 'none';
+  document.getElementById('copyBtn').style.display = 'none';
+  document.getElementById('statusDot').className = 'status-dot idle';
+  document.getElementById('statusText').textContent = '已清屏，等待新验证码...';
+  lastCodeId = 'cleared';
+}
+
+function showNotification(msg) {
+  var n = document.getElementById('notification');
+  n.textContent = msg;
+  n.classList.add('show');
+  setTimeout(function() { n.classList.remove('show'); }, 3000);
+}
+
+// Start polling
+fetchLatestCode();
+fetchAllCodes();
+pollTimer = setInterval(function() {
+  fetchLatestCode();
+  fetchAllCodes();
+}, 2000);
+</script>
+</body>
+</html>
