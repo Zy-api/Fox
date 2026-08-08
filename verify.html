@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>验证码接收 — DeployFlow</title>
+<style>
+:root{--bg:#f5f7fa;--card:#ffffff;--text:#1a1d29;--text2:#5f6368;--border:#d9dde3;--accent:#1f6feb;--accent2:#388bfd;--accent-soft:#e8f0fe;--shadow:0 1px 3px rgba(0,0,0,.05),0 1px 2px rgba(0,0,0,.03);--radius:12px}
+[data-theme="dark"]{--bg:#0d1117;--card:#161b22;--text:#e6edf3;--text2:#8b949e;--border:#30363d;--accent:#58a6ff;--accent2:#79c0ff;--accent-soft:#1c2333;--shadow:0 1px 3px rgba(0,0,0,.3)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:16px}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit;font-size:14px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:24px;box-shadow:var(--shadow);width:100%;max-width:420px}
+.head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:16px}
+.logo{width:30px;height:30px;border-radius:8px;background:var(--accent);display:inline-flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:14px}
+.icon-btn{width:36px;height:36px;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;transition:background .15s}
+.icon-btn:hover{background:var(--bg)}
+.icon-btn svg{width:18px;height:18px;stroke:var(--text2);fill:none;stroke-width:2}
+h2{font-size:17px;margin-bottom:4px}
+.sub{font-size:12px;color:var(--text2);margin-bottom:16px}
+.target{font-size:12px;color:var(--text2);margin-bottom:4px}
+.target-val{font-size:13px;font-weight:600;color:var(--text);word-break:break-all;margin-bottom:14px;padding:8px 10px;background:var(--bg);border-radius:8px;border:1px solid var(--border)}
+.otp-box{display:flex;gap:8px;margin-bottom:6px}
+.otp-box input{flex:1;padding:14px;text-align:center;font-size:28px;letter-spacing:.4em;font-weight:700;background:var(--card);border:1px solid var(--border);border-radius:10px;color:var(--text);outline:none}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 16px;border-radius:8px;font-weight:600;font-size:13px;transition:filter .15s,background .15s;cursor:pointer;border:none;width:100%}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{filter:brightness(1.08)}
+.btn-primary:active{filter:brightness(.95)}
+.status{font-size:12px;margin-top:12px;text-align:center;padding:6px 10px;border-radius:6px}
+.status.wait{background:var(--accent-soft);color:var(--accent)}
+.status.ok{background:#eaf6ef;color:#2f9e6f}
+.status.exp{background:#fbeef0;color:#d9485c}
+[data-theme="dark"] .status.ok{background:#1f3a2c;color:#6ec28f}
+[data-theme="dark"] .status.exp{background:#3a2026;color:#e57373}
+.hint{font-size:11px;color:var(--text2);margin-top:14px;line-height:1.6;text-align:center}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--card);color:var(--text);padding:10px 18px;border-radius:8px;box-shadow:0 8px 30px rgba(0,0,0,.18);font-size:13px;z-index:200;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;border-left:3px solid var(--accent)}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+@media(max-width:480px){.card{padding:18px}.otp-box input{font-size:24px;padding:12px}}
+
+/* 修复：按钮点击无蓝色方形反馈，仅轻微亮度变化 */
+.btn:active,.btn-primary:active,button:active{transform:none;-webkit-transform:none;box-shadow:none!important;filter:brightness(.96);}
+.btn:focus,.btn-primary:focus,button:focus{outline:none;box-shadow:none;}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="head">
+    <div class="brand"><span class="logo">D</span>DeployFlow</div>
+    <button class="icon-btn" id="themeBtn" aria-label="切换主题"><svg id="themeIcon" viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
+  </div>
+  <h2>接收验证码</h2>
+  <div class="sub">来自 DeployFlow 主应用的 6 位验证码将显示在此处</div>
+  <div class="target">目标账号</div>
+  <div class="target-val" id="targetVal">等待下发...</div>
+  <div class="otp-box"><input id="otpInput" readonly placeholder="------"></div>
+  <button class="btn btn-primary" id="copyBtn">一键复制验证码</button>
+  <div class="status wait" id="status">等待中</div>
+  <div class="hint">本页通过 BroadcastChannel + localStorage 事件 + 定时轮询三种方式，与同浏览器中的 DeployFlow 主应用实时联动。若主应用已配置 EmailJS，验证码将同时通过邮件真实下发到目标邮箱。</div>
+</div>
+<div class="toast" id="toast"></div>
+<script>
+function toast(m){const t=document.getElementById("toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2400)}
+function $(s){return document.querySelector(s)}
+/* 主题 */
+async function loadTheme(){let t=localStorage.getItem("theme");if(!t)t=matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light";document.documentElement.setAttribute("data-theme",t);paint(t)}
+function paint(t){$("#themeIcon").innerHTML=t==="dark"?'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/>':'<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>'}
+$("#themeBtn").addEventListener("click",async()=>{const c=document.documentElement.getAttribute("data-theme")||"light";const n=c==="dark"?"light":"dark";document.documentElement.setAttribute("data-theme",n);localStorage.setItem("theme",n);paint(n)});
+/* OTP 显示与倒计时 */
+let expireAt=0;let timer=null;
+function setOtp(code,target,exp){
+  const inp=$("#otpInput");inp.value=code;$("#targetVal").textContent=target||"-";expireAt=exp||(Date.now()+5*60*1000);
+  const st=$("#status");st.className="status ok";st.textContent="已接收 · 5:00";
+  if(timer)clearInterval(timer);timer=setInterval(()=>{const left=Math.max(0,expireAt-Date.now());if(left<=0){st.className="status exp";st.textContent="验证码已过期";inp.value="------";clearInterval(timer)}else{const s=Math.ceil(left/1000);st.textContent="已接收 · "+Math.floor(s/60)+":"+String(s%60).padStart(2,"0")}},500);
+}
+function clearOtp(){expireAt=0;if(timer)clearInterval(timer);$("#otpInput").value="------";$("#status").className="status wait";$("#status").textContent="等待中";$("#targetVal").textContent="等待下发..."}
+/* 读取 otpPending */
+function readPending(){
+  try{const raw=localStorage.getItem("otpPending");if(!raw)return null;const o=JSON.parse(raw);if(o.expireAt&&o.expireAt<Date.now()){localStorage.removeItem("otpPending");return null}return o}catch(e){return null}
+}
+/* 初始化：若已有有效码则显示；否则若可生成本地码（主应用未下发时兜底） */
+(function init(){
+  loadTheme();
+  const o=readPending();if(o&&o.code){setOtp(o.code,o.target,o.expireAt);return}
+  /* 兜底：同浏览器主应用未下发时，生成一个本地码供演示（真实场景由主应用写入 otpPending） */
+  const code=String(Math.floor(Math.random()*900000)+100000);const target="本地生成（主应用未下发）";const exp=Date.now()+5*60*1000;localStorage.setItem("otpPending",JSON.stringify({code,target,time:new Date().toLocaleTimeString("zh-CN",{hour12:false}),expireAt:exp}));setOtp(code,target,exp);$("#status").textContent="已接收（本地兜底）· 5:00";$("#status").className="status ok";
+})();
+/* 跨页联动：BroadcastChannel + storage 事件 + 轮询 */
+if(window.BroadcastChannel){new BroadcastChannel("deploy-otp").addEventListener("message",e=>{if(e.data&&e.data.type==="otp"){setOtp(e.data.code,e.data.target,Date.now()+5*60*1000)}})}
+window.addEventListener("storage",e=>{if(e.key==="otpPending"){const o=readPending();if(o&&o.code)setOtp(o.code,o.target,o.expireAt)}});
+setInterval(()=>{const o=readPending();if(o&&o.code&&(!expireAt||Date.now()>expireAt-1))setOtp(o.code,o.target,o.expireAt)},2000);
+/* 复制 */
+$("#copyBtn").addEventListener("click",()=>{const v=$("#otpInput").value;if(!v||v==="------"){toast("暂无可用验证码");return}navigator.clipboard.writeText(v).then(()=>toast("验证码已复制")).catch(()=>toast("复制失败"))});
+</script>
+</body>
+</html>

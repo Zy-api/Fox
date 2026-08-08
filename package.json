@@ -1,0 +1,1 @@
+{"name":"deployflow-oauth","version":"1.0.0","main":"oauth-server.js","scripts":{"start":"node oauth-server.js"},"dependencies":{"express":"^4.18.2","axios":"^1.6.0"}}
